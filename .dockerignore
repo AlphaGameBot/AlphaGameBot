@@ -1,0 +1,5 @@
+*.md
+.venv
+.idea
+.git*
+request-handler.sqlite

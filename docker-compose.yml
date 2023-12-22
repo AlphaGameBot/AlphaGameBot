@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  alphagamebot:
+    image: alphagamedev/alphagamebot:latest
+    restart: unless-stopped
+    container_name: alphagamebot
+    environment:
+      TOKEN: "" # insert your Discord bot token here.
+      LOGLEVEL: "INFO" # change this is you want to bombarded with logging messages lol
