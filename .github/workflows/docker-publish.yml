@@ -13,13 +13,13 @@ on:
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "development" ]
 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: alphagamedev/alphagamebot
+  IMAGE_NAME: alphagamedev/alphagamebot:development
 
 
 jobs:
