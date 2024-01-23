@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Settings &bull; AlphaGameBot</title>
+        <link rel="stylesheet" type="text/css" href="/static/global.css" />
+        <style>
+            .ctr {text-align: center; margin-left: auto; margin-right: auto;}
+            body {
+                margin-left: 10%;
+                margin-right: 10%;
+                height: 100vh;
+                border-left: 2px dotted #000000;
+                border-right: 2px dotted #000000; 
+            }
+
+            #settings {
+                margin: 10%;
+            }
+            #title {
+                text-align: center;
+            }
+            td {
+                border: 1px solid #000000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="settings">
+            <div id="title">
+                <h1>AlphaGameBot Settings</h1>
+            </div>
+            <form method="POST" action="/app/{{guild}}/dashboard/apply">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Value</th>
+                    </tr>
+                    {% for setting in settings %}
+                    <tr>
+                        <td>{{setting["id"]}}</td>
+                        <td>{{setting["name"]}}</td>
+                        <td>{{setting["description"]}}</td>
+                        <td><input type="{{setting['type']}}" name="{{setting['id']}}" /></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <div class="ctr">
+                    <input type="submit" />
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

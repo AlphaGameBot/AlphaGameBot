@@ -1,0 +1,8 @@
+[
+    {
+        "id": "alphagamebot.commands.enabled",
+        "name": "Enable AlphaGameBot",
+        "description": "Allows AlphaGameBot to execute commands.  Only disable this if you don't want AlphaGameBot to work.",
+        "type": "checkbox"
+    }
+]

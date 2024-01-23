@@ -5,6 +5,9 @@ services:
     image: alphagamedev/alphagamebot:latest
     restart: unless-stopped
     container_name: alphagamebot
-    environment:
-      TOKEN: "" # insert your Discord bot token here.
-      LOGLEVEL: "INFO" # change this is you want to bombarded with logging messages lol
+    env_file:
+      - .env
+
+    # Make a file called ".env" and put one line, saying "TOKEN=<your token>  No spaces or quotes."
+    # example:
+    # TOKEN=mysupersecrettoken123pleasedontlookhahalol
