@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Information &bull; AlphaGameBot Web UI</title>
+        <link rel="stylesheet" type="text/css" href="/static/global.css" />
+        <style>
+            #informationBox {
+                --side: 30%;
+                --vertical: 35%;
+                position: fixed;
+                left: var(--side);
+                right: var(--side);
+                top: var(--vertical);
+                bottom: var(--vertical);
+                border: 1px solid #000000;
+            }
+            #informationBox img {
+                max-width: 20%;
+                margin-right: 1%;
+            }
+
+            #informationBox h2 {
+                margin-left: 5%;
+                text-align: center;
+                margin: 1%;
+            }
+            #informationBox p{
+                text-indent: 5%;
+                margin: 5%;
+                font-size: 18pt;
+                text-align: center;
+            }
+            #informationBox footer {
+                position: absolute;
+                bottom: 0;
+                margin: 0;
+                left: 0;
+                right: 0;
+                padding: 0;
+            }
+            #informationBox footer p {
+                font-size: 12pt;
+                margin: 0;
+                padding: 0;
+                border-top: 1px solid #000000;
+            }
+            #informationBox footer p.notop {
+                border: none;
+            }
+            #linksContainer {
+                display: flex;
+                justify-content: center;
+                
+            }
+            #linksContainer {
+                font-size: 14pt;
+                margin: 0;
+            }
+            a,a:visited {color: blue;}
+        </style>
+    </head>
+    <body>
+        <div id="informationBox">
+            <h2>
+                {% if type =="INFO" %}
+                <img width="20" src="/static/information.jpg" /> Information
+                {% elif type == "WARN" %}
+                <img width="20" src="/static/warning.png" /> Warning
+                {% elif type == "ERROR" %}
+                <img width="20" src="/static/error.png" /> Error 
+                {% else %}
+                Message
+                {% endif %}
+            </h2>
+            <hr />
+            <p>{{message}}</p>
+            {% if links %}
+            <hr />
+            <div id="linksContainer">
+                {% for link in links %}
+                <a href="{{link['href']}}">{{link['text']}}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <footer>
+                <p><i>AlphaGameBot Web UI copyright &copy; Damien Boisvert, 2023.</i></p>
+            </footer>
+        </div>
+    </body>
+</html>

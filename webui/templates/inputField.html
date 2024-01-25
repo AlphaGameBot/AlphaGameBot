@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/static/global.css" />
+        <title>AlphaGameBot WebUI</title>
+        <style>
+            #inputField {
+                top: 25%;
+                bottom: 25%;
+                left: 25%;
+                right: 25%;
+                position: fixed;
+                border: 1px dashed #000000;
+            }
+            #inputField h1 {
+                text-align: center;
+            }
+            #inputFieldContainer {
+                margin: 10%;
+            }
+            form {
+                text-align: center;
+            }
+            input {
+                font-size: 18pt;
+            }
+            #headerp {
+                border-top: 1px solid #000000;
+                border-bottom: 1px solid #000000;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="inputField">
+            <div class="titleContainer">
+                <h1>{{ title }}</h1>
+                <hr />
+                {% if message %}
+                <p id="headerp">{{message}}</p>
+                {% endif %}
+            </div>
+            <div id="inputFieldContainer">
+                <form method="GET" action="{{action}}">
+                    <input name="{{fieldid}}" type="{{type}}" placeholder="{{placeholder}}" />
+                    <hr />
+                    <input type="submit" />
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,4 +1,9 @@
-# python
+.idea
+Scripts
+pyvenv.cfg
+request-handler.sqlite
+
+# --- Python .gitignore default ---
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
