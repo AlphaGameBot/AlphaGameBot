@@ -3,7 +3,7 @@ from discord.embeds import *
 import webui.sqlConnector
 import webui.configuration
 
-def embed(**kwargs):
+def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
     :returns discord.Embed"""
@@ -13,10 +13,10 @@ def embed(**kwargs):
 
 def decoratedFunction(f):
     pass
-autoconfig = webui.configuration.getEnvironmentalConfigurationForMySQLServer()
+#autoconfig = webui.configuration.getEnvironmentalConfigurationForMySQLServer()
 
-connection = webui.sqlConnector.SQLConnector(**autoconfig)
-cursor = connection.cursor
+#connection = webui.sqlConnector.SQLConnector(**autoconfig)
+#ursor = connection.cursor
 
 @decoratedFunction
 def isCommandDisabled(command, interaction: discord.Interaction):

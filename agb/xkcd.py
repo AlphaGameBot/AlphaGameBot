@@ -29,7 +29,7 @@ class xkcdCog(discord.Cog):
             request = comic[1] # requests object
             if request.status_code == 404:
                 self.logger.error("404 error >:(")
-                await interaction.response.send_message(":x: Comic not found! (`HTTP/2 404: Not Found!`")
+                await interaction.response.send_message(":x: Comic not found! (`HTTP/2 404: Not Found!`)")
                 return
         embed = cogwheel.Embed(title="Random XKCD", description=xkcd['alt'])
         embed.set_image(url=xkcd['img'])

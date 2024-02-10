@@ -2,23 +2,29 @@ import discord
 from discord.ext import commands
 import os
 import nltk
+import sys
 import logging
 import logging.config
 import agb.cogwheel
 import threading
-import webui.app as webui
+#import webui.app as webui
 # commands
 import agb.utility
 import agb.xkcd
 import agb.memes
 import agb.jokes
+import agb.rps
 
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
 # be automatically loaded. :) --Damien 12.22.23
 # TODO: Add base logging.cfg for people to copy
-logging.config.fileConfig("logging.ini")
+try:
+    logging.config.fileConfig("logging.ini")
+except:
+    logging.basicConfig(level=logging.WARNING)
+    logging.warn("CANNOT READ LOGGING CONFIGURATION FILE 'logging.ini'!")
 #logging.basicConfig(level=logging.DEBUG)
 intents = discord.Intents.all()
 
@@ -46,6 +52,7 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     await interaction.response.send_message(embed=embed)
+    raise error
 
 
 @bot.command(name="say")
@@ -65,7 +72,8 @@ bot.add_cog(agb.utility.UtilityCog(bot))
 bot.add_cog(agb.xkcd.xkcdCog(bot))
 bot.add_cog(agb.memes.MemesCog(bot))
 bot.add_cog(agb.jokes.jokesCog(bot))
+bot.add_cog(agb.rps.rpsCog(bot))
 
 if __name__ == "__main__":
-    threading.Thread(target=webui.start).start()
-    bot.run(os.getenv("TOKEN"))
+    #threading.Thread(target=webui.start).start()
+    bot.run(os.getenv("TOKEN") if os.getenv("TOKEN") != None else sys.argv[1])

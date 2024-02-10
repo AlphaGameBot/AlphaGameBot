@@ -47,6 +47,7 @@ def messagebox(_type: str, message: str, links=None):
 @app.route("/internal")
 def _int():
     return cachedSessions
+
 def getAuthToken():
     try:
         return request.cookies.to_dict()["authenticationToken"]
