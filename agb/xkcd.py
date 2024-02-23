@@ -4,9 +4,9 @@ from discord.ext import commands
 import discord
 import json
 import random
-from . import requestHandler
+import agb.requestHandler
 import logging
-from . import cogwheel
+import agb.cogwheel
 
 class xkcdCog(discord.Cog):
     def __init__(self, bot):
@@ -31,7 +31,7 @@ class xkcdCog(discord.Cog):
                 self.logger.error("404 error >:(")
                 await interaction.response.send_message(":x: Comic not found! (`HTTP/2 404: Not Found!`)")
                 return
-        embed = cogwheel.Embed(title="Random XKCD", description=xkcd['alt'])
+        embed = agb.cogwheel.Embed(title="Random XKCD", description=xkcd['alt'])
         embed.set_image(url=xkcd['img'])
         await interaction.response.send_message(embed=embed)
 
@@ -43,5 +43,5 @@ class xkcdCog(discord.Cog):
         else:
             u = "https://xkcd.com/{}/info.0.json".format(num)
 
-        r = requestHandler.handler.get(u)
+        r = agb.requestHandler.handler.get(u)
         return [json.loads(r.text), r]

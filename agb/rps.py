@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from . import cogwheel
+import agb.cogwheel
 import logging
 import random
 
@@ -48,27 +48,11 @@ class rpsCog(discord.Cog):
             data["human-win-status"] = "LOST"
         return data
 
-    async def playerchoice_autocomplete(
-        interaction: discord.Interaction,
-        current: str
-    ):
-        data = []
-        for choice in ['rock', 'paper', 'scissors']:
-            if current.lower() in choice.lower():
-                data.append(
-                    commands.Choice(
-                        name=choice,
-                        value=choice
-                    )
-                )
-        return data
-    
     @commands.slash_command(name="rps", description="Let's play Rock Paper Scissors!")
-    #@commands.autocomplete(playerchoice=playerchoice_autocomplete)
     async def _rps(self, interaction: discord.Interaction, playerchoice:str):
         if playerchoice.lower() not in self.gameData.keys():
             # well shit i guess you entered something wrong :/
-            embed = cogwheel.embed(title="Error!", description="Well this is awkward... '{}' doesn't seem to be a valid option.  Please use:\nrock,paper,scissors".format(playerchoice))
+            embed = agb.cogwheel.embed(title="Error!", description="Well this is awkward... '{}' doesn't seem to be a valid option.  Please use:\nrock,paper,scissors".format(playerchoice))
             await interaction.response.send_message(embed=embed)
             return None
         ai = random.choice(["rock", "paper", "scissors"])
@@ -79,7 +63,7 @@ class rpsCog(discord.Cog):
         # 2 --> AI wins
         # 0 --> Draw
 
-        embed = cogwheel.embed(title="Rock Paper Scissors",
+        embed = agb.cogwheel.embed(title="Rock Paper Scissors",
                                description=(
                                    "You %s" % state["human-win-status"]))
         embed.add_field(name="Your choice", value=state["players"]["player"])
