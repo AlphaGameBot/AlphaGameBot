@@ -20,8 +20,8 @@ class xkcdCog(discord.Cog):
         r = range(1, cur["num"])
         if not number:
             # if no number is given, do random
-            num = random.choice(r)
-            xkcd = self.getComic(num)[0]
+            number = random.choice(r)
+            xkcd = self.getComic(number)[0]
 
         else:
             comic = self.getComic(number)
@@ -31,7 +31,7 @@ class xkcdCog(discord.Cog):
                 self.logger.error("404 error >:(")
                 await interaction.response.send_message(":x: Comic not found! (`HTTP/2 404: Not Found!`)")
                 return
-        embed = agb.cogwheel.Embed(title="Random XKCD", description=xkcd['alt'])
+        embed = agb.cogwheel.Embed(title="Random XKCD", description="#{0}: {1}".format(number, xkcd['alt']))
         embed.set_image(url=xkcd['img'])
         await interaction.response.send_message(embed=embed)
 
