@@ -9,11 +9,13 @@ class GoogleCog(discord.Cog):
         self.logger = logging.getLogger("cogwheel")
         self.logger.info("GoogleCog has been initalized!")
 
-    @discord.slash_command(name="google", description="Search on Google (for those of you who don't wanna open Chrome :/)")
-    async def _google(self, interaction: discord.Interaction, query: str, number:int=10, lang:str="en"):
+    @discord.command(name="google", description="Search on Google (for those of you who don't wanna open Chrome :/)")
+    async def _google(self, interaction: discord.Interaction, query: str, number:int=5, lang:str="en"):
+        self.logger.debug("Google called")
         data = search(query, num_results=number, lang=lang, advanced=True)
         text = ""
         for result in data:
             text = text + "[{0}]({1}) - {2}\n".format(result.title, result.url, result.description)
-        return
+        if len(text) > 2000:
+            await interaction.response.send_message(":x: ERROR: Message body too long ({} > 2000)".format(len(text)))
         await interaction.response.send_message(text)
