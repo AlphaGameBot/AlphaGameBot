@@ -6,13 +6,12 @@ import logging
 import logging.config
 import agb.cogwheel
 import threading
-import webui.app as webui
 # commands
 import agb.utility
 import agb.xkcd
 import agb.memes
 import agb.jokes
-
+import agb.jojo
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -65,7 +64,7 @@ bot.add_cog(agb.utility.UtilityCog(bot))
 bot.add_cog(agb.xkcd.xkcdCog(bot))
 bot.add_cog(agb.memes.MemesCog(bot))
 bot.add_cog(agb.jokes.jokesCog(bot))
+bot.add_cog(agb.jojo.JojoCog(bot))
 
 if __name__ == "__main__":
-    threading.Thread(target=webui.start).start()
     bot.run(os.getenv("TOKEN"))
