@@ -23,7 +23,7 @@ pipeline {
                 // conditionally deploy
                 sh "docker container stop alphagamebot"
                 sh "docker container rm alphagamebot"
-                sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN=\"$TOKEN\" --restart=always alphagamedev/alphagamebot"
+                sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN=$TOKEN --restart=always alphagamedev/alphagamebot"
             }
     }
 }
