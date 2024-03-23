@@ -1,6 +1,9 @@
+# discord.py
 py-cord
 requests~=2.31.0
 requests-cache
 nltk~=3.8.1
-Flask~=3.0.0
-mysql-connector-python
+# Flask~=3.0.0
+# mysql-connector-python
+googlesearch-python
+cowsay

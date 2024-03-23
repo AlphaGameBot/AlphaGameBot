@@ -50,7 +50,7 @@ class rpsCog(discord.Cog):
         return data
 
     @commands.slash_command(name="rps", description="Let's play Rock Paper Scissors!")
-    async def _rps(self, interaction: discord.Interaction, playerchoice: str):
+    async def _rps(self, interaction, playerchoice: str):
         if playerchoice.lower() not in self.gameData.keys():
             # well shit I guess you entered something wrong :/
             embed = agb.cogwheel.embed(title="Error!",

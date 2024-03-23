@@ -10,3 +10,4 @@
   <img alt="GitHub repo file count (file type)" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file">
   <img alt="GitHub repo Python files" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file&logo=python&label=Python%20files&extension=py">
 </p>
+<p align="center">Made by a <b>ENTP</b> with love ❤️</p>
