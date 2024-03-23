@@ -22,8 +22,8 @@ class jokesCog(discord.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.slash_command(name="wisdom", description="Get a word of wisdom")
-    async def _wisdom(self, interaction):
-        await interaction.response.send_message(random.choice(words()))
+    async def _wisdom(self, interaction: discord.Interaction):
+        await interaction.response.send_message(random.choice(words.words()))
 
     @commands.slash_command(name="hello", description="I'm polite, you know!")
     async def _hello(self, interaction):
