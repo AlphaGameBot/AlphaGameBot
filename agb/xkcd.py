@@ -15,7 +15,7 @@ class xkcdCog(discord.Cog):
         self.logger.info("xkcdCog has been initalized!")
 
     @commands.slash_command(name="xkcd", description="Get a random XKCD :)")
-    async def _random(self, interaction: discord.Interaction, number:int=None):
+    async def _random(self, interaction, number:int=None):
         cur = self.getComic()[0]
         r = range(1, cur["num"])
         if not number:

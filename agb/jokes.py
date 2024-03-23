@@ -14,7 +14,7 @@ class jokesCog(discord.Cog):
         self.logger.info("jokesCog has been initalized.")
 
     @commands.slash_command(name="joke", description="I'm so funny, right?")
-    async def _joke(self, interaction: discord.Interaction):
+    async def _joke(self, interaction):
         r = agb.requestHandler.handler.get("https://official-joke-api.appspot.com/random_joke", attemptCache=False)
         joke = json.loads(r.text)
 
@@ -22,11 +22,11 @@ class jokesCog(discord.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.slash_command(name="wisdom", description="Get a word of wisdom")
-    async def _wisdom(self, interaction: discord.Interaction):
+    async def _wisdom(self, interaction):
         await interaction.response.send_message(random.choice(words()))
 
     @commands.slash_command(name="hello", description="I'm polite, you know!")
-    async def _hello(self, interaction: discord.Interaction):
+    async def _hello(self, interaction):
         await interaction.response.send_message(":wave: Hi, {0}".format(interaction.user.mention))
 
     @commands.slash_command(name="dog", description="Get a dog picture!")
@@ -38,7 +38,7 @@ class jokesCog(discord.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.slash_command(name="dogbreed", description="Dog breeds :3")
-    async def _dogbreeds(self, interaction: discord.Interaction):
+    async def _dogbreeds(self, interaction):
         r = agb.requestHandler.handler.get("https://dog.ceo/api/breeds/list/all")
         j = json.loads(r.text)
         a = list(j["message"].keys())
@@ -46,11 +46,11 @@ class jokesCog(discord.Cog):
         await interaction.response.send_message(":dog: `{0}`".format(breed))
 
     @commands.slash_command(name="coinflip")
-    async def _coinflip(self, interaction: discord.Interaction):
+    async def _coinflip(self, interaction):
         await interaction.response.send_message(":coin: %s" % "Heads" if random.choice([True,False]) else "Tails")
 
     @commands.slash_command(name="cowsay")
-    async def _cowsay(self, interaction: discord.Interaction, text:str):
+    async def _cowsay(self, interaction, text:str):
         t = cowsay.get_output_string("cow", text)
         if len(t) > 2000:
             await interaction.response.send_message(":x: Too long! ({0} > 2000)".format(len(t)))

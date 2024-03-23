@@ -12,7 +12,7 @@ class JojoCog(discord.Cog):
         self.logger.info("JoJoCog has been initalized!")
 
     @discord.slash_command(name="jojocharacter", description="Get a random JoJo's Bizarre Adventure character!")
-    async def _jojocharacter(self, interaction: discord.Interaction):
+    async def _jojocharacter(self, interaction):
         r = requestHandler.handler.get("https://stand-by-me.herokuapp.com/api/v1/characters")
         j = json.loads(r.text)
 

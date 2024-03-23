@@ -10,7 +10,7 @@ class UtilityCog(discord.Cog):
         self.logger.info("UtilityCog has been initalized!")
 
     @commands.slash_command(name="whoami", description="For whose who need a discord bot to help with an identity crisis.")
-    async def whoami(self, interaction: discord.Interaction):
+    async def whoami(self, interaction):
 
         user = interaction.user.name
         nick = interaction.user.nick
@@ -23,7 +23,7 @@ class UtilityCog(discord.Cog):
         await interaction.response.send_message(text)
 
     @commands.slash_command(name="uuid", description="Get a version 4 UUID")
-    async def _uuid(self, interaction:discord.Interaction, count:int=1):
+    async def _uuid(self, interaction, count:int=1):
         if count > 100:
             await interaction.response.send_message(":x: Way too spicy!  You can only create 100 UUIDs per request!")
             return
@@ -34,7 +34,7 @@ class UtilityCog(discord.Cog):
         await interaction.response.send_message(r)
 
     @commands.slash_command(name="randomstring", description="Get a random string!")
-    async def _randstr(self, interaction:discord.Interaction, length:int=12):
+    async def _randstr(self, interaction, length:int=12):
         if length > 120:
             await interaction.response.send_message(":x: Woah, there!  Random strings can only be up to 120 characters long!")
             return
