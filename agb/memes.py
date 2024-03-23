@@ -12,7 +12,7 @@ class MemesCog(discord.Cog):
         self.logger.info("MemesCog has been initalized")
 
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
-    async def meme(self, interaction: discord.Interaction):
+    async def meme(self, interaction):
         # get the meme from the memes api
         r = agb.requestHandler.handler.get("https://meme-api.com/gimme", attemptCache=False)
         d = json.loads(r.text)
@@ -23,5 +23,5 @@ class MemesCog(discord.Cog):
         await interaction.response.send_message(embed=embed)
 
     @commands.slash_command(name="helloworld", description="It's industry standard, right?")
-    async def hworld(self, interaction: discord.Interaction):
+    async def hworld(self, interaction):
         await interaction.response.send_message(":earth_americas: Hello, World!")

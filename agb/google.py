@@ -10,7 +10,7 @@ class GoogleCog(discord.Cog):
         self.logger.info("GoogleCog has been initalized!")
 
     @discord.command(name="google", description="Search on Google (for those of you who don't wanna open Chrome :/)")
-    async def _google(self, interaction: discord.Interaction, query: str, number:int=5, lang:str="en"):
+    async def _google(self, interaction, query: str, number:int=5, lang:str="en"):
         self.logger.debug("Google called")
         data = search(query, num_results=number, lang=lang, advanced=True)
         text = ""

@@ -54,13 +54,13 @@ async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
         await ctx.send(":middle_finger: Nice try, bozo :middle_finger: ")
         return
     if ctx.author.id != DAMIEN:
-        print("{0} tried to make me say \"{1}\", but I successfully ignored it.")
+        logging.warn("{0} tried to make me say \"{1}\", but I successfully ignored it.")
         await ctx.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
         return
 
     if text == None:
         return
-    print("I was told to say: \"{}\".".format(text))
+    logging.info("I was told to say: \"{}\".".format(text))
     await ctx.send(text)
     await ctx.message.delete()
 
