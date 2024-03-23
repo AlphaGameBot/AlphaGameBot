@@ -25,6 +25,18 @@ class jokesCog(discord.Cog):
     async def _wisdom(self, interaction):
         await interaction.response.send_message(random.choice(words.words()))
 
+    @commands.slash_command(name="shakespeare", description="Shakespeare translator!")
+    async def _shakespeare(self, interaction, text:str):
+        endpoint = "https://api.funtranslations.com/translate/shakespeare.json"
+        params = {"text": text}
+        if text[len(text) - 1] == " ":
+            text[len(text) - 1] = ""
+        text = text.lower()
+        # following spaces so cache is possible lol
+        r = agb.requestHandler.handler.get(endpoint + "?text=" + text)
+        j = json.loads(r.text)
+        await interaction.response.send_message(j['contents']["translated"])
+
     @commands.slash_command(name="hello", description="I'm polite, you know!")
     async def _hello(self, interaction):
         await interaction.response.send_message(":wave: Hi, {0}".format(interaction.user.mention))
@@ -56,3 +68,4 @@ class jokesCog(discord.Cog):
             await interaction.response.send_message(":x: Too long! ({0} > 2000)".format(len(t)))
             return
         await interaction.response.send_message("```\n{0}\n```".format(t))
+
