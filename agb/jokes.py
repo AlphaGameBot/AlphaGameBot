@@ -6,7 +6,7 @@ import agb.requestHandler
 import json
 from nltk.corpus import words
 import random
-
+import cowsay
 class jokesCog(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -45,3 +45,14 @@ class jokesCog(discord.Cog):
         breed = random.choice(list(a))
         await interaction.response.send_message(":dog: `{0}`".format(breed))
 
+    @commands.slash_command(name="coinflip")
+    async def _coinflip(self, interaction: discord.Interaction):
+        await interaction.response.send_message(":coin: %s" % "Heads" if random.choice([True,False]) else "Tails")
+
+    @commands.slash_command(name="cowsay")
+    async def _cowsay(self, interaction: discord.Interaction, text:str):
+        t = cowsay.get_output_string("cow", text)
+        if len(t) > 2000:
+            await interaction.response.send_message(":x: Too long! ({0} > 2000)".format(len(t)))
+            return
+        await interaction.response.send_message("```\n{0}\n```".format(t))

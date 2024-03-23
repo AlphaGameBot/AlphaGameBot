@@ -12,6 +12,7 @@ import agb.xkcd
 import agb.memes
 import agb.jokes
 import agb.jojo
+import agb.rps
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -22,7 +23,7 @@ logging.config.fileConfig("logging.ini")
 intents = discord.Intents.all()
 
 DAMIEN = 420052952686919690
-
+HOLDEN = 951639877768863754
 #if os.getenv("DEBUG") != None:
 #    logging.basicConfig(level=logging.DEBUG)
 #else:
@@ -35,7 +36,7 @@ async def on_ready():
     status = discord.Game("with the API")
     await bot.change_presence(activity=status)
     bot.auto_sync_commands = True
-    print("Bot is ready! :)")
+    logging.info("Bot is ready!")
 
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
@@ -49,10 +50,14 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 
 @bot.command(name="say")
 async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
+    if ctx.author.id == HOLDEN:
+        await ctx.send(":middle_finger: Nice try, bozo :middle_finger: ")
+        return
     if ctx.author.id != DAMIEN:
         print("{0} tried to make me say \"{1}\", but I successfully ignored it.")
         await ctx.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
         return
+
     if text == None:
         return
     print("I was told to say: \"{}\".".format(text))
@@ -65,6 +70,6 @@ bot.add_cog(agb.xkcd.xkcdCog(bot))
 bot.add_cog(agb.memes.MemesCog(bot))
 bot.add_cog(agb.jokes.jokesCog(bot))
 bot.add_cog(agb.jojo.JojoCog(bot))
-
+bot.add_cog(agb.rps.rpsCog(bot))
 if __name__ == "__main__":
     bot.run(os.getenv("TOKEN"))
