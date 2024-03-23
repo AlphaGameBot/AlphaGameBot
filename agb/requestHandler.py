@@ -30,9 +30,10 @@ class RequestHandler:
         else:
             r = requests.get(url, headers=headers)  # some sites / APIs don't work well with caching,
             # especially /meme.  It always returns same because of the cache.
-        self.logger.info("Web request finished.  StatusCode={0} ({1}), time={2}ms".format(r.status_code,
+        self.logger.info("Web request finished.  StatusCode={0} ({1}), time={2}ms, from_cache:{3}".format(r.status_code,
                                                                                           responses[r.status_code],
-                                                                                          round(r.elapsed.total_seconds() * 100)))
+                                                                                          round(r.elapsed.total_seconds() * 100),
+                                                                                               "yes" if r.from_cache else "no"))
         return r
 
 

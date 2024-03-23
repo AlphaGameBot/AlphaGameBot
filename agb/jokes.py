@@ -24,3 +24,15 @@ class jokesCog(discord.Cog):
     @commands.slash_command(name="wisdom", description="Get a word of wisdom")
     async def _wisdom(self, interaction):
         await interaction.response.send_message(random.choice(words.words()))
+
+    @commands.slash_command(name="shakespeare", description="Shakespeare translator!")
+    async def _shakespeare(self, interaction, text:str):
+        endpoint = "https://api.funtranslations.com/translate/shakespeare.json"
+        params = {"text": text}
+        if text[len(text) - 1] == " ":
+            text[len(text) - 1] = ""
+        text = text.lower()
+        # following spaces so cache is possible lol
+        r = agb.requestHandler.handler.get(endpoint + "?text=" + text)
+        j = json.loads(r.text)
+        await interaction.response.send_message(j['contents']["translated"])
