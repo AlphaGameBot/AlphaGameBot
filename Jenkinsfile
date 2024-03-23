@@ -5,6 +5,9 @@ pipeline {
             args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
         }
     }
+    environment {
+        TOKEN = credentials('alphagamebot-token')
+    }
     stages {
         stage('build') {
             steps {
