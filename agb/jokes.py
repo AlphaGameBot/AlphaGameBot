@@ -23,4 +23,4 @@ class jokesCog(discord.Cog):
 
     @commands.slash_command(name="wisdom", description="Get a word of wisdom")
     async def _wisdom(self, interaction: discord.Interaction):
-        await interaction.response.send_message(random.choice(words()))
+        await interaction.response.send_message(random.choice(words.words()))
