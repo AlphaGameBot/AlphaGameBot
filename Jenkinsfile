@@ -15,7 +15,6 @@ pipeline {
 
                 sh 'docker build -t alphagamedev/alphagamebot .'
 
-                // junit 'target/**/test-reports/*.xml'
             }
         }
         stage('deploy') {
@@ -25,5 +24,6 @@ pipeline {
                 sh "docker container rm alphagamebot"
                 sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN=$TOKEN --restart=always alphagamedev/alphagamebot"
             }
+        }
     }
 }
