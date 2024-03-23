@@ -14,7 +14,7 @@ class JojoCog(discord.Cog):
     @discord.slash_command(name="jojocharacter", description="Get a random JoJo's Bizarre Adventure character!")
     async def _jojocharacter(self, interaction: discord.Interaction):
         r = requestHandler.handler.get("https://stand-by-me.herokuapp.com/api/v1/characters")
-        j  = json.loads(r.text)
+        j = json.loads(r.text)
 
         character = random.choice(j)
 

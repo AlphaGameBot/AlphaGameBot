@@ -16,7 +16,8 @@ class MemesCog(discord.Cog):
         # get the meme from the memes api
         r = agb.requestHandler.handler.get("https://meme-api.com/gimme", attemptCache=False)
         d = json.loads(r.text)
-        embed = discord.Embed(title=d["title"], description="Subreddit: r/{0}, by ".format(d["subreddit"], d["author"]))
+        embed = discord.Embed(title=d["title"], description="Subreddit: r/{0}".format(d["subreddit"]))
+        embed.set_footer(text="By: u/{}".format(d["author"]))
         i = d["preview"][len(d["preview"])-1]
         embed.set_image(url=i)
         await interaction.response.send_message(embed=embed)
