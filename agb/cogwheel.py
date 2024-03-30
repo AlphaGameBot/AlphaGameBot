@@ -5,6 +5,7 @@ from discord.embeds import *
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
+    :rtype: object
     :returns discord.Embed"""
     _embed = discord.Embed(**kwargs)
     _embed.set_footer(text="AlphaGameBot v1 by AlphaGameDeveloper; alphagame.dev",
