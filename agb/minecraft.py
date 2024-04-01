@@ -13,7 +13,7 @@ class MinecraftCog(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.logger = logging.getLogger("cogwheel")
-        self.logger.info("MinecraftCog has been initalized!")
+        self.logger.info("MinecraftCog has been initialized!")
 
     @commands.slash_command(name="minecraft", description="Ping a Minecraft: Java Edition server amd get data!")
     async def _minecraft(self, interaction, host: str, port: int = 25565):
