@@ -33,7 +33,7 @@ class RequestHandler:
         self.logger.info("Web request finished.  StatusCode={0} ({1}), time={2}ms, from_cache:{3}".format(r.status_code,
                                                                                           responses[r.status_code],
                                                                                           round(r.elapsed.total_seconds() * 100),
-                                                                                               "yes" if r.from_cache else "no"))
+                                                                                                          ("yes" if r.from_cache else "no") if attemptCache == True else "disabled"))
         return r
 
 
