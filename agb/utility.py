@@ -3,6 +3,7 @@ from discord.ext import commands
 import logging
 import uuid
 import random
+import agb.cogwheel
 
 class UtilityCog(discord.Cog):
     def __init__(self, bot):
@@ -26,7 +27,7 @@ class UtilityCog(discord.Cog):
 
     @commands.slash_command(name="about", description="About AlphaGameBot!")
     async def _about(self, interaction):
-
+        _d = agb.cogwheel.getBotInformation()
         view = discord.ui.View()
         linkStyle = discord.ButtonStyle.link
         addTheBot = discord.ui.Button(style=linkStyle, label="Add the Bot!",
@@ -37,9 +38,12 @@ class UtilityCog(discord.Cog):
         view.add_item(item=addTheBot)
         view.add_item(item=checkItOut)
         view.add_item(item=githubBtn)
-        embed = discord.Embed(title="About the Bot",
+        embed = discord.Embed(title=f"AlphaGameBot {agb.cogwheel.getVersion()}",
                               description="AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!")
         embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
+        embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())
+        embed.add_field(name="Latest Update Message", value=_d["CHANGELOG"][agb.cogwheel.getVersion()])
+
         await interaction.response.send_message(embed=embed, view=view)
 
     @commands.slash_command(name="uuid", description="Get a version 4 UUID")
