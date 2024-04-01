@@ -15,8 +15,8 @@ class MinecraftCog(discord.Cog):
         self.logger = logging.getLogger("cogwheel")
         self.logger.info("MinecraftCog has been initalized!")
 
-    @commands.slash_command(name="minecraftjava", description="Ping a Minecraft: Java Edition server amd get data!")
-    async def _minecraft_java(self, interaction, host: str, port: int = 25565):
+    @commands.slash_command(name="minecraft", description="Ping a Minecraft: Java Edition server amd get data!")
+    async def _minecraft(self, interaction, host: str, port: int = 25565):
         if port == 25565:
             addr = "{0}".format(host)
         else:
