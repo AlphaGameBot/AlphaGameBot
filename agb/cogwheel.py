@@ -24,7 +24,7 @@ def embed(**kwargs) -> discord.Embed:
     __IS_DEBUG = (os.getenv("DEBUG_ENV") is not None)
 
     _embed = discord.Embed(**kwargs)
-    _embed.set_footer(text="AlphaGameBot version {0}{1} by AlphaGameDeveloper; alphagame.dev".format(
+    _embed.set_footer(text="AlphaGameBot version {0}{1}".format(
         getVersion(),
         " (development build)" if __IS_DEBUG else ""
     ),
