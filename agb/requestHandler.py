@@ -1,10 +1,16 @@
 import requests_cache
 import logging
 import requests
+import json
+import os
 
 global responses
-responses = {200: 'OK', 201: 'Created', 202: 'Accepted', 203: 'Non-Authoritative Information', 204: 'No Content',
-             205: 'Reset Content', 206: 'Partial Content', 400: 'Bad Request', 401: 'Unauthorized',
+
+
+class RequestHandler:
+    def __init__(self):
+        self.RESPONSES = {200: 'OK', 201: 'Created', 202: 'Accepted', 203: 'Non-Authoritative Information',
+             204: 'No Content', 205: 'Reset Content', 206: 'Partial Content', 400: 'Bad Request', 401: 'Unauthorized',
              402: 'Payment Required', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed',
              406: 'Not Acceptable', 407: 'Proxy Authentication Required', 408: 'Request Timeout', 409: 'Conflict',
              410: 'Gone', 411: 'Length Required', 412: 'Precondition Failed', 413: 'Request Entity Too Large',
@@ -14,27 +20,40 @@ responses = {200: 'OK', 201: 'Created', 202: 'Accepted', 203: 'Non-Authoritative
              306: '(Unused)', 307: 'Temporary Redirect', 500: 'Internal Server Error', 501: 'Not Implemented',
              502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout', 505: 'HTTP Version Not Supported'}
 
-
-class RequestHandler:
-    def __init__(self):
         self.logger = logging.getLogger("cogwheel")
         self.session = requests_cache.CachedSession("request-handler", cache_control=True)
         self.logger.info("RequestHandler has been initalized!")
+        with open("alphagamebot.json", "r") as f:
+            self.BOT_INFORMATION = json.load(f)
 
+        self.REQUEST_HEADERS = {
+            "User-Agent": self.BOT_INFORMATION["USER-AGENT"],  # this can be changed in the config (alphagamebot.json)
+            "Accept": "text/plain,application/json,application/xml",
+            "x-alphagamebot-version": self.BOT_INFORMATION["VERSION"],
+            "Upgrade-Insecure-Requests": "1",
+            "Connection": "close" # we dont need a constant connection :)
+        }
     def get(self, url: str, attemptCache=True):
         self.logger.debug("Web request was called with URL \"{0}\".  {1}".format(url,
                                                                                  "(CACHING WAS DISABLED)" if attemptCache == False else ""))
-        headers = {"User-Agent": "AlphaGameBot/1; https://alphagame.dev; +damien@alphagame.dev"}
         if attemptCache:
-            r = self.session.get(url, headers=headers)
+            r = self.session.get(url, headers=self.REQUEST_HEADERS)
         else:
-            r = requests.get(url, headers=headers)  # some sites / APIs don't work well with caching,
+            r = requests.get(url, headers=self.REQUEST_HEADERS)  # some sites / APIs don't work well with caching,
             # especially /meme.  It always returns same because of the cache.
         self.logger.info("Web request finished.  StatusCode={0} ({1}), time={2}ms, from_cache:{3}".format(r.status_code,
-                                                                                          responses[r.status_code],
+                                                                                          self.RESPONSES[r.status_code],
                                                                                           round(r.elapsed.total_seconds() * 100),
                                                                                                           ("yes" if r.from_cache else "no") if attemptCache == True else "disabled"))
         return r
 
+    def post(self, url:str, data:dict, description:str=None):
+        self.logger.debug("POST request was called with URL \"{0}\".  {1}".format(url, (
+            "description:\"%s\"" % description if description is not None else ""
+        )))
+        r = requests.post(url, data, headers=self.REQUEST_HEADERS)
+        self.logger.info("POST request finished.  StatusCode={0} ({1}), time={2}ms".format(
+            r.status_code, self.RESPONSES[r.status_code], round(r.elapsed.total_seconds() * 100)
+        ))
 
 handler = RequestHandler()
