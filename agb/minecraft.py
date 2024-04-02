@@ -16,7 +16,9 @@ class MinecraftCog(discord.Cog):
         self.logger.info("MinecraftCog has been initialized!")
 
     @commands.slash_command(name="minecraft", description="Ping a Minecraft: Java Edition server amd get data!")
-    async def _minecraft(self, interaction, host: str, port: int = 25565):
+    async def _minecraft(self, interaction,
+                         host: discord.Option(str, description="The host IP address of the server"),
+                         port: discord.Option(int, description="The port of the Minecraft server", default=25565)):
         if port == 25565:
             addr = "{0}".format(host)
         else:
