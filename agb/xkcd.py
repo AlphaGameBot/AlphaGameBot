@@ -31,7 +31,13 @@ class xkcdCog(discord.Cog):
                 self.logger.error("404 error >:(")
                 await interaction.response.send_message(":x: Comic not found! (`HTTP/2 404: Not Found!`)")
                 return
-        embed = agb.cogwheel.Embed(title="Random XKCD", description="#{0}: {1}".format(number, xkcd['alt']))
+        embed = agb.cogwheel.Embed(title="#{0}: {1}".format(number, xkcd["safe_title"]),
+                                   description="{1}".format(number, xkcd['alt']))
+        embed.set_footer(text="XKCD #{0} - {1}/{2}/{3} - \"{4}\"".format(number,
+                                                                         xkcd["month"],
+                                                                         xkcd["day"],
+                                                                         xkcd["year"],
+                                                                         xkcd["safe_title"]))
         embed.set_image(url=xkcd['img'])
         await interaction.response.send_message(embed=embed)
 
