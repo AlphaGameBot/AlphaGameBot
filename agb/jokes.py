@@ -7,6 +7,8 @@ import json
 from nltk.corpus import words
 import random
 import cowsay
+import agb.cogwheel
+
 class jokesCog(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,7 +17,7 @@ class jokesCog(discord.Cog):
 
     @commands.slash_command(name="joke", description="I'm so funny, right?")
     async def _joke(self, interaction):
-        r = agb.requestHandler.handler.get("https://official-joke-api.appspot.com/random_joke", attemptCache=False)
+        r = agb.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)
         joke = json.loads(r.text)
 
         embed = discord.Embed(title="Joke #{}".format(joke["id"]), description="{0}\n{1}".format(joke["setup"], joke["punchline"]))
@@ -27,8 +29,7 @@ class jokesCog(discord.Cog):
 
     @commands.slash_command(name="shakespeare", description="Shakespeare translator!")
     async def _shakespeare(self, interaction, text:str):
-        endpoint = "https://api.funtranslations.com/translate/shakespeare.json"
-        params = {"text": text}
+        endpoint = agb.cogwheel.getAPIEndpoint("shakespeare", "TRANSLATE")
         if text[len(text) - 1] == " ":
             text[len(text) - 1] = ""
         text = text.lower()
@@ -43,7 +44,8 @@ class jokesCog(discord.Cog):
 
     @commands.slash_command(name="dog", description="Get a dog picture!")
     async def _dog(self, interaction):
-        r = agb.requestHandler.handler.get("https://dog.ceo/api/breeds/image/random", attemptCache=False)
+        endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_PICTURE")
+        r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
         embed = discord.Embed(title="Dog")
         url = json.loads(r.text)["message"]
         embed.set_image(url=url)
@@ -51,7 +53,8 @@ class jokesCog(discord.Cog):
 
     @commands.slash_command(name="dogbreed", description="Dog breeds :3")
     async def _dogbreeds(self, interaction):
-        r = agb.requestHandler.handler.get("https://dog.ceo/api/breeds/list/all")
+        endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_BREEDS")
+        r = agb.requestHandler.handler.get(endpoint)
         j = json.loads(r.text)
         a = list(j["message"].keys())
         breed = random.choice(list(a))

@@ -39,9 +39,9 @@ class xkcdCog(discord.Cog):
     def getComic(self, num: int = None):
         self.logger.debug("Getting XKCD #{}".format(num if num != None else "CURRENT"))
         if num == None:
-            u = "https://xkcd.com/info.0.json"
+            u = agb.cogwheel.getAPIEndpoint("xkcd", "GET_CURRENT")
         else:
-            u = "https://xkcd.com/{}/info.0.json".format(num)
+            u = agb.cogwheel.getAPIEndpoint("xkcd", "GET_SPECIFIC").format(num)
 
         r = agb.requestHandler.handler.get(u)
         return [json.loads(r.text), r]

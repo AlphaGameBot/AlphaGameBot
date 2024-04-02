@@ -39,7 +39,7 @@ class UtilityCog(discord.Cog):
         view.add_item(item=checkItOut)
         view.add_item(item=githubBtn)
         embed = discord.Embed(title=f"AlphaGameBot {agb.cogwheel.getVersion()}",
-                              description="AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!",
+                              description=_d["BOT_INFORMATION"]["DESCRIPTION"],
                               colour=discord.Colour.dark_blue())
         embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
         embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())

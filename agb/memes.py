@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 import agb.requestHandler
 import logging
-
+import agb.cogwheel
 
 class MemesCog(discord.Cog):
     def __init__(self, bot: commands.Bot):
@@ -14,7 +14,8 @@ class MemesCog(discord.Cog):
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
     async def meme(self, interaction):
         # get the meme from the memes api
-        r = agb.requestHandler.handler.get("https://meme-api.com/gimme", attemptCache=False)
+        endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME")
+        r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
         d = json.loads(r.text)
         embed = discord.Embed(title=d["title"], description="Subreddit: r/{0}".format(d["subreddit"]))
         embed.set_footer(text="By: u/{}".format(d["author"]))

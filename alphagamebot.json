@@ -1,6 +1,32 @@
 {
+  "BOT_INFORMATION": {
+    "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
+  },
+  "API_ENDPOINTS": {
+    "meme": {
+      "GET_MEME": "https://meme-api.com/gimme"
+    },
+    "xkcd": {
+      "GET_CURRENT": "https://xkcd.com/info.0.json",
+      "GET_SPECIFIC": "https://xkcd.com/{}/info.0.json"
+    },
+    "joke": {
+      "GET_JOKE": "https://official-joke-api.appspot.com/random_joke"
+    },
+    "shakespeare": {
+      "TRANSLATE": "https://api.funtranslations.com/translate/shakespeare.json"
+    },
+    "dog": {
+      "GET_PICTURE": "https://dog.ceo/api/breeds/image/random",
+      "GET_BREEDS": "https://dog.ceo/api/breeds/list/all"
+    },
+    "jojo": {
+      "GET_CHARACTERS": "https://stand-by-me.herokuapp.com/api/v1/characters",
+      "GET_CHARACTER_IMAGE": "https://jojos-bizarre-api.netlify.app/assets/{}"
+    }
+  },
   "VERSION": "2.1.3",
-  "USER-AGENT": "python-requests/2.31.0; curl/8.4.0; AlphaGameBot/1; https://alphagame.dev/alphagamebot +damien@alphagame.dev",
+  "USER-AGENT": "python-requests/2.31.0; curl/8.4.0; AlphaGameBot/{}; https://alphagame.dev/alphagamebot +damien@alphagame.dev",
   "CHANGELOG": {
     "2.1.3": "Make bot more responsible with API usage",
     "2.1.2": "Add version embed footer stuff"

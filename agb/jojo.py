@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+
+import agb.cogwheel
 from . import requestHandler
 import json
 import random
@@ -13,15 +15,12 @@ class JojoCog(discord.Cog):
 
     @discord.slash_command(name="jojocharacter", description="Get a random JoJo's Bizarre Adventure character!")
     async def _jojocharacter(self, interaction):
-        r = requestHandler.handler.get("https://stand-by-me.herokuapp.com/api/v1/characters")
+        endpoint = agb.cogwheel.getAPIEndpoint("jojo", "GET_CHARACTERS")
+        r = requestHandler.handler.get(endpoint)
         j = json.loads(r.text)
-
         character = random.choice(j)
-
         embed = discord.Embed(title=character["name"], description=character["catchphrase"])
-
-        image = "https://jojos-bizarre-api.netlify.app/assets/{}".format(character["image"])
-        print(image)
+        image = agb.cogwheel.getAPIEndpoint("jojo", "GET_CHARACTER_IMAGE").format(character["image"])
         embed.set_image(url=image)
 
         await interaction.response.send_message(embed=embed)

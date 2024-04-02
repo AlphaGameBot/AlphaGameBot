@@ -8,6 +8,13 @@ def getVersion() -> str:
 
 def getBotInformation() -> dict:
     return json.load(open("alphagamebot.json", "r"))
+
+def getAPIEndpoint(apiName, process):
+    _d = getBotInformation()
+    _a = _d["API_ENDPOINTS"][apiName]
+    _p = _a[process]
+    return _p
+
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
