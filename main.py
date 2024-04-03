@@ -14,6 +14,7 @@ import agb.jokes
 import agb.jojo
 import agb.rps
 import agb.minecraft
+import agb.google
 
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -93,6 +94,12 @@ bot.add_cog(agb.jokes.jokesCog(bot))
 bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
+# don't want to put half-working code in production
+# Uncomment this line if you want to use the /google
+# command.
+
+# bot.add_cog(agb.google.GoogleCog(bot))
 
 if __name__ == "__main__":
+    logging.info("Starting the bot...")
     bot.run(os.getenv("TOKEN"))
