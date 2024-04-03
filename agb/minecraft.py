@@ -23,7 +23,6 @@ class MinecraftCog(discord.Cog):
             addr = "{0}".format(host)
         else:
             addr = "{0}:{1}".format(host, port)
-        self.logger.debug(addr)
         server = JavaServer.lookup(addr)
         await interaction.response.defer()
         try:
@@ -47,7 +46,6 @@ class MinecraftCog(discord.Cog):
             query = server.query()
             enableQuery = True
         except TimeoutError:
-            self.logger.debug("Cannot use query for server {}".format(addr))
             pass
 
         online = status.players.online
