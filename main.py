@@ -72,11 +72,11 @@ async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
     if ctx.message.guild.id not in SAY_EXCEPTIONS:
         return
     if ctx.author.id == HOLDEN:
-        await ctx.send(":middle_finger: Nice try, bozo :middle_finger: ")
+        await ctx.send(":middle_finger: Nice try, bozo")
         cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(text))
         return
     if ctx.author.id != DAMIEN:
-        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.")
+        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name, text))
         await ctx.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
         return
 
