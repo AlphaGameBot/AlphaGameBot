@@ -14,6 +14,7 @@ import agb.jokes
 import agb.jojo
 import agb.rps
 import agb.minecraft
+import agb.google
 
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -71,11 +72,11 @@ async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
     if ctx.message.guild.id not in SAY_EXCEPTIONS:
         return
     if ctx.author.id == HOLDEN:
-        await ctx.send(":middle_finger: Nice try, bozo :middle_finger: ")
+        await ctx.send(":middle_finger: Nice try, bozo")
         cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(text))
         return
     if ctx.author.id != DAMIEN:
-        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.")
+        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name, text))
         await ctx.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
         return
 
@@ -93,6 +94,12 @@ bot.add_cog(agb.jokes.jokesCog(bot))
 bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
+# don't want to put half-working code in production
+# Uncomment this line if you want to use the /google
+# command.
+
+# bot.add_cog(agb.google.GoogleCog(bot))
 
 if __name__ == "__main__":
+    logging.info("Starting the bot...")
     bot.run(os.getenv("TOKEN"))

@@ -26,7 +26,6 @@ class rpsCog(discord.Cog):
         }
 
     def getWinnerState(self, player_choice, computer_choice):
-        self.logger.debug("getWinnerState was called with values {}".format((player_choice, computer_choice)))
         data = {
             "winner": -1,  # the number
             "human-win-status": "<ERROR:UNCHANGED VALUE>",
@@ -49,8 +48,13 @@ class rpsCog(discord.Cog):
             data["human-win-status"] = "LOST"
         return data
 
-    @commands.slash_command(name="rps", description="Let's play Rock Paper Scissors!")
-    async def _rps(self, interaction, playerchoice: str):
+    @commands.slash_command(name="rockpaperscissors", description="Let's play Rock Paper Scissors!")
+    async def _rps(self, interaction,
+                   playerchoice: discord.Option(str, description="Your Choice!", choices=[
+                       "rock",
+                       "paper",
+                       "scissors"
+                   ])):
         if playerchoice.lower() not in self.gameData.keys():
             # well shit I guess you entered something wrong :/
             embed = agb.cogwheel.embed(title="Error!",

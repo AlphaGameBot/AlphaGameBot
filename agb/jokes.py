@@ -28,7 +28,8 @@ class jokesCog(discord.Cog):
         await interaction.response.send_message(random.choice(words.words()))
 
     @commands.slash_command(name="shakespeare", description="Shakespeare translator!")
-    async def _shakespeare(self, interaction, text:str):
+    async def _shakespeare(self, interaction,
+                           text: discord.Option(str, description="Text to translate!")):
         endpoint = agb.cogwheel.getAPIEndpoint("shakespeare", "TRANSLATE")
         if text[len(text) - 1] == " ":
             text[len(text) - 1] = ""
@@ -65,7 +66,8 @@ class jokesCog(discord.Cog):
         await interaction.response.send_message(":coin: %s" % "Heads" if random.choice([True,False]) else "Tails")
 
     @commands.slash_command(name="cowsay")
-    async def _cowsay(self, interaction, text:str):
+    async def _cowsay(self, interaction,
+                      text: discord.Option(str, description="The text for the cow to say!")):
         t = cowsay.get_output_string("cow", text)
         if len(t) > 2000:
             await interaction.response.send_message(":x: Too long! ({0} > 2000)".format(len(t)))
