@@ -43,8 +43,10 @@ class UtilityCog(discord.Cog):
                               colour=discord.Colour.dark_blue())
         embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
         embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())
-        embed.add_field(name="Latest Update Message", value=_d["CHANGELOG"][agb.cogwheel.getVersion()])
-
+        try:
+            embed.add_field(name="Latest Update Message", value=_d["CHANGELOG"][agb.cogwheel.getVersion()])
+        except:
+            embed.add_field(name="Latest Update Message", value="No message")
         await interaction.response.send_message(embed=embed, view=view)
 
     @commands.slash_command(name="uuid", description="Get a version 4 UUID")
