@@ -25,9 +25,10 @@
       "GET_CHARACTER_IMAGE": "https://jojos-bizarre-api.netlify.app/assets/{}"
     }
   },
-  "VERSION": "2.2",
+  "VERSION": "2.2.2",
   "USER-AGENT": "AlphaGameBot/{} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/2.31.0; curl/8.4.0;",
   "CHANGELOG": {
+    "2.2.2": "Update",
     "2.1.3": "Make bot more responsible with API usage",
     "2.1.2": "Add version embed footer stuff"
   }
