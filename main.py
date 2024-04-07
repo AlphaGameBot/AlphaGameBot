@@ -31,7 +31,7 @@ import agb.jojo
 import agb.rps
 import agb.minecraft
 import agb.google
-
+import agb.moderation
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -73,7 +73,7 @@ async def on_ready():
 
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
-    cogw.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
+    listener.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
                                                                    to make it work by trying again.\nSorry about that! (awkward face emoji)", color=discord.Color.red())
 
@@ -121,6 +121,7 @@ bot.add_cog(agb.jokes.jokesCog(bot))
 bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
+bot.add_cog(agb.moderation.ModerationCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
