@@ -67,8 +67,10 @@ class jokesCog(discord.Cog):
 
     @commands.slash_command(name="cowsay")
     async def _cowsay(self, interaction,
-                      text: discord.Option(str, description="The text for the cow to say!")):
-        t = cowsay.get_output_string("cow", text)
+                      text: discord.Option(str, description="The text for the cow to say!"),
+                      character: discord.Option(str, description="The character you want to use!",
+                                                default="cow", choices=cowsay.char_names)):
+        t = cowsay.get_output_string(character, text)
         if len(t) > 2000:
             await interaction.response.send_message(":x: Too long! ({0} > 2000)".format(len(t)))
             return
