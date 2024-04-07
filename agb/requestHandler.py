@@ -20,7 +20,7 @@ class RequestHandler:
              306: '(Unused)', 307: 'Temporary Redirect', 500: 'Internal Server Error', 501: 'Not Implemented',
              502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout', 505: 'HTTP Version Not Supported'}
 
-        self.logger = logging.getLogger("cogwheel")
+        self.logger = logging.getLogger("requesthandler")
         self.session = requests_cache.CachedSession("request-handler", cache_control=True)
         self.logger.info("RequestHandler has been initalized!")
         with open("alphagamebot.json", "r") as f:
