@@ -32,9 +32,10 @@ SAY_EXCEPTIONS = [
 DAMIEN = 420052952686919690
 HOLDEN = 951639877768863754
 
-global isDebugEnv, cogw
+global isDebugEnv, cogw, listener
 isDebugEnv = (os.getenv("DEBUG_ENV") != None)
 cogw = logging.getLogger("cogwheel")
+listener = logging.getLogger("listener")
 #if os.getenv("DEBUG") != None:
 #    logging.basicConfig(level=logging.DEBUG)
 #else:
@@ -44,15 +45,22 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 nltk.download('words')
 @bot.event
 async def on_ready():
-    status = discord.Game("with the API")
+    if not isDebugEnv:
+        status = discord.Game("with the API")
+    else:
+        logging.debug("note: Using debug Discord activity")
+        status = discord.Streaming(name="Squash That Bug!", url="https://alphagame.dev/alphagamebot")
     await bot.change_presence(activity=status)
     bot.auto_sync_commands = True
-    logging.info("Bot is ready!")
+    logging.info("Bot is now ready!")
+    logging.info("Bot user is \"{0}\".".format(bot.user.name))
 
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
+    cogw.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
                                                                    to make it work by trying again.\nSorry about that! (awkward face emoji)", color=discord.Color.red())
+
 
     embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
@@ -63,6 +71,9 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
     if isDebugEnv:
         raise error
 
+@bot.listen()
+async def on_application_command(ctx: discord.ApplicationContext):
+    listener.info("Command Called: /{0}".format(ctx.command.name))
 
 @bot.command(name="say")
 async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):

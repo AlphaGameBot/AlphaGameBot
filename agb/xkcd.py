@@ -16,7 +16,7 @@ class xkcdCog(discord.Cog):
 
     @commands.slash_command(name="xkcd", description="Get a random XKCD :)")
     async def _random(self, interaction,
-                      number: discord.Option(str, description="The ID of the desired XKCD comic")):
+                      number: discord.Option(str, description="The ID of the desired XKCD comic", required=False, default=None)):
         cur = self.getComic()[0]
         r = range(1, cur["num"])
         if not number:

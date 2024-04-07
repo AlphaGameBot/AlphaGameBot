@@ -61,11 +61,11 @@ class jokesCog(discord.Cog):
         breed = random.choice(list(a))
         await interaction.response.send_message(":dog: `{0}`".format(breed))
 
-    @commands.slash_command(name="coinflip")
+    @commands.slash_command(name="coinflip", description="Flip a coin!")
     async def _coinflip(self, interaction):
         await interaction.response.send_message(":coin: %s" % "Heads" if random.choice([True,False]) else "Tails")
 
-    @commands.slash_command(name="cowsay")
+    @commands.slash_command(name="cowsay", description="Linux cowsay command in Discord")
     async def _cowsay(self, interaction,
                       text: discord.Option(str, description="The text for the cow to say!"),
                       character: discord.Option(str, description="The character you want to use!",
