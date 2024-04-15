@@ -91,3 +91,46 @@ class UtilityCog(discord.Cog):
             r = r + random.choice(all_characters)
 
         await interaction.response.send_message("`{}`".format(r))
+
+    @commands.slash_command(name="dnd", description="Roll some D&D dice!")
+    async def _dnd(self, interaction,
+                   d4: discord.Option(int, description="Amount of D4 dice to roll", required=False, default=0),
+                   d6: discord.Option(int, description="Amount of D6 dice to roll", required=False, default=0),
+                   d8: discord.Option(int, description="Amount of D8 dice to roll", required=False, default=0),
+                   d10: discord.Option(int, description="Amount of D10 dice to roll", required=False, default=0),
+                   d12: discord.Option(int, description="Amount of D12 dice to roll", required=False, default=0),
+                   d20: discord.Option(int, description="Amount of D20 dice to roll", required=False, default=0),
+                   d100: discord.Option(int, description="Amount of D100 (D%) dice to roll", required=False, default=0)):
+        total = 0
+
+        # Roll x amount of d4
+        for _d4 in range(d4):
+            total += random.randint(1, 4)
+
+        # Roll x amount of d6
+        for _d6 in range(d6):
+            total += random.randint(1, 6)
+
+        # Roll x amount of d8
+        for _d8 in range(d8):
+            total += random.randint(1, 8)
+
+        # Roll x amount of d10
+        for _d10 in range(d10):
+            total += random.randint(1, 10)
+
+        # Roll x amount of d12
+        for _d12 in range(d12):
+            total += random.randint(1, 12)
+
+        # Roll x amount of d20
+        for _d20 in range(d20):
+            total += random.randint(1, 20)
+
+        # Roll x amount of d100 (or D% / Percent)
+        for _d100 in range(d100):
+            total += random.choice(
+                [(_+1)*10 for _ in range(10)]
+            )
+
+        await interaction.response.send_message(":game_die: {0}".format(total))
