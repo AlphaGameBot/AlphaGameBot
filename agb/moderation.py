@@ -19,7 +19,10 @@ from discord.ext import commands
 from discord import Permissions
 import logging
 
-class ModerationCog(discord.Cog):
+import agb.cogwheel
+
+
+class ModerationCog(agb.cogwheel.Cogwheel):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.logger = logging.getLogger("cogwheel")

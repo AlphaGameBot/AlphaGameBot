@@ -25,12 +25,8 @@ from mcstatus.querier import QueryResponse
 import agb.cogwheel
 
 
-class MinecraftCog(discord.Cog):
+class MinecraftCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="minecraft", description="Minecraft-related commands")
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("MinecraftCog has been initialized!")
 
     @group.command(name="mcjava", description="Ping a Minecraft: Java Edition server amd get data!")
     async def _java(self, interaction,

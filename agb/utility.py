@@ -21,11 +21,7 @@ import uuid
 import random
 import agb.cogwheel
 
-class UtilityCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("UtilityCog has been initalized!")
+class UtilityCog(agb.cogwheel.Cogwheel):
 
 
     @commands.slash_command(name="whoami", description="For whose who need a discord bot to help with an identity crisis.")

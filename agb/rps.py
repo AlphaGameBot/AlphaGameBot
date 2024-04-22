@@ -21,11 +21,8 @@ import logging
 import random
 
 
-class rpsCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("rpsCog has been initalized!")
+class rpsCog(agb.cogwheel.Cogwheel):
+    def init(self):
         self.gameData = {
             "rock": {
                 "name": "Rock",

@@ -1,5 +1,10 @@
-#    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
-#    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
+#  Copyright (c) 2024. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+#  Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
+#  Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
+#  Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
+#  Vestibulum commodo. Ut rhoncus gravida arcu.
+#
+#
 
 #    AlphaGameBot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +37,7 @@ import agb.rps
 import agb.minecraft
 import agb.google
 import agb.moderation
+import agb.mbtitest
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -122,6 +128,7 @@ bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
 bot.add_cog(agb.moderation.ModerationCog(bot))
+bot.add_cog(agb.mbtitest.MBTITestCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.

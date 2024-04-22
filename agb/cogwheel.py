@@ -1,5 +1,6 @@
 #    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
 #    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
+import logging
 
 #    AlphaGameBot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
+from discord.ext import commands
 from discord.embeds import *
 import os
 import json
@@ -46,3 +48,64 @@ def embed(**kwargs) -> discord.Embed:
     ),
                       icon_url="https://static.alphagame.dev/alphagamebot/img/icon.png")
     return _embed
+
+
+class CogwheelLoggerHelper:
+    def __init__(self, logger, cogname):
+        self.logger = logger
+        self.cogname = cogname
+        self.constructor = "{0}: %s".format(self.cogname)
+
+    def info(self, text: str = ""):
+        """Proxy for `logging.info` but only for Cogs.  This will give a unified
+        appearance that will allow different cogs to be distinguished in the console."""
+        self.logger.info(self.constructor % text)
+        return
+
+    def warn(self, text: str = ""):
+        """Proxy for `logging.warn` but only for Cogs.  This will give a unified
+        appearance that will allow different cogs to be distinguished in the console."""
+        self.logger.warn(self.constructor % text)
+        return
+
+    def error(self, text: str = ""):
+        """Proxy for `logging.error` but only for Cogs.  This will give a unified
+        appearance that will allow different cogs to be distinguished in the console."""
+        self.logger.error(self.constructor % text)
+        return
+
+    def debug(self, text: str = ""):
+        """Proxy for `logging.debug` but only for Cogs.  This will give a unified
+        appearance that will allow different cogs to be distinguished in the console."""
+        self.logger.debug(self.constructor % text)
+        return
+
+
+class Cogwheel(commands.Cog):
+    """Cogwheel (`agb.cogwheel.Cogwheel`) is a customized version of `Cog` (`discord.ext.commands.Cog`)
+    It allows for more predictable (and unified) behavior of Cogs.  All cogs used by AlphaGameBot are
+    derived of `agb.cogwheel.Cogwheel`
+
+    :param bot: Bot instance of which the cog is being deployed upon.
+    :returns: Cogwheel (`agb.cogwheel.Cogwheel`) derived from `discord.ext.commands.Cog`"""
+    def __init__(self, bot):
+        self.loggerInstance = logging.getLogger("cogwheel")
+        self.cogName = type(self).__name__
+        self.logger = CogwheelLoggerHelper(self.loggerInstance, self.cogName)
+        self.bot = bot
+
+        # Attempt to run cog-specific tasks in self.init (NOT __init__)
+        self.init()
+        # init can be overwritten when needed
+
+        self.logger.info("Let's go!  I have successfully initalized!")
+
+    def init(self):
+        """This is a function that can be used in place of `__init__`.
+        This function is *called* by __init__ on cog initialization.
+
+        By default, this does nothing (meant to be overwritten)"""
+        self.logger.debug("Skipping custom init process because it was never overwritten! (This is completely fine "
+                          "and is up to the Cog in question to decide if this is used.)")
+
+        return
