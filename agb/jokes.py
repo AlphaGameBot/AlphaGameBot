@@ -25,12 +25,7 @@ import random
 import cowsay
 import agb.cogwheel
 
-class jokesCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("jokesCog has been initalized.")
-
+class jokesCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="joke", description="I'm so funny, right?")
     async def _joke(self, interaction):
         r = agb.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)

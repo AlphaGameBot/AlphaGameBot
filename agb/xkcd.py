@@ -22,12 +22,7 @@ import agb.requestHandler
 import logging
 import agb.cogwheel
 
-class xkcdCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("xkcdCog has been initalized!")
-
+class xkcdCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="xkcd", description="Get a random XKCD :)")
     async def _random(self, interaction,
                       number: discord.Option(str, description="The ID of the desired XKCD comic", required=False, default=None)):

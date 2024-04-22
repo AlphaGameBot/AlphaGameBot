@@ -19,12 +19,7 @@ import discord
 import logging
 import agb.cogwheel
 
-class GoogleCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("GoogleCog has been initalized!")
-
+class GoogleCog(agb.cogwheel.Cogwheel):
     @discord.command(name="google", description="Search on Google (for those of you who don't wanna open Chrome :/)")
     async def _google(self, interaction,
                       query: discord.Option(str, description="The search term that you want"),
