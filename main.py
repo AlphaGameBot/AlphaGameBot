@@ -37,7 +37,8 @@ import agb.rps
 import agb.minecraft
 import agb.google
 import agb.moderation
-import agb.mbtitest
+# import agb.mbtitest
+import agb.rssFeedCog
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -89,7 +90,7 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
     try:
         await interaction.response.send_message(embed=embed)
     except discord.errors.InteractionResponded:
-        pass
+        await interaction.followup.send(embed=embed)
     if isDebugEnv:
         raise error
 
@@ -128,7 +129,8 @@ bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
 bot.add_cog(agb.moderation.ModerationCog(bot))
-bot.add_cog(agb.mbtitest.MBTITestCog(bot))
+# bot.add_cog(agb.mbtitest.MBTITestCog(bot))
+bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
