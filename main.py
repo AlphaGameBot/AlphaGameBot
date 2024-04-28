@@ -37,6 +37,7 @@ import agb.rps
 import agb.minecraft
 import agb.google
 import agb.moderation
+import agb.system.commandError
 # import agb.mbtitest
 import agb.rssFeedCog
 # if you wanna set custom logging configs i guess
@@ -81,18 +82,8 @@ async def on_ready():
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
-    embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
-                                                                   to make it work by trying again.\nSorry about that! (awkward face emoji)", color=discord.Color.red())
+    return await agb.system.commandError.handleApplicationCommandError(interaction, error)
 
-
-    embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
-    embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
-    try:
-        await interaction.response.send_message(embed=embed)
-    except discord.errors.InteractionResponded:
-        await interaction.followup.send(embed=embed)
-    if isDebugEnv:
-        raise error
 
 @bot.listen()
 async def on_application_command(ctx: discord.ApplicationContext):

@@ -1,10 +1,52 @@
-# discord.py
+#    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
+#    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
+
+#    AlphaGameBot is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+
+#    AlphaGameBot is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+
+#    You should have received a copy of the GNU General Public License
+#    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
+
+#    Note: These libraries used are licensed under their own respective licenses.
+
 py-cord
 requests~=2.31.0
 requests-cache
 nltk~=3.8.1
-# Flask~=3.0.0
-# mysql-connector-python
+
+# Cowsay
+cowsay~=6.1
+
+# MCStatus is used in agb/minecraft.py
+mcstatus~=11.1.1
+
+# FeedParser is used in agb/rssFeedCog.py
+feedparser~=6.0.11
+
+# - - - - - - - - - - - - - - - - - - -
+# - The following packages are optional.
+# - - - - - - - - - - - - - - - - - - -
+
+# GoogleSearch-python is only needed or used
+# if you would like to use the /google command.
+
+# If you would like to use it, you must also edit
+# `main.py` and uncomment these lines:
+#   # import agb.google
+#   # bot.add_cog(agb.google.GoogleCog)
+
+# GoogleSearch-python *is* enabled by default in
+# requirements.txt for simplicity's sake, however
+# if you would like to remove it for any reason,
+# for example, making the Docker image smaller,
+# you can comment it out.  Just be sure to remove
+# the import to GoogleCog in main.py!
+
 googlesearch-python
-cowsay
-mcstatus
