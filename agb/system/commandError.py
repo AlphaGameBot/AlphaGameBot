@@ -19,7 +19,7 @@ import discord
 from discord import commands
 import agb.cogwheel
 import agb.requestHandler
-
+import time
 logger = logging.getLogger("listener")
 
 
@@ -58,19 +58,34 @@ class ErrorOptionView(discord.ui.View):
         button.disabled = True
         button.label = "Error Reported!"
         await interaction.response.edit_message(view=self)
+
+        data = self.realinteraction.interaction.to_dict()
+        arguments = ""
+        for x in data["data"]["options"]:
+            arguments = arguments + "* `{0}: {1}`\n".format(x["name"], x["value"])
         webhook("""
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
-**User**: {0} (Nick: {1})
+**User**: `{0}` (Nick: *{1}*)
 **Error Message**: `{2}`
 **Command Affected**: `/{3}`
- 
-""".format(interaction.user.name, interaction.user.nick, repr(self._error), self.realinteraction.command))
+
+**Command Arguments**
+{4}
+
+**Reported At** {5}
+        """.format(interaction.user.name,
+                   interaction.user.nick,
+                   repr(self._error),
+                   self.realinteraction.command,
+                   arguments,
+                   time.ctime()))
 
         button.disabled = True
         button.label = "Error Reported!"
-        await interaction.response.edit_message(view=self)
+        # It seems that editing the original message is not needed. :/
+        #await interaction.followup.edit_message(view=self)
 
 async def handleApplicationCommandError(interaction: commands.context.ApplicationContext, error):
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
