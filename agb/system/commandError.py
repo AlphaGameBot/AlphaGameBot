@@ -71,7 +71,7 @@ An error was reported.  Here is some information!
                                                                         "AlphaGameDeveloper, so THAT should be fixed! "
                                                                         " Thank you so much!\n\nCheers,"
                                                                         "\nAlphaGameDeveloper")
-        await interaction.followup.send(embed=embed)
+#        await interaction.followup.send(embed=embed)
 
         button.disabled = True
         button.label = "Error Reported!"
