@@ -67,11 +67,6 @@ An error was reported.  Here is some information!
 **Command Affected**: `/{3}`
  
 """.format(interaction.user.name, interaction.user.nick, repr(self._error), self.realinteraction.command))
-        embed = agb.cogwheel.embed(title="Error Reported!", description="You rock!  This pesky error was reported to "
-                                                                        "AlphaGameDeveloper, so THAT should be fixed! "
-                                                                        " Thank you so much!\n\nCheers,"
-                                                                        "\nAlphaGameDeveloper")
-#        await interaction.followup.send(embed=embed)
 
         button.disabled = True
         button.label = "Error Reported!"
