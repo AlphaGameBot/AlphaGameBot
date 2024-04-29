@@ -25,9 +25,10 @@
       "GET_CHARACTER_IMAGE": "https://jojos-bizarre-api.netlify.app/assets/{}"
     }
   },
-  "VERSION": "2.4",
+  "VERSION": "2.4.1",
   "USER-AGENT": "AlphaGameBot/{} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/2.31.0; curl/8.4.0;",
   "CHANGELOG": {
+    "2.4.1": "Remove Python errors in prod",
     "2.4": "Add D&D command",
     "2.3": "Add RSS command",
     "2.2.2": "Update",
