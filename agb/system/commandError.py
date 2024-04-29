@@ -92,7 +92,8 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
                                                                        to make it work by trying again.\nSorry about that! (awkward face emoji)",
                                color=discord.Color.red())
 
-    embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
+    if agb.cogwheel.isDebugEnv:
+    	embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     try:
         await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction))
