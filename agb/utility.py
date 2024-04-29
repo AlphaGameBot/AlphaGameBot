@@ -90,6 +90,8 @@ class UtilityCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="dnd", description="Roll some D&D dice!")
     async def _dnd(self, interaction,
+                   modifier: discord.Option(int, description="Modifier to be added to the roll.", required=False,
+                                            default=0),
                    d4: discord.Option(int, description="Amount of D4 dice to roll", required=False, default=0),
                    d6: discord.Option(int, description="Amount of D6 dice to roll", required=False, default=0),
                    d8: discord.Option(int, description="Amount of D8 dice to roll", required=False, default=0),
@@ -128,5 +130,11 @@ class UtilityCog(agb.cogwheel.Cogwheel):
             total += random.choice(
                 [(_+1)*10 for _ in range(10)]
             )
+
+        # Add the modifier at the end.  This allows for rolls like
+        # 2d6 + 10, where 10 is the modifier.  It can be negative,
+        # i guess.
+        # By default this does nothing, as it defaults to zero.
+        total += modifier
 
         await interaction.response.send_message(":game_die: {0}".format(total))
