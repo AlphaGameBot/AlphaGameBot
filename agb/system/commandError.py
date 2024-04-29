@@ -49,9 +49,10 @@ def webhook(message):
 
 
 class ErrorOptionView(discord.ui.View):
-    def __init__(self, error):
+    def __init__(self, error, interaction):
         super().__init__()
         self._error = error
+        self.realinteraction = interaction
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
     async def reportError(self, button, interaction: commands.context.ApplicationContext):
         button.disabled = True
@@ -65,13 +66,16 @@ An error was reported.  Here is some information!
 **Error Message**: `{2}`
 **Command Affected**: `/{3}`
  
-""")
+""".format(interaction.user.name, interaction.user.nick, repr(self._error), self.realinteraction.command))
         embed = agb.cogwheel.embed(title="Error Reported!", description="You rock!  This pesky error was reported to "
                                                                         "AlphaGameDeveloper, so THAT should be fixed! "
                                                                         " Thank you so much!\n\nCheers,"
                                                                         "\nAlphaGameDeveloper")
         await interaction.followup.send(embed=embed)
 
+        button.disabled = True
+        button.label = "Error Reported!"
+        await interaction.response.edit_message(view=self)
 
 async def handleApplicationCommandError(interaction: commands.context.ApplicationContext, error):
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
@@ -81,8 +85,8 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
     embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     try:
-        await interaction.response.send_message(embed=embed, view=ErrorOptionView(error))
+        await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction))
     except discord.errors.InteractionResponded:
-        await interaction.followup.send(embed=embed, view=ErrorOptionView(error))
+        await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction))
     if agb.cogwheel.isDebugEnv:
         raise error
