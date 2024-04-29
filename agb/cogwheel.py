@@ -33,6 +33,7 @@ def getAPIEndpoint(apiName, process):
     _p = _a[process]
     return _p
 
+isDebugEnv = (os.getenv("DEBUG") != None)
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
