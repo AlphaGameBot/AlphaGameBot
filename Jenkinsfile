@@ -7,6 +7,7 @@ pipeline {
     }
     environment {
         TOKEN = credentials('alphagamebot-token')
+	WEBHOOK = credentials('alphagamebot-webhook')
     }
     stages {
         stage('build') {
@@ -25,7 +26,7 @@ pipeline {
                 // conditionally deploy
                 sh "docker container stop alphagamebot || true"
                 sh "docker container rm alphagamebot || true"
-                sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN=$TOKEN --restart=always alphagamedev/alphagamebot"
+                sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN -e WEBHOOK --restart=always alphagamedev/alphagamebot"
             }
         }
     }
