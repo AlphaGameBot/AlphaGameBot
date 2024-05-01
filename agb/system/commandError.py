@@ -49,8 +49,9 @@ def webhook(message):
 
 
 class ErrorOptionView(discord.ui.View):
-    def __init__(self, error, interaction):
+    def __init__(self, error, interaction, user: discord.User):
         super().__init__()
+        self.user = user
         self._error = error
         self.realinteraction = interaction
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
@@ -63,7 +64,7 @@ class ErrorOptionView(discord.ui.View):
         arguments = ""
         for x in data["data"]["options"]:
             arguments = arguments + "* `{0}: {1}`\n".format(x["name"], x["value"])
-        webhook("""
+        print("""
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -84,6 +85,31 @@ An error was reported.  Here is some information!
 
         button.disabled = True
         button.label = "Error Reported!"
+        dm = await self.user.create_dm()
+        sent_embed = agb.cogwheel.embed(
+            title="✅ Bug Report Recieved!",
+            description=f"""
+Hey, {self.user.name}!
+
+I just got your bug report, and will try to fix it soon!  Thanks for helping me squash those bugs!
+People like you help AlphaGameBot be the Discord bot we all know it can be, and I couldn't do it without your bug reports!
+Anyway, that command that gave you a hard time (`/{self.realinteraction.command}`) should be fixed soon.  While you wait, why not check out the [GitHub repository](https://github.com/AlphaGameDeveloper/AlphaGameBot/)?
+
+Cheers,
+*AlphaGameDeveloper*
+
+*Note: Your bug report will be processed as per the Privacy Policy.  (It's fair.. Don't worry!)*""",
+            color=discord.Color.green()
+        )
+        view = discord.ui.View()
+
+        btn1 = discord.ui.Button(label="GitHub", url="https://github.com/AlphaGameDeveloper/AlphaGameBot", style=discord.ButtonStyle.link)
+        btn2 = discord.ui.Button(label="Privacy Policy", emoji="📜", url="https://alphagame.dev/alphagamebot/privacy", style=discord.ButtonStyle.link)
+        
+        view.add_item(item=btn1)
+        view.add_item(item=btn2)
+
+        await dm.send(embed=sent_embed, view=view)
         # It seems that editing the original message is not needed. :/
         #await interaction.followup.edit_message(view=self)
 
@@ -96,7 +122,7 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
     	embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     try:
-        await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction))
+        await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
     except discord.errors.InteractionResponded:
         await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction))
     if agb.cogwheel.isDebugEnv:
