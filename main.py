@@ -37,6 +37,7 @@ import agb.rps
 import agb.minecraft
 import agb.google
 import agb.moderation
+import agb.fun
 import agb.system.commandError
 # import agb.mbtitest
 import agb.rssFeedCog
@@ -91,7 +92,7 @@ async def on_application_command(ctx: discord.ApplicationContext):
 
 @bot.command(name="say")
 async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
-    if isDebugEnv:
+    if agb.cogwheel.isDebugEnv:
         cogw.info("?say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
     if ctx.message.guild.id not in SAY_EXCEPTIONS:
@@ -122,6 +123,8 @@ bot.add_cog(agb.minecraft.MinecraftCog(bot))
 bot.add_cog(agb.moderation.ModerationCog(bot))
 # bot.add_cog(agb.mbtitest.MBTITestCog(bot))
 bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
+bot.add_cog(agb.fun.FunCog(bot))
+
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
