@@ -40,12 +40,10 @@ def embed(**kwargs) -> discord.Embed:
     :rtype: object
     :returns discord.Embed"""
 
-    __IS_DEBUG = (os.getenv("DEBUG_ENV") is not None)
-
     _embed = discord.Embed(**kwargs)
     _embed.set_footer(text="AlphaGameBot version {0}{1}".format(
         getVersion(),
-        " (development build)" if __IS_DEBUG else ""
+        " (development build)" if isDebugEnv else ""
     ),
                       icon_url="https://static.alphagame.dev/alphagamebot/img/icon.png")
     return _embed
