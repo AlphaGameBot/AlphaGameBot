@@ -101,6 +101,10 @@ class UtilityCog(agb.cogwheel.Cogwheel):
                    d100: discord.Option(int, description="Amount of D100 (D%) dice to roll", required=False, default=0)):
         total = 0
 
+        totalDice = d4 + d6 + d8 + d10 + d12 + d20 + d100
+        if totalDice > 1000:
+            await interaction.response.send_message(f":x: Number of dice too high! ({totalDice} > 1000)")
+            return
         # Roll x amount of d4
         for _d4 in range(d4):
             total += random.randint(1, 4)
@@ -138,3 +142,6 @@ class UtilityCog(agb.cogwheel.Cogwheel):
         total += modifier
 
         await interaction.response.send_message(":game_die: {0}".format(total))
+
+    def dnd_verifyUpperLimit(self, value):
+        return (value <= 1000)
