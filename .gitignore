@@ -1,3 +1,9 @@
+# DO NOT TRACK MY TOKEN!
+.env
+
+bin/
+lib64
+
 .idea
 Scripts
 pyvenv.cfg
