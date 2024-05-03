@@ -17,13 +17,17 @@ pipeline {
                 // sh 'printenv'
 
                 echo "Building"
-                sh "AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)"
+                sh """
+                    # Retrieve the AGB_VERSION from the JSON file
+                    AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)
 
-                // Check if the retrieved tag is blank
-                if (env.AGB_VERSION.trim() == '') {
-                    // Set a fallback value if the tag is blank
-                    env.AGB_VERSION = 'latest'
-                }
+                    # Check if AGB_VERSION is empty, and if so, assign a fallback value
+                    if [ -z "\$AGB_VERSION" ]; then
+                        AGB_VERSION='latest'
+                    fi
+
+                    echo "AGB_VERSION is: \$AGB_VERSION"
+                """
 
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
