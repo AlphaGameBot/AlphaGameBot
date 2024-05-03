@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'boisvert/scala-build'
+            image 'boisvert/python-build'
             args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
         }
     }
