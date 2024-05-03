@@ -29,7 +29,7 @@ pipeline {
                     echo "AGB_VERSION is: \$AGB_VERSION"
                 """
 
-                sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
+                sh 'docker build -t alphagamedev/alphagamebot:\$AGB_VERSION .'
 
                 // get alphagamebot version
 
@@ -40,7 +40,7 @@ pipeline {
             steps {
                 echo "Pushing image to Docker Hub"
                 sh 'echo $DOCKER_TOKEN | sudo docker login -u alphagamedev --password-stdin'
-                sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
+                sh 'docker push alphagamedev/alphagamebot:\$AGB_VERSION'
                 sh 'docker logout'
             }
         }
