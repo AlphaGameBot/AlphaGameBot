@@ -41,13 +41,11 @@ pipeline {
             }
         }
     } // stages
-    post {
-        always {
-            node {
-                // We must ALWAYS LOG OUT, regardless if it fails or not
-                sh "docker logout"
-                echo "bye bye :)"
-            }
-        }
+
+    always {
+        // We must ALWAYS LOG OUT, regardless if it fails or not
+        sh "docker logout"
+        echo "bye bye :)"
     }
+
 }
