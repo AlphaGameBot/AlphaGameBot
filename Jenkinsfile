@@ -30,6 +30,7 @@ pipeline {
                 echo "Pushing image to Docker Hub"
                 sh 'echo $DOCKER_TOKEN | sudo docker login -u alphagamedev --password-stdin'
                 sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
+                sh 'docker logout'
             }
         }
         stage('deploy') {
@@ -41,11 +42,4 @@ pipeline {
             }
         }
     } // stages
-
-    always {
-        // We must ALWAYS LOG OUT, regardless if it fails or not
-        sh "docker logout"
-        echo "bye bye :)"
-    }
-
 }
