@@ -36,31 +36,6 @@ class UtilityCog(agb.cogwheel.Cogwheel):
 
         await interaction.response.send_message(text)
 
-
-    @commands.slash_command(name="about", description="About AlphaGameBot!")
-    async def _about(self, interaction):
-        _d = agb.cogwheel.getBotInformation()
-        view = discord.ui.View()
-        linkStyle = discord.ButtonStyle.link
-        addTheBot = discord.ui.Button(style=linkStyle, label="Add the Bot!",
-                                      url="https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=8&scope=bot")
-        checkItOut = discord.ui.Button(style=linkStyle, label="Learn More!", url="https://alphagame.dev/alphagamebot/")
-        githubBtn = discord.ui.Button(style=linkStyle, label="GitHub",
-                                      url="https://github.com/AlphaGameDeveloper/AlphaGameBot")
-        view.add_item(item=addTheBot)
-        view.add_item(item=checkItOut)
-        view.add_item(item=githubBtn)
-        embed = discord.Embed(title=f"AlphaGameBot {agb.cogwheel.getVersion()}",
-                              description=_d["BOT_INFORMATION"]["DESCRIPTION"],
-                              colour=discord.Colour.dark_blue())
-        embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
-        embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())
-        try:
-            embed.add_field(name="Latest Update Message", value=_d["CHANGELOG"][agb.cogwheel.getVersion()])
-        except:
-            embed.add_field(name="Latest Update Message", value="No message")
-        await interaction.response.send_message(embed=embed, view=view)
-
     @commands.slash_command(name="uuid", description="Get a version 4 UUID")
     async def _uuid(self, interaction, count:int=1):
         if count > 100:
