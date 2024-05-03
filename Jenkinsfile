@@ -28,7 +28,7 @@ pipeline {
         stage('push') {
             steps {
                 echo "Pushing image to Docker Hub"
-                sh 'echo $DOCKER_TOKEN | sudo docker login -u alphagamedev --password-stdin'
+                sh 'echo $DOCKER_TOKEN | docker login -u alphagamedev --password-stdin'
                 sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
                 sh 'docker logout'
             }
