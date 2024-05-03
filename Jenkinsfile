@@ -26,9 +26,9 @@ pipeline {
                         AGB_VERSION='latest'
                     fi
 
-                    echo "AGB_VERSION is: \$AGB_VERSION"
-                """
 
+                """
+                sh 'echo "AGB_VERSION is: \$AGB_VERSION"'
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
                 // get alphagamebot version
