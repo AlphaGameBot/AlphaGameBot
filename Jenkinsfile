@@ -19,7 +19,7 @@ pipeline {
                 echo "Building"
                 sh """
                     # Retrieve the AGB_VERSION from the JSON file
-                    AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)
+                    export AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)
 
                     # Check if AGB_VERSION is empty, and if so, assign a fallback value
                     if [ -z "\$AGB_VERSION" ]; then
@@ -29,7 +29,7 @@ pipeline {
                     echo "AGB_VERSION is: \$AGB_VERSION"
                 """
 
-                sh 'docker build -t alphagamedev/alphagamebot:\$AGB_VERSION .'
+                sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
                 // get alphagamebot version
 
