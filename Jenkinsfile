@@ -7,7 +7,8 @@ pipeline {
     }
     environment {
         TOKEN = credentials('alphagamebot-token')
-	WEBHOOK = credentials('alphagamebot-webhook')
+	    WEBHOOK = credentials('alphagamebot-webhook')
+	    DOCKER_TOKEN = credentials('alphagamedev-docker-token')
     }
     stages {
         stage('build') {
@@ -16,9 +17,19 @@ pipeline {
                 // sh 'printenv'
 
                 echo "Building"
+                sh "AGB_VERSION=$(cat alphagamebot.json | jq '.VERSION' -c -M -r)"
+                sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
-                sh 'docker build -t alphagamedev/alphagamebot .'
+                // get alphagamebot version
 
+
+            }
+        }
+        stage('push') {
+            steps {
+                echo "Pushing image to Docker Hub"
+                sh 'echo $DOCKER_TOKEN | sudo docker login -u alphagamedev --password-stdin'
+                sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
             }
         }
         stage('deploy') {
@@ -28,6 +39,13 @@ pipeline {
                 sh "docker container rm alphagamebot || true"
                 sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN -e WEBHOOK --restart=always alphagamedev/alphagamebot"
             }
+        }
+    } // stages
+    post {
+        always {
+            // We must ALWAYS LOG OUT, regardless if it fails or not
+            sh "docker logout"
+            echo "bye bye :)"
         }
     }
 }
