@@ -17,7 +17,7 @@ pipeline {
                 // sh 'printenv'
 
                 echo "Building"
-                sh "AGB_VERSION=$(cat alphagamebot.json | jq '.VERSION' -c -M -r)"
+                sh "AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)"
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
                 // get alphagamebot version
