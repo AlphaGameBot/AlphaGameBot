@@ -10,6 +10,7 @@ pipeline {
 	    WEBHOOK = credentials('alphagamebot-webhook')
 	    DOCKER_TOKEN = credentials('alphagamedev-docker-token')
 	    AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -c -M -r").trim()
+	    COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
     }
     stages {
         stage('build') {
@@ -38,7 +39,13 @@ pipeline {
                 // conditionally deploy
                 sh "docker container stop alphagamebot || true"
                 sh "docker container rm alphagamebot || true"
-                sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN -e WEBHOOK --restart=always alphagamedev/alphagamebot"
+                sh "docker run -d \
+                                -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite \
+                                --name alphagamebot \
+                                -e TOKEN -e WEBHOOK -e BUILD_NUMBER -e BRANCH_NAME \
+                                -e BRANCH_IS_PRIMARY -e BUILD_ID -e BUILD_TAG -e COMMIT_MESSAGE \
+                                --restart=always \
+                                alphagamedev/alphagamebot"
             }
         }
     } // stages
