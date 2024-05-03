@@ -16,7 +16,7 @@ pipeline {
         stage('build') {
             steps {
                 // debug if necessary
-                sh 'printenv'
+                // sh 'printenv'
 
                 echo "Building"
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
