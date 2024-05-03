@@ -38,6 +38,7 @@ import agb.minecraft
 import agb.google
 import agb.moderation
 import agb.fun
+import agb.botinfo
 import agb.system.commandError
 # import agb.mbtitest
 import agb.rssFeedCog
@@ -124,6 +125,7 @@ bot.add_cog(agb.moderation.ModerationCog(bot))
 # bot.add_cog(agb.mbtitest.MBTITestCog(bot))
 bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
 bot.add_cog(agb.fun.FunCog(bot))
+bot.add_cog(agb.botinfo.BotInformationCog(bot))
 
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
