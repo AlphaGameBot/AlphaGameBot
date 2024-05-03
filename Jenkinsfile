@@ -45,7 +45,7 @@ pipeline {
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER -e BRANCH_NAME \
                                 -e BRANCH_IS_PRIMARY -e BUILD_ID -e BUILD_TAG -e COMMIT_MESSAGE \
                                 --restart=always \
-                                alphagamedev/alphagamebot"
+                                alphagamedev/alphagamebot:$AGB_VERSION"
             }
         }
     } // stages
