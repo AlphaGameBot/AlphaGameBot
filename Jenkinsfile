@@ -18,6 +18,13 @@ pipeline {
 
                 echo "Building"
                 sh "AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)"
+
+                // Check if the retrieved tag is blank
+                if (env.AGB_VERSION.trim() == '') {
+                    // Set a fallback value if the tag is blank
+                    env.AGB_VERSION = 'latest'
+                }
+
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
                 // get alphagamebot version
