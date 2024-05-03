@@ -9,26 +9,15 @@ pipeline {
         TOKEN = credentials('alphagamebot-token')
 	    WEBHOOK = credentials('alphagamebot-webhook')
 	    DOCKER_TOKEN = credentials('alphagamedev-docker-token')
+	    AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -c -M -r").trim()
     }
     stages {
         stage('build') {
             steps {
                 // debug if necessary
-                // sh 'printenv'
+                sh 'printenv'
 
                 echo "Building"
-                sh """
-                    # Retrieve the AGB_VERSION from the JSON file
-                    export AGB_VERSION=\$(cat alphagamebot.json | jq '.VERSION' -c -M -r)
-
-                    # Check if AGB_VERSION is empty, and if so, assign a fallback value
-                    if [ -z "\$AGB_VERSION" ]; then
-                        AGB_VERSION='latest'
-                    fi
-
-
-                """
-                sh 'echo "AGB_VERSION is: \$AGB_VERSION"'
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION .'
 
                 // get alphagamebot version
@@ -40,7 +29,7 @@ pipeline {
             steps {
                 echo "Pushing image to Docker Hub"
                 sh 'echo $DOCKER_TOKEN | sudo docker login -u alphagamedev --password-stdin'
-                sh 'docker push alphagamedev/alphagamebot:\$AGB_VERSION'
+                sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
                 sh 'docker logout'
             }
         }
