@@ -1,11 +1,3 @@
-#  Copyright (c) 2024. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-#  Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
-#  Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
-#  Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
-#  Vestibulum commodo. Ut rhoncus gravida arcu.
-#
-#
-
 #    AlphaGameBot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -91,27 +83,31 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 async def on_application_command(ctx: discord.ApplicationContext):
     listener.info("Command Called: /{0}".format(ctx.command.name))
 
-@bot.command(name="say")
-async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
+@bot.event
+async def on_message(ctx: discord.Message):
+    if ctx.content.startswith("..") == False:
+        return
     if agb.cogwheel.isDebugEnv:
-        cogw.info("?say was ignored as I think this is a development build.")
+        cogw.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
-    if ctx.message.guild.id not in SAY_EXCEPTIONS:
+    if ctx.guild.id not in SAY_EXCEPTIONS:
         return
     if ctx.author.id == HOLDEN:
-        await ctx.send(":middle_finger: Nice try, bozo")
+        await ctx.channel.send("> *:middle_finger: \"You can go fuck yourself with that!*\"\n Brewstew, *Devil Chip*")
         cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(text))
         return
     if ctx.author.id != DAMIEN:
         cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name, text))
-        await ctx.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
+        await ctx.channel.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
         return
 
+    text = ctx.content
+    text = text[2:]
     if text == None:
         return
     logging.info("I was told to say: \"{}\".".format(text))
-    await ctx.send(text)
-    await ctx.message.delete()
+    await ctx.channel.send(text)
+    await ctx.delete()
 
 # set command cogs
 bot.add_cog(agb.utility.UtilityCog(bot))
