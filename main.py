@@ -18,7 +18,6 @@ import nltk
 import logging
 import logging.config
 import agb.cogwheel
-import threading
 # commands
 import agb.utility
 import agb.xkcd
@@ -32,8 +31,9 @@ import agb.moderation
 import agb.fun
 import agb.botinfo
 import agb.system.commandError
-# import agb.mbtitest
 import agb.rssFeedCog
+import agb.suntsu
+# - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -87,6 +87,9 @@ async def on_application_command(ctx: discord.ApplicationContext):
 async def on_message(ctx: discord.Message):
     if ctx.content.startswith("..") == False:
         return
+    if ctx.content.startswith("...") == True:
+        return
+
     if agb.cogwheel.isDebugEnv:
         cogw.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
@@ -94,10 +97,11 @@ async def on_message(ctx: discord.Message):
         return
     if ctx.author.id == HOLDEN:
         await ctx.channel.send("> *:middle_finger: \"You can go fuck yourself with that!*\"\n Brewstew, *Devil Chip*")
-        cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(text))
+        cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(ctx.content))
         return
     if ctx.author.id != DAMIEN:
-        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name, text))
+        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
+                                                                                               ctx.content))
         await ctx.channel.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
         return
 
@@ -118,10 +122,10 @@ bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
 bot.add_cog(agb.moderation.ModerationCog(bot))
-# bot.add_cog(agb.mbtitest.MBTITestCog(bot))
 bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
 bot.add_cog(agb.fun.FunCog(bot))
 bot.add_cog(agb.botinfo.BotInformationCog(bot))
+bot.add_cog(agb.suntsu.SunTsuCog(bot))
 
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
