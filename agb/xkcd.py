@@ -24,21 +24,37 @@ import agb.cogwheel
 
 class xkcdCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="xkcd", description="XKCD Integrations in Discord!")
-    async def _random(self, interaction,
-                      number: discord.Option(str, description="The ID of the desired XKCD comic", required=False, default=None)): # type: ignore
-        cur = self.getComic()[0]
-        r = range(1, cur["num"])
-        if not number:
+    async def _xkcd(self, interaction,
+                      recent: discord.Option(bool, description="Get the most recent XKCD comic", required=False, default=False), # type: ignore
+                      number: discord.Option(int, description="The ID of the desired XKCD comic", required=False, default=None)): # type: ignore
+        
+        # Get the current XKCD comic!
+        current = self.getComic()[0]
+        if not number and recent == False:
             # if no number is given, do random
-            number = random.choice(r)
+            # Get some random xkcd comic
+            print((1, current["num"]))
+            number = random.randint(1, current["num"])
             xkcd = self.getComic(number)[0]
 
+        elif recent == True:
+            # Pass most recent XKCD along (current)
+            # Note: yes, i could do current[:] but it is read-only
+            # so that would be pretty-useless (and memory-intensive)
+            # to do so! (Kinda like a linux symlink when i think about it ☻)
+            xkcd = current
         else:
+            # Check if the number is under zero, I found that this was (quite) problematic!
+            if number < 0:
+                await interaction.response.send_message(":x: You know, these comics don't go into the negatives... That'd be weird!")
+                return
+            if number > current["num"]:
+                await interaction.response.send_message(":x: XKCD number does not exist.  Currently, the highest value is {}!".format(current["num"]))
+                return
             comic = self.getComic(number)
             xkcd = comic[0]
             request = comic[1] # requests object
             if request.status_code == 404:
-                self.logger.error("404 error >:(")
                 await interaction.response.send_message(":x: Comic not found! (`HTTP/2 404: Not Found!`)")
                 return
         embed = agb.cogwheel.Embed(title="#{0}: {1}".format(number, xkcd["safe_title"]),
@@ -52,12 +68,17 @@ class xkcdCog(agb.cogwheel.Cogwheel):
         await interaction.response.send_message(embed=embed)
 
 
-    def getComic(self, num: int = None):
+    def getComic(self, num: int = None) -> list:
         self.logger.debug("Getting XKCD #{}".format(num if num != None else "CURRENT"))
         if num == None:
-            u = agb.cogwheel.getAPIEndpoint("xkcd", "GET_CURRENT")
+            url = agb.cogwheel.getAPIEndpoint("xkcd", "GET_CURRENT")
         else:
-            u = agb.cogwheel.getAPIEndpoint("xkcd", "GET_SPECIFIC").format(num)
+            url = agb.cogwheel.getAPIEndpoint("xkcd", "GET_SPECIFIC").format(num)
 
-        r = agb.requestHandler.handler.get(u)
-        return [json.loads(r.text), r]
+        response = agb.requestHandler.handler.get(url)
+        if response.status_code == 200:
+            xkcd = json.loads(response.text)
+        else:
+            # Response is not 200 OK, return empty dictionary because womp womp
+            xkcd = {}
+        return [xkcd, response]
