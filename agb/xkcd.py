@@ -23,9 +23,9 @@ import logging
 import agb.cogwheel
 
 class xkcdCog(agb.cogwheel.Cogwheel):
-    @commands.slash_command(name="xkcd", description="Get a random XKCD :)")
+    @commands.slash_command(name="xkcd", description="XKCD Integrations in Discord!")
     async def _random(self, interaction,
-                      number: discord.Option(str, description="The ID of the desired XKCD comic", required=False, default=None)):
+                      number: discord.Option(str, description="The ID of the desired XKCD comic", required=False, default=None)): # type: ignore
         cur = self.getComic()[0]
         r = range(1, cur["num"])
         if not number:
