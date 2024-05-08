@@ -37,7 +37,7 @@ class RequestHandler:
              502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout', 505: 'HTTP Version Not Supported'}
 
         self.logger = logging.getLogger("requesthandler")
-        self.session = requests_cache.CachedSession("request-handler", cache_control=True)
+        self.session = requests_cache.CachedSession("request-handler", cache_control=True, expire_after=43200) # 43200 seconds = 12 hours
         self.logger.info("RequestHandler has been initalized!")
         with open("alphagamebot.json", "r") as f:
             self.BOT_INFORMATION = json.load(f)
