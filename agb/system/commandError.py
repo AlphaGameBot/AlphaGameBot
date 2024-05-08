@@ -38,10 +38,9 @@ def webhook(message):
     try:
         response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), payload)
         if response.status_code == 200:
-            print("Message sent successfully")
             return True
         else:
-            print(f"Failed to send message. Status code: {response.status_code}")
+            logger.error(f"Failed to webhook message. Status code: {response.status_code}")
             return False
     except Exception as e:
         logger.warning(f"Unable to send information to webhook: {e}")
@@ -64,7 +63,7 @@ class ErrorOptionView(discord.ui.View):
         arguments = ""
         for x in data["data"]["options"]:
             arguments = arguments + "* `{0}: {1}`\n".format(x["name"], x["value"])
-        print("""
+        webhook("""
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -119,7 +118,7 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
                                color=discord.Color.red())
 
     if agb.cogwheel.isDebugEnv:
-    	embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
+        embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     try:
         await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
