@@ -21,6 +21,9 @@ requests~=2.31.0
 requests-cache
 nltk~=3.8.1
 
+# DHooks to send data to discord webhooks (mostly for error reporting)
+dhooks
+
 # Cowsay
 cowsay~=6.1
 
