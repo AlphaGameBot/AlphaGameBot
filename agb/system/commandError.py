@@ -20,31 +20,8 @@ from discord import commands
 import agb.cogwheel
 import agb.requestHandler
 import time
+from dhooks import Webhook
 logger = logging.getLogger("listener")
-
-
-def webhook(message):
-    """
-    Send a message to the specified webhook URL.
-
-    Args:
-    webhook_url (str): The URL of the webhook.
-    message (str): The message to send.
-
-    Returns:
-    bool: True if the message was sent successfully, False otherwise.
-    """
-    payload = {'content': message}
-    try:
-        response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), payload)
-        if response.status_code == 200:
-            return True
-        else:
-            logger.error(f"Failed to webhook message. Status code: {response.status_code}")
-            return False
-    except Exception as e:
-        logger.warning(f"Unable to send information to webhook: {e}")
-        return False
 
 
 class ErrorOptionView(discord.ui.View):
@@ -55,15 +32,20 @@ class ErrorOptionView(discord.ui.View):
         self.realinteraction = interaction
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
     async def reportError(self, button, interaction: commands.context.ApplicationContext):
+        # Set the button to be disabled to prevent spamming. (button.disabled)
         button.disabled = True
         button.label = "Error Reported!"
         await interaction.response.edit_message(view=self)
+
+        # Send information to the webhook
+        webhook = Webhook.Async(os.getenv("WEBHOOK"))
+        
 
         data = self.realinteraction.interaction.to_dict()
         arguments = ""
         for x in data["data"]["options"]:
             arguments = arguments + "* `{0}: {1}`\n".format(x["name"], x["value"])
-        webhook("""
+        await webhook.send("""
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -109,6 +91,9 @@ Cheers,
         view.add_item(item=btn2)
 
         await dm.send(embed=sent_embed, view=view)
+
+        # We no longer need the Webhook connection.  Close it!
+        await webhook.close()
         # It seems that editing the original message is not needed. :/
         #await interaction.followup.edit_message(view=self)
 
@@ -125,4 +110,5 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
     except discord.errors.InteractionResponded:
         await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction))
     if agb.cogwheel.isDebugEnv:
-        raise error
+        # Pass the error along to the Python Error Handler (console)
+        raise error 
