@@ -130,21 +130,18 @@ class ErrorOptionView(discord.ui.View):
         self._error = error
         self.realinteraction = interaction
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
-    async def reportError(self, button, interaction: commands.context.ApplicationContext):
+    async def reportError(self, button: discord.ui.Button, interaction: commands.context.ApplicationContext):
         # Set the button to be disabled to prevent spamming. (button.disabled)
-        button.disabled = True
-        button.label = "Error Reported!"
-        await interaction.response.edit_message(view=self)
 
         # Send information to the webhook
-        webhook = Webhook.Async(os.getenv("WEBHOOK"))
+        webhook = Webhook(os.getenv("WEBHOOK"))
         
 
         data = self.realinteraction.interaction.to_dict()
         arguments = ""
         for x in data["data"]["options"]:
             arguments = arguments + "* `{0}: {1}`\n".format(x["name"], x["value"])
-        await webhook.send("""
+        response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -161,10 +158,19 @@ An error was reported.  Here is some information!
                    repr(self._error),
                    self.realinteraction.command,
                    arguments,
-                   time.ctime()))
-
+                   time.ctime())}, "Error report by %s" % self.user.name)
+        if response.status_code in [200, 204]: # Success!
+            ok = True
+            button.label = "Error Reported!"
+        else: # womp womp error :(
+            ok = False
+            button.label = "Error while sending bug report!"
+            button.emoji = None
+            button.style = discord.ButtonStyle.danger
         button.disabled = True
-        button.label = "Error Reported!"
+        await interaction.response.edit_message(view=self)
+        if not ok:
+            return
         dm = await self.user.create_dm()
         sent_embed = agb.cogwheel.embed(
             title="✅ Bug Report Recieved!",
@@ -191,10 +197,6 @@ Cheers,
 
         await dm.send(embed=sent_embed, view=view)
 
-        # We no longer need the Webhook connection.  Close it!
-        await webhook.close()
-        # It seems that editing the original message is not needed. :/
-        #await interaction.followup.edit_message(view=self)
 
 async def handleApplicationCommandError(interaction: commands.context.ApplicationContext, error):
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \

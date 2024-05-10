@@ -71,5 +71,6 @@ class RequestHandler:
         self.logger.info("POST request finished.  StatusCode={0} ({1}), time={2}ms".format(
             r.status_code, self.RESPONSES[r.status_code], round(r.elapsed.total_seconds() * 100)
         ))
+        return r
 
 handler = RequestHandler()
