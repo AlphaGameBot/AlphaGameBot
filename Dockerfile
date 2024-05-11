@@ -23,11 +23,15 @@ ARG COMMIT_MESSAGE="No Git commit message given!"
 ARG BUILD_NUMBER="-1"
 ARG BRANCH_NAME="unknown"
 
-
 # We use Python 3.11, as 3.12 is not compatable with Pycord for some reason :/
 FROM python:3.11.2
 
 
+# Now, we must set the build arguments to be in the environment variables.
+ENV COMMIT_MESSAGE=${COMMIT_MESSAGE}
+ENV BUILD_NUMBER=${BUILD_NUMBER}
+ENV BRANCH_NAME=${BRANCH_NAME}
+# - - - - -
 
 # All program code is located in the /docker directory (in the container)
 WORKDIR /docker
