@@ -17,16 +17,19 @@ pipeline {
             steps {
                 // debug if necessary
                 // sh 'printenv'
-                def tag = env.AGB_VERSION
-                if (env.BRANCH_NAME == 'development') {
-                    tag += '-dev'
+                script {
+                    def tag = env.AGB_VERSION
+                    if (env.BRANCH_NAME == 'development') {
+                        tag += '-dev'
+                    }
+                    echo "Building with tag name $TAG"
+                    sh "docker build -t alphagamedev/alphagamebot:${tag} \
+                                    --build-arg COMMIT_MESSAGE=\"$COMMIT_MESSAGE\" \
+                                    --build-arg BUILD_NUMBER=$BUILD_NUMBER \
+                                    --build-arg BRANCH_NAME=$BRANCH_NAME ."
                 }
-                echo "Using tag name $TAG"
-                echo "Building"
-                sh 'docker build -t alphagamedev/alphagamebot:$TAG \
-                                --build-arg COMMIT_MESSAGE="$COMMIT_MESSAGE" \
-                                --build-arg BUILD_NUMBER=$BUILD_NUMBER \
-                                --build-arg BRANCH_NAME=$BRANCH_NAME .'
+                
+                
 
             }
         }
