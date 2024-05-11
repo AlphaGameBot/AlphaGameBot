@@ -19,10 +19,10 @@ pipeline {
                 // sh 'printenv'
 
                 echo "Building"
-                sh "docker build -t alphagamedev/alphagamebot:$AGB_VERSION \
-                                --build-arg COMMIT_MESSAGE=\"$COMMIT_MESSAGE\" \
+                sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION \
+                                --build-arg COMMIT_MESSAGE="$COMMIT_MESSAGE" \
                                 --build-arg BUILD_NUMBER=$BUILD_NUMBER \
-                                --build-arg BRANCH_NAME=$BRANCH_NAME ."
+                                --build-arg BRANCH_NAME=$BRANCH_NAME .'
 
             }
         }
