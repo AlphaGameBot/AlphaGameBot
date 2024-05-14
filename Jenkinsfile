@@ -17,16 +17,22 @@ pipeline {
             steps {
                 // debug if necessary
                 // sh 'printenv'
-
-                echo "Building"
-                sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION \
-                                --build-arg COMMIT_MESSAGE="$COMMIT_MESSAGE" \
-                                --build-arg BUILD_NUMBER=$BUILD_NUMBER \
-                                --build-arg BRANCH_NAME=$BRANCH_NAME .'
+                script {
+                    sh "docker build -t alphagamedev/alphagamebot:$AGB_VERSION \
+                                    --build-arg COMMIT_MESSAGE=\"$COMMIT_MESSAGE\" \
+                                    --build-arg BUILD_NUMBER=$BUILD_NUMBER \
+                                    --build-arg BRANCH_NAME=$BRANCH_NAME ."
+                }
+                
+                
 
             }
         }
         stage('push') {
+            when {
+                // We ONLY want to push Docker images when we are in the master branch!
+                branch 'master'
+            }
             steps {
                 echo "Pushing image to Docker Hub"
                 sh 'echo $DOCKER_TOKEN | docker login -u alphagamedev --password-stdin'
