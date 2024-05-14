@@ -32,7 +32,8 @@ import agb.fun
 import agb.botinfo
 import agb.system.commandError
 import agb.rssFeedCog
-import agb.suntsu
+import agb.suntsu 
+import agb.myersbriggs
 # - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -50,8 +51,7 @@ SAY_EXCEPTIONS = [
 DAMIEN = 420052952686919690
 HOLDEN = 951639877768863754
 
-global isDebugEnv, cogw, listener
-isDebugEnv = (os.getenv("DEBUG_ENV") != None)
+global cogw, listener
 cogw = logging.getLogger("cogwheel")
 listener = logging.getLogger("listener")
 #if os.getenv("DEBUG") != None:
@@ -63,7 +63,7 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 nltk.download('words')
 @bot.event
 async def on_ready():
-    if not isDebugEnv:
+    if not agb.cogwheel.isDebugEnv:
         status = discord.Game("with the API")
     else:
         logging.debug("note: Using debug Discord activity")
@@ -87,14 +87,25 @@ async def on_application_command(ctx: discord.ApplicationContext):
 async def on_message(ctx: discord.Message):
     if ctx.content.startswith("..") == False:
         return
-    if ctx.content.startswith("...") == True:
+    if ctx.content.startswith("...") == True: 
+        # Sometimes, I make sarcastic comments, starting with ...
+        # Example: "... blah blah blah", and the bot responds to it as
+        # ". blah blah blah".  This prevents the bot from responding.
         return
 
+
+    # Disable the say command for all servers except for the ones in which they are explicitly
+    # enabled in alphagamebot.json, key "SAY_EXCEPTIONS"
+    if ctx.guild.id not in SAY_EXCEPTIONS:
+        return
+    
+    # When I run 2 instances of AlphaGameBot at the same time, both will reply to my message.
+    # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
+    # I will just remove the `DEBUG=1` environment variable.
     if agb.cogwheel.isDebugEnv:
         cogw.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
-    if ctx.guild.id not in SAY_EXCEPTIONS:
-        return
+    
     if ctx.author.id == HOLDEN:
         await ctx.channel.send("> *:middle_finger: \"You can go fuck yourself with that!*\"\n Brewstew, *Devil Chip*")
         cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(ctx.content))
@@ -108,10 +119,16 @@ async def on_message(ctx: discord.Message):
     text = ctx.content
     text = text[2:]
     if text == None:
+        # No text given, so give up...
         return
+    
+    # Put in the console that it was told to say something!
     logging.info("I was told to say: \"{}\".".format(text))
     await ctx.channel.send(text)
+
+    # Delete the original message, so it looks better in the application!
     await ctx.delete()
+
 
 # set command cogs
 bot.add_cog(agb.utility.UtilityCog(bot))
@@ -126,7 +143,7 @@ bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
 bot.add_cog(agb.fun.FunCog(bot))
 bot.add_cog(agb.botinfo.BotInformationCog(bot))
 bot.add_cog(agb.suntsu.SunTsuCog(bot))
-
+bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
