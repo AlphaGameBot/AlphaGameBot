@@ -202,14 +202,15 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
                                                                        to make it work by trying again.\nSorry about that! (awkward face emoji)",
                                color=discord.Color.red())
-    embed.add_field(name="Joke", value=random.choice(ERROR_JOKES))
+    if not agb.cogwheel.isDebugEnv:
+        embed.add_field(name="Joke", value=random.choice(ERROR_JOKES))
     if agb.cogwheel.isDebugEnv:
         embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     try:
         await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
     except discord.errors.InteractionResponded:
-        await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction))
+        await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
     if agb.cogwheel.isDebugEnv:
         # Pass the error along to the Python Error Handler (console)
         raise error 
