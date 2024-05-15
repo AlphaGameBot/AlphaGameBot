@@ -43,6 +43,7 @@ class xkcdCog(agb.cogwheel.Cogwheel):
             # so that would be pretty-useless (and memory-intensive)
             # to do so! (Kinda like a linux symlink when i think about it ☻)
             xkcd = current
+            number = xkcd["num"]
         else:
             # Check if the number is under zero, I found that this was (quite) problematic!
             if number < 0:
