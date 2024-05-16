@@ -16,6 +16,7 @@
 import logging
 import os
 import random
+import traceback
 import discord
 from discord import commands
 import agb.cogwheel
@@ -133,14 +134,24 @@ class ErrorOptionView(discord.ui.View):
     async def reportError(self, button: discord.ui.Button, interaction: commands.context.ApplicationContext):
         # Set the button to be disabled to prevent spamming. (button.disabled)
 
-        # Send information to the webhook
-        webhook = Webhook(os.getenv("WEBHOOK"))
-        
+        # Check if the user is the same one who originally did the command!
+        if interaction.user.id != self.user.id:
+            # ephemeral=True adds the "Only you can see this message" message
+            await interaction.response.send_message("Only the person who originally ran the command can send a bug report :(", ephemeral=True)
+            return
 
         data = self.realinteraction.interaction.to_dict()
         arguments = ""
         for x in data["data"]["options"]:
-            arguments = arguments + "* `{0}: {1}`\n".format(x["name"], x["value"])
+            rtype = type(x["value"])
+            if isinstance(x["value"], bool):
+                rtype = "Boolean"
+            elif isinstance(x["value"], int):
+                rtype = "Integer"
+            elif isinstance(x["value"], str):
+                rtype = "String"
+            
+            arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
         response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
@@ -152,12 +163,18 @@ An error was reported.  Here is some information!
 **Command Arguments**
 {4}
 
-**Reported At** {5}
+**Python Traceback**
+```
+{5}
+```
+
+**Reported At** {6}
         """.format(interaction.user.name,
                    interaction.user.nick,
                    repr(self._error),
                    self.realinteraction.command,
                    arguments,
+                   ''.join(traceback.format_tb(self._error.__traceback__)),
                    time.ctime())}, "Error report by %s" % self.user.name)
         if response.status_code in [200, 204]: # Success!
             ok = True
