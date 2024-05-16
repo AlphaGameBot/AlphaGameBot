@@ -65,15 +65,14 @@ class UtilityCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="dnd", description="Roll some D&D dice!")
     async def _dnd(self, interaction,
-                   modifier: discord.Option(int, description="Modifier to be added to the roll.", required=False,
-                                            default=0),
-                   d4: discord.Option(int, description="Amount of D4 dice to roll", required=False, default=0),
-                   d6: discord.Option(int, description="Amount of D6 dice to roll", required=False, default=0),
-                   d8: discord.Option(int, description="Amount of D8 dice to roll", required=False, default=0),
-                   d10: discord.Option(int, description="Amount of D10 dice to roll", required=False, default=0),
-                   d12: discord.Option(int, description="Amount of D12 dice to roll", required=False, default=0),
-                   d20: discord.Option(int, description="Amount of D20 dice to roll", required=False, default=0),
-                   d100: discord.Option(int, description="Amount of D100 (D%) dice to roll", required=False, default=0)):
+                   modifier: discord.Option(int, description="Modifier to be added to the roll.", required=False, default=0), # type: ignore
+                   d4: discord.Option(int, description="Amount of D4 dice to roll", required=False, default=0), # type: ignore
+                   d6: discord.Option(int, description="Amount of D6 dice to roll", required=False, default=0), # type: ignore
+                   d8: discord.Option(int, description="Amount of D8 dice to roll", required=False, default=0), # type: ignore
+                   d10: discord.Option(int, description="Amount of D10 dice to roll", required=False, default=0), # type: ignore
+                   d12: discord.Option(int, description="Amount of D12 dice to roll", required=False, default=0), # type: ignore
+                   d20: discord.Option(int, description="Amount of D20 dice to roll", required=False, default=0), # type: ignore
+                   d100: discord.Option(int, description="Amount of D100 (D%) dice to roll", required=False, default=0)): # type: ignore
         total = 0
 
         totalDice = d4 + d6 + d8 + d10 + d12 + d20 + d100
@@ -118,5 +117,3 @@ class UtilityCog(agb.cogwheel.Cogwheel):
 
         await interaction.response.send_message(":game_die: {0}".format(total))
 
-    def dnd_verifyUpperLimit(self, value):
-        return (value <= 1000)

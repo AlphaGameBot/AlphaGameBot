@@ -32,8 +32,8 @@ class ModerationCog(agb.cogwheel.Cogwheel):
 
     @group.command(name="kick", description="Kicks a user.")
     @commands.has_permissions(kick_members = True)
-    async def _kick(self, interaction, user: discord.Option(discord.Member, description="User to kick", required=True), 
-                  reason: discord.Option(str, description="Reason for ban", required=True)):
+    async def _kick(self, interaction, user: discord.Option(discord.Member, description="User to kick", required=True),  # type: ignore
+                  reason: discord.Option(str, description="Reason for ban", required=True)): # type: ignore # type: ignore
         
         await user.kick(reason = reason)
         
@@ -49,8 +49,8 @@ class ModerationCog(agb.cogwheel.Cogwheel):
     @group.command(name="ban", description="Ban a user!")
     @commands.has_permissions(ban_members=True)
     async def _ban(self, interaction,
-            user: discord.Option(discord.Member, description="The user to ban"),
-            reason: discord.Option(str, description="The reason for the ban", required=False, default="No Reason Given")):
+            user: discord.Option(discord.Member, description="The user to ban"), # type: ignore
+            reason: discord.Option(str, description="The reason for the ban", required=False, default="No Reason Given")): # type: ignore
         await user.ban(reason=reason)
         embed = discord.Embed(
         title="User Kicked",
