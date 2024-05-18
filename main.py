@@ -18,6 +18,8 @@ import nltk
 import logging
 import logging.config
 import agb.cogwheel
+import sys
+from dotenv import load_dotenv
 # commands
 import agb.utility
 import agb.xkcd
@@ -152,4 +154,15 @@ bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
 
 if __name__ == "__main__":
     logging.info("Starting the bot...")
-    bot.run(os.getenv("TOKEN"))
+    if len(sys.argv) >= 2:
+        if sys.argv[1].lower() == "useEnvironment":
+            logging.info("Using .env environment file because it was explicitly requested with 'useEnvironment'!")
+            load_dotenv()
+        else:
+            logging.warning(f"Unknown value for argv location 1: '{sys.argv[1]}'!")
+    token = os.getenv("TOKEN")
+    if token == None:
+        logging.error("No token was given via the environment variable 'TOKEN'!")
+        logging.error("Use the argument 'useEnvironment' to automatically load your .env file.")
+        sys.exit(1)
+    bot.run(token)
