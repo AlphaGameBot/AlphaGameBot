@@ -41,11 +41,22 @@ class TestButtonView(discord.ui.View):
         self.test.questionYes()
         await self.test.nextQuestion()
 
+class TestCompleteOptionView(discord.ui.View):
+    def __init__(self, message: discord.Message, channel: discord.Thread):
+        super().__init__()
+        self.channel = channel
+        self.message = message
+
+    @discord.ui.button(label="Close Test",
+                       style=discord.ButtonStyle.blurple)
+    async def _close(self, button, interaction):
+        # Close the thread in which the mbti test was preformed
+        await self.channel.delete()
+
 class MyersBriggsTypeIndicatorTest:
-    def __init__(self, user, interaction: discord.context.ApplicationContext):
+    def __init__(self, user):
         self.user = user # discord.User
         self.id = self.user.id
-        self.interaction = interaction
     
         self.key = {
             "I": "Introverted",
@@ -70,6 +81,8 @@ class MyersBriggsTypeIndicatorTest:
         }
         self.currentquestion = 0
         self.thread = None 
+        self.mbti = "XXXX"
+        self.mbti_list = [None, None, None, None]
         self.QUESTIONS = [
             {
                 "question": "I prefer to be around others usually.",
@@ -196,12 +209,15 @@ class MyersBriggsTypeIndicatorTest:
         self.question = self.QUESTIONS[self.currentquestion]
 
     def questionYes(self):
+        """Increments the score for the trait in the question for 'yes'"""
         self.stats[self.QUESTIONS[self.currentquestion]["yes"]] += 1
 
     def questionNo(self):
+        """Increments the score for the trait in the question for 'no'"""
         self.stats[self.QUESTIONS[self.currentquestion]["no"]] += 1
         
     async def nextQuestion(self, advance=True):
+        """Prepares and shows the next question"""
         if advance:
             self.currentquestion += 1
         if self.currentquestion >= len(self.QUESTIONS):
@@ -209,11 +225,10 @@ class MyersBriggsTypeIndicatorTest:
             return
         self.question = self.QUESTIONS[self.currentquestion]
 
-        # embed = agb.cogwheel.embed(title="MBTI Test: Question #{0}".format(self.currentquestion + 1), description=self.question["question"])
         await self.thread.send("{0}. {1}".format(self.currentquestion + 1, self.question["question"]), view=TestButtonView(self))
-        # await self.thread.send(embed=embed, view=TestButtonView(self))
 
     async def showResults(self):
+        """Displays the results to the user"""
         mbti = [None, None, None, None]
         
         # introverted or extraverted
@@ -241,27 +256,33 @@ class MyersBriggsTypeIndicatorTest:
             mbti[3] = "J"
 
         
-        fmbti = "".join(mbti)
+        mbti_string = "".join(mbti)
+        self.mbti = mbti_string
+        self.mbti_list = mbti
         embed = agb.cogwheel.Embed(title="Results", description="Your MBTI is: {0} *({1}, {2}, {3}, and {4})*".format(
-            fmbti,
-            self.key[fmbti[0]],
-            self.key[fmbti[1]],
-            self.key[fmbti[2]],
-            self.key[fmbti[3]]
+            mbti_string,
+            self.key[mbti_string[0]],
+            self.key[mbti_string[1]],
+            self.key[mbti_string[2]],
+            self.key[mbti_string[3]]
         ))
-        view = discord.ui.View()
-        lm = discord.ui.Button(label="Learn More!", style=discord.ButtonStyle.link, url="https://16personalities.com/{0}-personality".format(fmbti.lower()))
-        view.add_item(lm)
+        learnmore = "https://16personalities.com/{0}-personality".format(mbti_string.lower())
+        await self.message.edit(embed=embed)
+        view = TestCompleteOptionView(self.message, self.thread)
+        learnmore_button = discord.ui.Button(label="Learn More!", style=discord.ButtonStyle.link, url=learnmore)
+        view.add_item(learnmore_button)
         await self.thread.send(embed=embed, view=view)
-    async def startTest(self):
-        await self.interaction.response.send_message("**Please continue in the following thread.**")
-        message = await self.interaction.channel.send("**%s's Myers-Briggs Type Indicator Test**" % self.user.name)
-        self.thread = await message.create_thread(name="%s Myers-Briggs Type Indicator Test" % self.user.name, auto_archive_duration=60)
-        await self.nextQuestion(advance=False)
+        
+    async def startTest(self,  interaction: discord.context.ApplicationContext):
+        await interaction.response.send_message("**Please continue in the following thread.**")
+        self.message = await interaction.channel.send("**%s's Myers-Briggs Type Indicator Test**" % self.user.name)
+        self.thread = await self.message.create_thread(name="%s Myers-Briggs Type Indicator Test" % self.user.name, auto_archive_duration=60)
+        await self.nextQuestion(advance=False)  # advance=False tells the function not to increase the question counter, as we are just starting.
 
+
+# initalized into the bot by pycord - such a long class name lol
 class MyersBriggsTypeIndicatorCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="mbtitest", description="Take a Myers-Briggs type indicator test!")
     async def _mbtitest(self, interaction: discord.context.ApplicationContext):
-        test = MyersBriggsTypeIndicatorTest(interaction.user, interaction)
-
-        await test.startTest()
+        test = MyersBriggsTypeIndicatorTest(interaction.user)
+        await test.startTest(interaction)
