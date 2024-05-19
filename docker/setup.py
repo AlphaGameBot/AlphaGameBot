@@ -30,4 +30,5 @@ def main(argv=sys.argv) -> int:
     logging.info("Docker Build tasks DONE!")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     sys.exit(main())
