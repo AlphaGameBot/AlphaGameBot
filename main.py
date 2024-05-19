@@ -62,7 +62,7 @@ listener = logging.getLogger("listener")
 #    logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(command_prefix="?", intents=intents)
-nltk.download('words')
+
 @bot.event
 async def on_ready():
     if not agb.cogwheel.isDebugEnv:

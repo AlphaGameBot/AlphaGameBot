@@ -46,8 +46,7 @@ pipeline {
                 sh "docker run -d \
                                 -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite \
                                 --name alphagamebot \
-                                -e TOKEN -e WEBHOOK -e BUILD_NUMBER -e BRANCH_NAME \
-                                -e BRANCH_IS_PRIMARY -e BUILD_ID -e BUILD_TAG -e COMMIT_MESSAGE \
+                                -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
                                 --restart=always \
                                 alphagamedev/alphagamebot:$AGB_VERSION"
             }
