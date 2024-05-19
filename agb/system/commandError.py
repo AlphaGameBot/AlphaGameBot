@@ -22,6 +22,7 @@ from discord import commands
 import agb.cogwheel
 import agb.requestHandler
 import time
+import nltk
 from dhooks import Webhook
 logger = logging.getLogger("listener")
 
@@ -130,6 +131,8 @@ class ErrorOptionView(discord.ui.View):
         self.user = user
         self._error = error
         self.realinteraction = interaction
+        self.logger = logging.getLogger('listener')
+
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
     async def reportError(self, button: discord.ui.Button, interaction: commands.context.ApplicationContext):
         # Set the button to be disabled to prevent spamming. (button.disabled)
@@ -138,6 +141,12 @@ class ErrorOptionView(discord.ui.View):
         if interaction.user.id != self.user.id:
             # ephemeral=True adds the "Only you can see this message" message
             await interaction.response.send_message("Only the person who originally ran the command can send a bug report :(", ephemeral=True)
+            return
+        
+        if agb.cogwheel.isDebugEnv:
+            # well this is kind of useless
+            self.logger.info("Bug reporting was disabled, as this is a debug build.  If you need to test bug reporting, remove the 'DEBUG' environment variable.  Also, be sure to set the 'WEBHOOK' so you can actually send the report!")
+            await interaction.response.send_message("Naturally, you shouldn't be able to send a bug report in a debug build, as there are lots of bugs in this.", ephemeral=True)
             return
 
         data = self.realinteraction.interaction.to_dict()
@@ -176,6 +185,13 @@ An error was reported.  Here is some information!
                    arguments,
                    ''.join(traceback.format_tb(self._error.__traceback__)),
                    time.ctime())}, "Error report by %s" % self.user.name)
+        
+        
+        # Stop the button from being used again.  Thank you for sending the bug report, but I don't need spam.
+        # Just use 'disabled=True' to disable it, and also change the button text to alert the user of the status.
+
+        # We define a success by getting a 200 (OK) or 204 (No Content) response code.  Anything else, we would call
+        # an error.  I've only seen Discord send 204 in their webhooks, but I also include 200 because it is better.
         if response.status_code in [200, 204]: # Success!
             ok = True
             button.label = "Error Reported!"
@@ -183,11 +199,20 @@ An error was reported.  Here is some information!
             ok = False
             button.label = "Error while sending bug report!"
             button.emoji = None
-            button.style = discord.ButtonStyle.danger
+            button.style = discord.ButtonStyle.danger # red
+
+        # Disable the button so it cannot be used again
         button.disabled = True
+
+        # Update the message to reflect the changes to the button.
         await interaction.response.edit_message(view=self)
+
+        # We don't need to send a dm, or do anything else if the bug report failed
         if not ok:
             return
+        
+        
+        # Send a DM thanking the user for reporting the bug (I will eventually add a way to not get a DM)
         dm = await self.user.create_dm()
         sent_embed = agb.cogwheel.embed(
             title="✅ Bug Report Recieved!",
