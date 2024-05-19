@@ -21,11 +21,7 @@ import agb.requestHandler
 import logging
 import agb.cogwheel
 
-class MemesCog(discord.Cog):
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("MemesCog has been initalized")
+class MemesCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
     async def meme(self, interaction):

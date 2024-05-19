@@ -14,18 +14,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
+import agb.requestHandler
 import discord
 from discord.ext import commands
 import logging
 import uuid
 import random
 import agb.cogwheel
+import json
+from nltk.corpus import words
 
-class UtilityCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("UtilityCog has been initalized!")
+class UtilityCog(agb.cogwheel.Cogwheel):
 
 
     @commands.slash_command(name="whoami", description="For whose who need a discord bot to help with an identity crisis.")
@@ -39,31 +38,6 @@ class UtilityCog(discord.Cog):
             text = "`{0}`".format(user)
 
         await interaction.response.send_message(text)
-
-
-    @commands.slash_command(name="about", description="About AlphaGameBot!")
-    async def _about(self, interaction):
-        _d = agb.cogwheel.getBotInformation()
-        view = discord.ui.View()
-        linkStyle = discord.ButtonStyle.link
-        addTheBot = discord.ui.Button(style=linkStyle, label="Add the Bot!",
-                                      url="https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=8&scope=bot")
-        checkItOut = discord.ui.Button(style=linkStyle, label="Learn More!", url="https://alphagame.dev/alphagamebot/")
-        githubBtn = discord.ui.Button(style=linkStyle, label="GitHub",
-                                      url="https://github.com/AlphaGameDeveloper/AlphaGameBot")
-        view.add_item(item=addTheBot)
-        view.add_item(item=checkItOut)
-        view.add_item(item=githubBtn)
-        embed = discord.Embed(title=f"AlphaGameBot {agb.cogwheel.getVersion()}",
-                              description=_d["BOT_INFORMATION"]["DESCRIPTION"],
-                              colour=discord.Colour.dark_blue())
-        embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
-        embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())
-        try:
-            embed.add_field(name="Latest Update Message", value=_d["CHANGELOG"][agb.cogwheel.getVersion()])
-        except:
-            embed.add_field(name="Latest Update Message", value="No message")
-        await interaction.response.send_message(embed=embed, view=view)
 
     @commands.slash_command(name="uuid", description="Get a version 4 UUID")
     async def _uuid(self, interaction, count:int=1):
@@ -91,3 +65,89 @@ class UtilityCog(discord.Cog):
             r = r + random.choice(all_characters)
 
         await interaction.response.send_message("`{}`".format(r))
+
+    @commands.slash_command(name="dnd", description="Roll some D&D dice!")
+    async def _dnd(self, interaction,
+                   modifier: discord.Option(int, description="Modifier to be added to the roll.", required=False, default=0), # type: ignore
+                   d4: discord.Option(int, description="Amount of D4 dice to roll", required=False, default=0), # type: ignore
+                   d6: discord.Option(int, description="Amount of D6 dice to roll", required=False, default=0), # type: ignore
+                   d8: discord.Option(int, description="Amount of D8 dice to roll", required=False, default=0), # type: ignore
+                   d10: discord.Option(int, description="Amount of D10 dice to roll", required=False, default=0), # type: ignore
+                   d12: discord.Option(int, description="Amount of D12 dice to roll", required=False, default=0), # type: ignore
+                   d20: discord.Option(int, description="Amount of D20 dice to roll", required=False, default=0), # type: ignore
+                   d100: discord.Option(int, description="Amount of D100 (D%) dice to roll", required=False, default=0)): # type: ignore
+        total = 0
+
+        totalDice = d4 + d6 + d8 + d10 + d12 + d20 + d100
+        if totalDice > 1000:
+            await interaction.response.send_message(f":x: Number of dice too high! ({totalDice} > 1000)")
+            return
+        # Roll x amount of d4
+        for _d4 in range(d4):
+            total += random.randint(1, 4)
+
+        # Roll x amount of d6
+        for _d6 in range(d6):
+            total += random.randint(1, 6)
+
+        # Roll x amount of d8
+        for _d8 in range(d8):
+            total += random.randint(1, 8)
+
+        # Roll x amount of d10
+        for _d10 in range(d10):
+            total += random.randint(1, 10)
+
+        # Roll x amount of d12
+        for _d12 in range(d12):
+            total += random.randint(1, 12)
+
+        # Roll x amount of d20
+        for _d20 in range(d20):
+            total += random.randint(1, 20)
+
+        # Roll x amount of d100 (or D% / Percent)
+        for _d100 in range(d100):
+            total += random.choice(
+                [(_+1)*10 for _ in range(10)]
+            )
+
+        # Add the modifier at the end.  This allows for rolls like
+        # 2d6 + 10, where 10 is the modifier.  It can be negative,
+        # i guess.
+        # By default this does nothing, as it defaults to zero.
+        total += modifier
+
+        await interaction.response.send_message(":game_die: {0}".format(total))
+
+    @commands.slash_command(name="dictionary", description="Search the dictionary!")
+    async def _dictionary(self, interaction: discord.context.ApplicationContext,
+                          word: discord.Option(str, description="The word to define!", required=True)): # type: ignore
+        # define word
+        endpoint = agb.cogwheel.getAPIEndpoint('dictionary', "GET_WORD_DEFINITION").format(word.lower())
+
+        request = agb.requestHandler.handler.get(endpoint)
+        response = json.loads(request.text)
+
+        if request.status_code == 404: # word not found
+            await interaction.response.send_message(":x: The word `{0}` was not found.  Maybe you misspelled it?".format(word))
+            return
+        response = response[0] # [{"data": null}]; data is index 0
+        
+        titleWord = list(response["word"])
+        titleWord[0] = titleWord[0].upper()
+        titleWord = "".join(titleWord)
+        
+        description = ""
+
+        for definition in response["meanings"]:
+            description = description + "*{0}*. {1}\n".format(
+                definition["partOfSpeech"],
+                definition["definitions"][0]["definition"]
+            )
+        embed = agb.cogwheel.embed(
+            title=titleWord,
+            description=description
+        )
+
+        await interaction.response.send_message(embed=embed)

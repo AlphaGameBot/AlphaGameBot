@@ -1,12 +1,16 @@
 pipeline {
     agent {
         docker {
-            image 'boisvert/scala-build'
+            image 'boisvert/python-build'
             args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
         }
     }
     environment {
         TOKEN = credentials('alphagamebot-token')
+	    WEBHOOK = credentials('alphagamebot-webhook')
+	    DOCKER_TOKEN = credentials('alphagamedev-docker-token')
+	    AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -c -M -r").trim()
+	    COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
     }
     stages {
         stage('build') {
@@ -15,9 +19,23 @@ pipeline {
                 // sh 'printenv'
 
                 echo "Building"
+                sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION \
+                                --build-arg COMMIT_MESSAGE="$COMMIT_MESSAGE" \
+                                --build-arg BUILD_NUMBER=$BUILD_NUMBER \
+                                --build-arg BRANCH_NAME=$BRANCH_NAME .'
 
-                sh 'docker build -t alphagamedev/alphagamebot .'
-
+            }
+        }
+        stage('push') {
+            when { 
+                // We ONLY want to push Docker images when we are in the master branch!
+                branch 'master'
+            }
+            steps {
+                echo "Pushing image to Docker Hub"
+                sh 'echo $DOCKER_TOKEN | docker login -u alphagamedev --password-stdin'
+                sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
+                sh 'docker logout'
             }
         }
         stage('deploy') {
@@ -25,8 +43,13 @@ pipeline {
                 // conditionally deploy
                 sh "docker container stop alphagamebot || true"
                 sh "docker container rm alphagamebot || true"
-                sh "docker run -d -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite --name alphagamebot -e TOKEN=$TOKEN --restart=always alphagamedev/alphagamebot"
+                sh "docker run -d \
+                                -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite \
+                                --name alphagamebot \
+                                -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
+                                --restart=always \
+                                alphagamedev/alphagamebot:$AGB_VERSION"
             }
         }
-    }
+    } // stages
 }

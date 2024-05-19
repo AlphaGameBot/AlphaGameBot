@@ -23,11 +23,7 @@ import json
 import random
 import logging
 
-class JojoCog(discord.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("JoJoCog has been initalized!")
+class JojoCog(agb.cogwheel.Cogwheel):
 
     @discord.slash_command(name="jojocharacter", description="Get a random JoJo's Bizarre Adventure character!")
     async def _jojocharacter(self, interaction):

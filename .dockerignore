@@ -3,3 +3,4 @@
 .idea
 .git*
 request-handler.sqlite
+build/

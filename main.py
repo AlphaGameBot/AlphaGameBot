@@ -1,6 +1,3 @@
-#    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
-#    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
-
 #    AlphaGameBot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +18,8 @@ import nltk
 import logging
 import logging.config
 import agb.cogwheel
-import threading
+import sys
+from dotenv import load_dotenv
 # commands
 import agb.utility
 import agb.xkcd
@@ -32,6 +30,13 @@ import agb.rps
 import agb.minecraft
 import agb.google
 import agb.moderation
+import agb.fun
+import agb.botinfo
+import agb.system.commandError
+import agb.rssFeedCog
+import agb.suntsu 
+import agb.myersbriggs
+# - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
 # not everyone needs it, and if they do, it will
@@ -48,8 +53,7 @@ SAY_EXCEPTIONS = [
 DAMIEN = 420052952686919690
 HOLDEN = 951639877768863754
 
-global isDebugEnv, cogw, listener
-isDebugEnv = (os.getenv("DEBUG_ENV") != None)
+global cogw, listener
 cogw = logging.getLogger("cogwheel")
 listener = logging.getLogger("listener")
 #if os.getenv("DEBUG") != None:
@@ -58,10 +62,10 @@ listener = logging.getLogger("listener")
 #    logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(command_prefix="?", intents=intents)
-nltk.download('words')
+
 @bot.event
 async def on_ready():
-    if not isDebugEnv:
+    if not agb.cogwheel.isDebugEnv:
         status = discord.Game("with the API")
     else:
         logging.debug("note: Using debug Discord activity")
@@ -74,44 +78,59 @@ async def on_ready():
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
-    embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
-                                                                   to make it work by trying again.\nSorry about that! (awkward face emoji)", color=discord.Color.red())
+    return await agb.system.commandError.handleApplicationCommandError(interaction, error)
 
-
-    embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
-    embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
-    try:
-        await interaction.response.send_message(embed=embed)
-    except discord.errors.InteractionResponded:
-        pass
-    if isDebugEnv:
-        raise error
 
 @bot.listen()
 async def on_application_command(ctx: discord.ApplicationContext):
     listener.info("Command Called: /{0}".format(ctx.command.name))
 
-@bot.command(name="say")
-async def _say(ctx: discord.ext.commands.context.Context, *, text:str=None):
-    if isDebugEnv:
-        cogw.info("?say was ignored as I think this is a development build.")
-        return EnvironmentError("Bot is in development build")
-    if ctx.message.guild.id not in SAY_EXCEPTIONS:
+@bot.event
+async def on_message(ctx: discord.Message):
+    if ctx.content.startswith("..") == False:
         return
-    if ctx.author.id == HOLDEN:
-        await ctx.send(":middle_finger: Nice try, bozo")
-        cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(text))
-        return
-    if ctx.author.id != DAMIEN:
-        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name, text))
-        await ctx.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
+    if ctx.content.startswith("...") == True: 
+        # Sometimes, I make sarcastic comments, starting with ...
+        # Example: "... blah blah blah", and the bot responds to it as
+        # ". blah blah blah".  This prevents the bot from responding.
         return
 
-    if text == None:
+
+    # Disable the say command for all servers except for the ones in which they are explicitly
+    # enabled in alphagamebot.json, key "SAY_EXCEPTIONS"
+    if ctx.guild.id not in SAY_EXCEPTIONS:
         return
+    
+    # When I run 2 instances of AlphaGameBot at the same time, both will reply to my message.
+    # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
+    # I will just remove the `DEBUG=1` environment variable.
+    if agb.cogwheel.isDebugEnv:
+        cogw.info("Say was ignored as I think this is a development build.")
+        return EnvironmentError("Bot is in development build")
+    
+    if ctx.author.id == HOLDEN:
+        await ctx.channel.send("> *:middle_finger: \"You can go fuck yourself with that!*\"\n Brewstew, *Devil Chip*")
+        cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(ctx.content))
+        return
+    if ctx.author.id != DAMIEN:
+        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
+                                                                                               ctx.content))
+        await ctx.channel.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
+        return
+
+    text = ctx.content
+    text = text[2:]
+    if text == None:
+        # No text given, so give up...
+        return
+    
+    # Put in the console that it was told to say something!
     logging.info("I was told to say: \"{}\".".format(text))
-    await ctx.send(text)
-    await ctx.message.delete()
+    await ctx.channel.send(text)
+
+    # Delete the original message, so it looks better in the application!
+    await ctx.delete()
+
 
 # set command cogs
 bot.add_cog(agb.utility.UtilityCog(bot))
@@ -122,6 +141,11 @@ bot.add_cog(agb.jojo.JojoCog(bot))
 bot.add_cog(agb.rps.rpsCog(bot))
 bot.add_cog(agb.minecraft.MinecraftCog(bot))
 bot.add_cog(agb.moderation.ModerationCog(bot))
+bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
+bot.add_cog(agb.fun.FunCog(bot))
+bot.add_cog(agb.botinfo.BotInformationCog(bot))
+bot.add_cog(agb.suntsu.SunTsuCog(bot))
+bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
@@ -130,4 +154,15 @@ bot.add_cog(agb.moderation.ModerationCog(bot))
 
 if __name__ == "__main__":
     logging.info("Starting the bot...")
-    bot.run(os.getenv("TOKEN"))
+    if len(sys.argv) >= 2:
+        if sys.argv[1].lower() == "useEnvironment":
+            logging.info("Using .env environment file because it was explicitly requested with 'useEnvironment'!")
+            load_dotenv()
+        else:
+            logging.warning(f"Unknown value for argv location 1: '{sys.argv[1]}'!")
+    token = os.getenv("TOKEN")
+    if token == None:
+        logging.error("No token was given via the environment variable 'TOKEN'!")
+        logging.error("Use the argument 'useEnvironment' to automatically load your .env file.")
+        sys.exit(1)
+    bot.run(token)

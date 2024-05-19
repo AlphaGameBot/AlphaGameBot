@@ -37,16 +37,19 @@ class RequestHandler:
              502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout', 505: 'HTTP Version Not Supported'}
 
         self.logger = logging.getLogger("requesthandler")
-        self.session = requests_cache.CachedSession("request-handler", cache_control=True)
+        self.session = requests_cache.CachedSession("request-handler", cache_control=True, expire_after=43200) # 43200 seconds = 12 hours
         self.logger.info("RequestHandler has been initalized!")
         with open("alphagamebot.json", "r") as f:
             self.BOT_INFORMATION = json.load(f)
 
         self.REQUEST_HEADERS = {
-            "User-Agent": self.BOT_INFORMATION["USER-AGENT"].format(self.BOT_INFORMATION["VERSION"]),  # this can be changed in the config (alphagamebot.json)
-            "Accept": "text/plain,application/json,application/xml",
+            "User-Agent": self.BOT_INFORMATION["USER-AGENT"].format(
+                version=self.BOT_INFORMATION["VERSION"],
+                requests=requests.__version__),  # this can be changed in the config (alphagamebot.json)
+            "Accept": "application/json,text/plain,application/xml",
             "x-alphagamebot-version": self.BOT_INFORMATION["VERSION"],
             "Upgrade-Insecure-Requests": "1",
+            "Accept-Encoding": "gzip",
             "Connection": "close" # we dont need a constant connection :)
         }
     def get(self, url: str, attemptCache=True):
@@ -71,5 +74,6 @@ class RequestHandler:
         self.logger.info("POST request finished.  StatusCode={0} ({1}), time={2}ms".format(
             r.status_code, self.RESPONSES[r.status_code], round(r.elapsed.total_seconds() * 100)
         ))
+        return r
 
 handler = RequestHandler()

@@ -2,6 +2,15 @@
   "BOT_INFORMATION": {
     "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
   },
+  "VERSION": "2.6.3",
+  "CHANGELOG": {
+    "2.4.1": "Remove Python errors in prod",
+    "2.4": "Add D&D command",
+    "2.3": "Add RSS command",
+    "2.2.2": "Update",
+    "2.1.3": "Make bot more responsible with API usage",
+    "2.1.2": "Add version embed footer stuff"
+  },
   "API_ENDPOINTS": {
     "meme": {
       "GET_MEME": "https://meme-api.com/gimme"
@@ -23,12 +32,10 @@
     "jojo": {
       "GET_CHARACTERS": "https://stand-by-me.herokuapp.com/api/v1/characters",
       "GET_CHARACTER_IMAGE": "https://jojos-bizarre-api.netlify.app/assets/{}"
+    },
+    "dictionary": {
+      "GET_WORD_DEFINITION": "https://api.dictionaryapi.dev/api/v2/entries/en/{}"
     }
   },
-  "VERSION": "2.2",
-  "USER-AGENT": "AlphaGameBot/{} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/2.31.0; curl/8.4.0;",
-  "CHANGELOG": {
-    "2.1.3": "Make bot more responsible with API usage",
-    "2.1.2": "Add version embed footer stuff"
-  }
+  "USER-AGENT": "AlphaGameBot/{version} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
 }
