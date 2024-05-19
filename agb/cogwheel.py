@@ -1,6 +1,5 @@
 #    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
 #    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
-import logging
 
 #    AlphaGameBot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,6 +19,7 @@ from discord.ext import commands
 from discord.embeds import *
 import os
 import json
+import logging
 
 def getVersion() -> str:
     return json.load(open("alphagamebot.json", "r"))["VERSION"]
@@ -87,7 +87,7 @@ class Cogwheel(commands.Cog):
 
     :param bot: Bot instance of which the cog is being deployed upon.
     :returns: Cogwheel (`agb.cogwheel.Cogwheel`) derived from `discord.ext.commands.Cog`"""
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.loggerInstance = logging.getLogger("cogwheel")
         self.cogName = type(self).__name__
         self.logger = CogwheelLoggerHelper(self.loggerInstance, self.cogName)

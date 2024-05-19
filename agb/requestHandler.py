@@ -18,7 +18,8 @@ import requests_cache
 import logging
 import requests
 import json
-import os
+import agb.cogwheel
+import urllib.parse
 
 global responses
 
@@ -45,7 +46,10 @@ class RequestHandler:
         self.REQUEST_HEADERS = {
             "User-Agent": self.BOT_INFORMATION["USER-AGENT"].format(
                 version=self.BOT_INFORMATION["VERSION"],
-                requests=requests.__version__),  # this can be changed in the config (alphagamebot.json)
+                requests=requests.__version__,
+                devstatus=(
+                    " (DEVELOPMENT EDITION)" if agb.cogwheel.isDebugEnv else ""
+                )),  # this can be changed in the config (alphagamebot.json)
             "Accept": "application/json,text/plain,application/xml",
             "x-alphagamebot-version": self.BOT_INFORMATION["VERSION"],
             "Upgrade-Insecure-Requests": "1",
@@ -77,3 +81,25 @@ class RequestHandler:
         return r
 
 handler = RequestHandler()
+
+def formatQueryString(url, params):
+    """
+    Appends query parameters to a given URL.
+
+    Args:
+    - url (str): The base URL to which the query string will be appended.
+    - params (dict): A dictionary of query string parameters.
+
+    Returns:
+    - str: The URL with the appended query string.
+    """
+    # Parse the URL into components
+    url_parts = list(urllib.parse.urlparse(url))
+    
+    # Convert the query string parameters to a query string
+    query = dict(urllib.parse.parse_qsl(url_parts[4]))
+    query.update(params)
+    url_parts[4] = urllib.parse.urlencode(query)
+    
+    # Reassemble the URL with the new query string
+    return urllib.parse.urlunparse(url_parts)
