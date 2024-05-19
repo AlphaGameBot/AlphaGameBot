@@ -43,10 +43,13 @@ class RequestHandler:
             self.BOT_INFORMATION = json.load(f)
 
         self.REQUEST_HEADERS = {
-            "User-Agent": self.BOT_INFORMATION["USER-AGENT"].format(version=self.BOT_INFORMATION["VERSION"], requests=requests.__version__),  # this can be changed in the config (alphagamebot.json)
-            "Accept": "text/plain,application/json,application/xml",
+            "User-Agent": self.BOT_INFORMATION["USER-AGENT"].format(
+                version=self.BOT_INFORMATION["VERSION"],
+                requests=requests.__version__),  # this can be changed in the config (alphagamebot.json)
+            "Accept": "application/json,text/plain,application/xml",
             "x-alphagamebot-version": self.BOT_INFORMATION["VERSION"],
             "Upgrade-Insecure-Requests": "1",
+            "Accept-Encoding": "gzip",
             "Connection": "close" # we dont need a constant connection :)
         }
     def get(self, url: str, attemptCache=True):
