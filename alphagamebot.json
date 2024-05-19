@@ -2,7 +2,7 @@
   "BOT_INFORMATION": {
     "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
   },
-  "VERSION": "2.6.1",
+  "VERSION": "2.6.2",
   "CHANGELOG": {
     "2.4.1": "Remove Python errors in prod",
     "2.4": "Add D&D command",
@@ -32,7 +32,10 @@
     "jojo": {
       "GET_CHARACTERS": "https://stand-by-me.herokuapp.com/api/v1/characters",
       "GET_CHARACTER_IMAGE": "https://jojos-bizarre-api.netlify.app/assets/{}"
+    },
+    "dictionary": {
+      "GET_WORD_DEFINITION": "https://api.dictionaryapi.dev/api/v2/entries/en/{}"
     }
   },
-  "USER-AGENT": "AlphaGameBot/{} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/2.31.0; curl/8.4.0;"
+  "USER-AGENT": "AlphaGameBot/{version} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
 }
