@@ -36,6 +36,7 @@ import agb.system.commandError
 import agb.rssFeedCog
 import agb.suntsu 
 import agb.myersbriggs
+import agb.wikipedia
 # - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -146,6 +147,7 @@ bot.add_cog(agb.fun.FunCog(bot))
 bot.add_cog(agb.botinfo.BotInformationCog(bot))
 bot.add_cog(agb.suntsu.SunTsuCog(bot))
 bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
+bot.add_cog(agb.wikipedia.WikipediaCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
