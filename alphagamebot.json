@@ -2,7 +2,7 @@
   "BOT_INFORMATION": {
     "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
   },
-  "VERSION": "2.6.2",
+  "VERSION": "2.6.3",
   "CHANGELOG": {
     "2.4.1": "Remove Python errors in prod",
     "2.4": "Add D&D command",
