@@ -97,14 +97,11 @@ class Cogwheel(commands.Cog):
         self.init()
         # init can be overwritten when needed
 
-        self.logger.info("Let's go!  I have successfully initalized!")
+        self.logger.info("Cog has successfully initalized!")
 
     def init(self):
         """This is a function that can be used in place of `__init__`.
         This function is *called* by __init__ on cog initialization.
 
         By default, this does nothing (meant to be overwritten)"""
-        self.logger.debug("Skipping custom init process because it was never overwritten! (This is completely fine "
-                          "and is up to the Cog in question to decide if this is used.)")
-
         return
