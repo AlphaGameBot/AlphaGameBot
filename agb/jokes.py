@@ -54,24 +54,6 @@ class jokesCog(agb.cogwheel.Cogwheel):
     async def _hello(self, interaction):
         await interaction.response.send_message(":wave: Hi, {0}".format(interaction.user.mention))
 
-    @commands.slash_command(name="dog", description="Get a dog picture!")
-    async def _dog(self, interaction):
-        endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_PICTURE")
-        r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
-        embed = discord.Embed(title="Dog")
-        url = json.loads(r.text)["message"]
-        embed.set_image(url=url)
-        await interaction.response.send_message(embed=embed)
-
-    @commands.slash_command(name="dogbreed", description="Dog breeds :3")
-    async def _dogbreeds(self, interaction):
-        endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_BREEDS")
-        r = agb.requestHandler.handler.get(endpoint)
-        j = json.loads(r.text)
-        a = list(j["message"].keys())
-        breed = random.choice(list(a))
-        await interaction.response.send_message(":dog: `{0}`".format(breed))
-
     @commands.slash_command(name="coinflip", description="Flip a coin!")
     async def _coinflip(self, interaction):
         await interaction.response.send_message(":coin: %s" % "Heads" if random.choice([True,False]) else "Tails")

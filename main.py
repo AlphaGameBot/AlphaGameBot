@@ -38,6 +38,7 @@ import agb.suntsu
 import agb.myersbriggs
 import agb.wikipedia
 import agb.mathematics
+import agb.dog
 # - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -52,8 +53,7 @@ SAY_EXCEPTIONS = [
     1180023544042770533, # The Nerds with No Life
     1179187852601479230  # AlphaGameDeveloper
 ]
-DAMIEN = 420052952686919690
-HOLDEN = 951639877768863754
+OWNER = os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690)
 
 global cogw, listener
 cogw = logging.getLogger("cogwheel")
@@ -68,14 +68,17 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 @bot.event
 async def on_ready():
     if not agb.cogwheel.isDebugEnv:
-        status = discord.Game("with the API")
+        game_name = os.getenv("DISCORD_STATUS", "Whack A Bug!")
     else:
         logging.debug("note: Using debug Discord activity")
-        status = discord.Streaming(name="Squash That Bug!", url="https://alphagame.dev/alphagamebot")
+        game_name = os.getenv("DISCORD_STATUS", "With the Discord API.")
+    
+    status = discord.Game(game_name)
     await bot.change_presence(activity=status)
+    logging.info(f"Set the bot's Discord activity to playing \"{game_name}\".")
     bot.auto_sync_commands = True
     logging.info("Bot is now ready!")
-    logging.info("Bot user is \"{0}\".".format(bot.user.name))
+    logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
 
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
@@ -89,6 +92,11 @@ async def on_application_command(ctx: discord.ApplicationContext):
 
 @bot.event
 async def on_message(ctx: discord.Message):
+    #   As this is a public Discord bot, I can see multiple people getting
+    #   scared of this function, possibly processing their messages.  I want
+    #   to point out the order of the if statements that follow.  Nothing is
+    #   processed, unless the discord server is in SAY_EXCEPTIONS.  If it is not,
+    #   NO DATA IS PROCESSED.
     if ctx.content.startswith("..") == False:
         return
     if ctx.content.startswith("...") == True: 
@@ -110,14 +118,10 @@ async def on_message(ctx: discord.Message):
         cogw.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
     
-    if ctx.author.id == HOLDEN:
-        await ctx.channel.send("> *:middle_finger: \"You can go fuck yourself with that!*\"\n Brewstew, *Devil Chip*")
-        cogw.warning("Holden tried to use ?say to say \"{0}\".  L bozo".format(ctx.content))
-        return
-    if ctx.author.id != DAMIEN:
+    if ctx.author.id != OWNER:
         cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
                                                                                                ctx.content))
-        await ctx.channel.send(":x: I beg your pardon, but my creator only wants me to say his opinions.")
+        await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
         return
 
     text = ctx.content
@@ -127,7 +131,7 @@ async def on_message(ctx: discord.Message):
         return
     
     # Put in the console that it was told to say something!
-    logging.info("I was told to say: \"{}\".".format(text))
+    logging.info("I was told to say: \"%s\"." % text)
     await ctx.channel.send(text)
 
     # Delete the original message, so it looks better in the application!
@@ -150,6 +154,7 @@ bot.add_cog(agb.suntsu.SunTsuCog(bot))
 bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
 bot.add_cog(agb.wikipedia.WikipediaCog(bot))
 bot.add_cog(agb.mathematics.MathematicsCog(bot))
+bot.add_cog(agb.dog.DogCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
