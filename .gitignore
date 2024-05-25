@@ -9,6 +9,10 @@ Scripts
 pyvenv.cfg
 request-handler.sqlite
 
+# .vscode doesn't *need* to be tracked.
+# Tell me if there is ANY reason to have this in a public repo.
+.vscode
+
 # --- Python .gitignore default ---
 # Byte-compiled / optimized / DLL files
 __pycache__/
