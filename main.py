@@ -20,6 +20,7 @@ import logging.config
 import agb.cogwheel
 import sys
 from dotenv import load_dotenv
+from aiohttp import client_exceptions
 # commands
 import agb.utility
 import agb.xkcd
@@ -39,6 +40,7 @@ import agb.myersbriggs
 import agb.wikipedia
 import agb.mathematics
 import agb.dog
+import agb.cat
 # - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -67,7 +69,7 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 
 @bot.event
 async def on_ready():
-    if not agb.cogwheel.isDebugEnv:
+    if agb.cogwheel.isDebugEnv:
         game_name = os.getenv("DISCORD_STATUS", "Whack A Bug!")
     else:
         logging.debug("note: Using debug Discord activity")
@@ -83,6 +85,7 @@ async def on_ready():
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
+    # Essentially a proxy function
     return await agb.system.commandError.handleApplicationCommandError(interaction, error)
 
 
@@ -155,6 +158,7 @@ bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
 bot.add_cog(agb.wikipedia.WikipediaCog(bot))
 bot.add_cog(agb.mathematics.MathematicsCog(bot))
 bot.add_cog(agb.dog.DogCog(bot))
+bot.add_cog(agb.cat.CatCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
@@ -162,16 +166,30 @@ bot.add_cog(agb.dog.DogCog(bot))
 # bot.add_cog(agb.google.GoogleCog(bot))
 
 if __name__ == "__main__":
-    logging.info("Starting the bot...")
     if len(sys.argv) >= 2:
-        if sys.argv[1].lower() == "useEnvironment":
+        if sys.argv[1].lower() == "useenvironment":
             logging.info("Using .env environment file because it was explicitly requested with 'useEnvironment'!")
             load_dotenv()
         else:
-            logging.warning(f"Unknown value for argv location 1: '{sys.argv[1]}'!")
+            logging.error(f"Unknown value for argv location 1: '{sys.argv[1]}'!")
+            sys.exit(1)
+    logging.info("Starting the bot...")
     token = os.getenv("TOKEN")
-    if token == None:
+    if token == None or token == "":
         logging.error("No token was given via the environment variable 'TOKEN'!")
         logging.error("Use the argument 'useEnvironment' to automatically load your .env file.")
         sys.exit(1)
-    bot.run(token)
+
+    try:
+        bot.run(token)
+    except client_exceptions.ClientConnectorError as e:
+        logging.fatal("Cannot connect to Discord's gateway!")
+        logging.fatal("Maybe check your internet connection?")
+        sys.exit(1)
+    except Exception as e:
+        logging.fatal("The bot has encountered a critical error and cannot continue.")
+        logging.fatal("This is an uncaught exception on the bot run command.")
+        logging.fatal("--- Here is some error information ---")
+        logging.fatal("Error Type: %s" % str(type(e).__name__))
+        logging.fatal("Error Message: %s" % repr(e))
+        sys.exit(1)
