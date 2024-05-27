@@ -21,6 +21,8 @@ import os
 import json
 import logging
 
+global isDebugEnv
+
 def getVersion() -> str:
     return json.load(open("alphagamebot.json", "r"))["VERSION"]
 
@@ -33,7 +35,27 @@ def getAPIEndpoint(apiName, process):
     _p = _a[process]
     return _p
 
-isDebugEnv = (os.getenv("DEBUG") != None)
+def isDebug(argp=None) -> bool:
+    global isDebugEnv
+    useArgp = False
+    
+    if argp:
+        _ = argp.debug
+        useArgp = True
+    else:
+        _ = False
+        argp = None
+    debug_value =  _ if useArgp else (os.getenv("DEBUG") not in {"no", "false", "0", "", None})
+    if isinstance(debug_value, bool):
+        isDebugEnv = debug_value
+        return debug_value
+    r =  debug_value not in {"no", "false", "0", "", None}
+    isDebugEnv = r
+    return r
+
+
+isDebugEnv = isDebug()
+
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
@@ -78,7 +100,6 @@ class CogwheelLoggerHelper:
         appearance that will allow different cogs to be distinguished in the console."""
         self.logger.debug(self.constructor % text)
         return
-
 
 class Cogwheel(commands.Cog):
     """Cogwheel (`agb.cogwheel.Cogwheel`) is a customized version of `Cog` (`discord.ext.commands.Cog`)

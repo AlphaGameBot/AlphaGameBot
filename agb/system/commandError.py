@@ -252,6 +252,7 @@ async def handleApplicationCommandError(interaction: commands.context.Applicatio
     try:
         await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
     except discord.errors.InteractionResponded:
+        logging.debug("Using a followup message to send the error message because the interaction was already responded to.")
         await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
     if agb.cogwheel.isDebugEnv:
         # Pass the error along to the Python Error Handler (console)
