@@ -21,6 +21,8 @@ import agb.cogwheel
 import sys
 from dotenv import load_dotenv
 from aiohttp import client_exceptions
+import datetime
+import argparse
 # commands
 import agb.utility
 import agb.xkcd
@@ -41,6 +43,7 @@ import agb.wikipedia
 import agb.mathematics
 import agb.dog
 import agb.cat
+# import agb.hyrule
 # - - - - - - - - - - - - - - - - - - - - - - -
 # if you wanna set custom logging configs i guess
 # this is in .gitignore and .dockerignore because
@@ -66,6 +69,19 @@ listener = logging.getLogger("listener")
 #    logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(command_prefix="?", intents=intents)
+
+# parsing command line arguments
+if __name__ == "__main__":
+    d = datetime.date.today()
+    parser = argparse.ArgumentParser(
+        prog="AlphaGameBot Discord Bot",
+        description="A Discord Bot that's free and (hopefully) doesn't suck.",
+        epilog=f"(c) Damien Boisvert (AlphaGameDeveloper) {d.year}.  Licensed under GNU GPL v3"
+    )
+    parser.add_argument("-d", "--debug", help="Enable debug mode for the bot.", action="store_true")
+    parser.add_argument("-e", "--environment", help="Automatically load a environment file for the bot.")
+    parser.add_argument("-t", "--token", help="Set the bot's token via the command line. (Not recommended)")
+    args = parser.parse_args()
 
 @bot.event
 async def on_ready():
@@ -159,6 +175,7 @@ bot.add_cog(agb.wikipedia.WikipediaCog(bot))
 bot.add_cog(agb.mathematics.MathematicsCog(bot))
 bot.add_cog(agb.dog.DogCog(bot))
 bot.add_cog(agb.cat.CatCog(bot))
+# bot.add_cog(agb.hyrule.HyruleCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
@@ -166,25 +183,45 @@ bot.add_cog(agb.cat.CatCog(bot))
 # bot.add_cog(agb.google.GoogleCog(bot))
 
 if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        if sys.argv[1].lower() == "useenvironment":
-            logging.info("Using .env environment file because it was explicitly requested with 'useEnvironment'!")
-            load_dotenv()
-        else:
-            logging.error(f"Unknown value for argv location 1: '{sys.argv[1]}'!")
-            sys.exit(1)
     logging.info("Starting the bot...")
     token = os.getenv("TOKEN")
+    tokenSource = "environment"
+
+    if args.environment != None:
+        logging.info("Loading the %s environment file because it was explicitly requested with '-e' or '--environment'." % args.environment)
+        if not os.path.isfile(args.environment):
+            logging.fatal("The environment file %s does not exist!  Please check the path and try again." % args.environment)
+            sys.exit(1)
+        if not load_dotenv(args.environment):
+            logging.info("No (new) environment variables were loaded from the .env file.  This is normal if the file does not exist.")
+        token = os.getenv("TOKEN")
+        print(token)
+        tokenSource = "environmentfile"
+
+    if args.token:
+        logging.warning("You tried to use the command line to set the bot's token.  This is insecure.  Please use the environment variable 'TOKEN' instead.")
+        token = args.token
+        tokenSource = "commandline"
+
     if token == None or token == "":
-        logging.error("No token was given via the environment variable 'TOKEN'!")
-        logging.error("Use the argument 'useEnvironment' to automatically load your .env file.")
+        logging.error("No token was given via the environment variable 'TOKEN', nor was one given via the commandline using '-t' or '--token'!")
+        logging.error("Use '-e' or '--environment' to automatically load your .env file.")
         sys.exit(1)
 
+
+
+    if agb.cogwheel.isDebug(argp=args) == True:
+        logging.warning("Debug mode is ENABLED.  This is a development build.  Do not use this in a production environment.")
+    
     try:
+        logging.info("Logging in using static token from %s" % tokenSource)
         bot.run(token)
     except client_exceptions.ClientConnectorError as e:
         logging.fatal("Cannot connect to Discord's gateway!")
         logging.fatal("Maybe check your internet connection?")
+        sys.exit(1)
+    except discord.errors.LoginFailure as e:
+        logging.fatal("LoginFailure: Invalid token given.  Please check the token and try again.")
         sys.exit(1)
     except Exception as e:
         logging.fatal("The bot has encountered a critical error and cannot continue.")
