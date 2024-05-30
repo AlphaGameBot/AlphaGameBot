@@ -21,6 +21,8 @@ requests~=2.31.0
 requests-cache
 nltk~=3.8.1
 
+# MySQL connection
+mysql-connector-python
 # For development stuff
 python-dotenv
 

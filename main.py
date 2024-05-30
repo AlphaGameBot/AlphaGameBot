@@ -1,3 +1,6 @@
+#    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
+#    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
+
 #    AlphaGameBot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +26,12 @@ from dotenv import load_dotenv
 from aiohttp import client_exceptions
 import datetime
 import argparse
+import mysql.connector
+# system
+import agb.system.commandError
+import agb.system.message
 # commands
+import agb.userstats
 import agb.utility
 import agb.xkcd
 import agb.memes
@@ -35,7 +43,7 @@ import agb.google
 import agb.moderation
 import agb.fun
 import agb.botinfo
-import agb.system.commandError
+
 import agb.rssFeedCog
 import agb.suntsu 
 import agb.myersbriggs
@@ -81,6 +89,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", help="Enable debug mode for the bot.", action="store_true")
     parser.add_argument("-e", "--environment", help="Automatically load a environment file for the bot.")
     parser.add_argument("-t", "--token", help="Set the bot's token via the command line. (Not recommended)")
+    parser.add_argument("-n", "--nodatabase", help="Force database to be disabled regardless of environment", action="store_true")
     args = parser.parse_args()
 
 @bot.event
@@ -108,55 +117,50 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 @bot.listen()
 async def on_application_command(ctx: discord.ApplicationContext):
     listener.info("Command Called: /{0}".format(ctx.command.name))
+    if CAN_USE_DATABASE:
+        # attempt to make a new user if not already in the database
+        agb.cogwheel.initalizeNewUser(cnx, ctx.author.id)
+
+        # Increase the value of commands_ran by 1 for the given user id
+        query = "UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s"
+        values = [ctx.author.id]
+        cursor = cnx.cursor()
+        cursor.execute(query, values)
+        cnx.commit()
+        cursor.close()
+
 
 @bot.event
 async def on_message(ctx: discord.Message):
-    #   As this is a public Discord bot, I can see multiple people getting
-    #   scared of this function, possibly processing their messages.  I want
-    #   to point out the order of the if statements that follow.  Nothing is
-    #   processed, unless the discord server is in SAY_EXCEPTIONS.  If it is not,
-    #   NO DATA IS PROCESSED.
-    if ctx.content.startswith("..") == False:
-        return
-    if ctx.content.startswith("...") == True: 
-        # Sometimes, I make sarcastic comments, starting with ...
-        # Example: "... blah blah blah", and the bot responds to it as
-        # ". blah blah blah".  This prevents the bot from responding.
-        return
+    # Essentially a proxy function
+    return await agb.system.message.handleOnMessage(ctx, CAN_USE_DATABASE, cnx)
 
+MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
+MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)
+MYSQL_USER = os.getenv("MYSQL_USER", False)
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", False)
 
-    # Disable the say command for all servers except for the ones in which they are explicitly
-    # enabled in alphagamebot.json, key "SAY_EXCEPTIONS"
-    if ctx.guild.id not in SAY_EXCEPTIONS:
-        return
-    
-    # When I run 2 instances of AlphaGameBot at the same time, both will reply to my message.
-    # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
-    # I will just remove the `DEBUG=1` environment variable.
-    if agb.cogwheel.isDebugEnv:
-        cogw.info("Say was ignored as I think this is a development build.")
-        return EnvironmentError("Bot is in development build")
-    
-    if ctx.author.id != OWNER:
-        cogw.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
-                                                                                               ctx.content))
-        await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
-        return
-
-    text = ctx.content
-    text = text[2:]
-    if text == None:
-        # No text given, so give up...
-        return
-    
-    # Put in the console that it was told to say something!
-    logging.info("I was told to say: \"%s\"." % text)
-    await ctx.channel.send(text)
-
-    # Delete the original message, so it looks better in the application!
-    await ctx.delete()
-
-
+if not (MYSQL_SERVER and MYSQL_DATABASE and MYSQL_USER and MYSQL_PASSWORD) and not args.nodatabase:
+    logging.warning("MySQL connection information is invalid!  MySQL connection is required to use specific commands.")
+    logging.warning("These environment variables must be set:")
+    logging.warning("* MYSQL_HOST")
+    logging.warning("* MYSQL_DATABASE")
+    logging.warning("* MYSQL_USER")
+    logging.warning("* MYSQL_PASSWORD")
+    CAN_USE_DATABASE = False
+    cnx = None
+elif args.nodatabase:
+    logging.warning("Database was force-disabled with '-n' or '--nodatabase'.  Database functionality is DISABLED.")
+    CAN_USE_DATABASE = False
+    cnx = None
+else:
+    CAN_USE_DATABASE = True
+    cnx = mysql.connector.connect(
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        host=MYSQL_SERVER,
+        database=MYSQL_DATABASE
+    )
 # set command cogs
 bot.add_cog(agb.utility.UtilityCog(bot))
 bot.add_cog(agb.xkcd.xkcdCog(bot))
@@ -175,6 +179,7 @@ bot.add_cog(agb.wikipedia.WikipediaCog(bot))
 bot.add_cog(agb.mathematics.MathematicsCog(bot))
 bot.add_cog(agb.dog.DogCog(bot))
 bot.add_cog(agb.cat.CatCog(bot))
+bot.add_cog(agb.userstats.UserStatsCog(bot, cnx, CAN_USE_DATABASE))
 # bot.add_cog(agb.hyrule.HyruleCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
@@ -195,7 +200,6 @@ if __name__ == "__main__":
         if not load_dotenv(args.environment):
             logging.info("No (new) environment variables were loaded from the .env file.  This is normal if the file does not exist.")
         token = os.getenv("TOKEN")
-        print(token)
         tokenSource = "environmentfile"
 
     if args.token:
