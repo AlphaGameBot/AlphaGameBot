@@ -20,7 +20,7 @@ from discord.embeds import *
 import os
 import json
 import logging
-
+import mysql.connector
 global isDebugEnv
 
 def getVersion() -> str:
@@ -53,7 +53,14 @@ def isDebug(argp=None) -> bool:
     isDebugEnv = r
     return r
 
-
+def initalizeNewUser(cnx, user_id):
+    c = cnx.cursor()
+    c.execute("SELECT * FROM user_stats WHERE userid = %s" % str(user_id))
+    result = c.fetchone()
+    if result is None:
+        c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) VALUES (%s, %s, %s)", (user_id,0,0))
+        cnx.commit()
+    c.close()
 isDebugEnv = isDebug()
 
 def embed(**kwargs) -> discord.Embed:
@@ -126,3 +133,14 @@ class Cogwheel(commands.Cog):
 
         By default, this does nothing (meant to be overwritten)"""
         return
+    
+class MySQLEnabledCogwheel(Cogwheel):
+    """Extended version of `Cogwheel`, but includes stuff for interacting with the """
+    def __init__(self, bot: commands.Bot, cnx: mysql.connector.connection.MySQLConnection, canUseDatabase: bool = False):
+        super().__init__(bot)
+        self.cnx = cnx
+        self.canUseDatabase = canUseDatabase
+        if canUseDatabase:
+            self.cursor = cnx.cursor()
+        else:
+            self.cursor = None
