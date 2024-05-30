@@ -135,7 +135,7 @@ class Cogwheel(commands.Cog):
         return
     
 class MySQLEnabledCogwheel(Cogwheel):
-    """Extended version of `Cogwheel`, but includes stuff for interacting with the """
+    """Extended version of `Cogwheel`, but includes stuff for interacting with the MySQL database"""
     def __init__(self, bot: commands.Bot, cnx: mysql.connector.connection.MySQLConnection, canUseDatabase: bool = False):
         super().__init__(bot)
         self.cnx = cnx
