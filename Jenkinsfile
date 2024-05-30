@@ -9,8 +9,14 @@ pipeline {
         TOKEN = credentials('alphagamebot-token')
 	    WEBHOOK = credentials('alphagamebot-webhook')
 	    DOCKER_TOKEN = credentials('alphagamedev-docker-token')
-	    AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -c -M -r").trim()
+	    AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -cMr").trim()
 	    COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
+
+        // MySQL stuff
+        MYSQL_HOST = "192.168.0.6"
+        MYSQL_DATABASE = "alphagamebot"
+        MYSQL_USER = "alphagamebot" 
+        MYSQL_PASSWORD = credentials('alphagamebot-mysql-password')
     }
     stages {
         stage('build') {
@@ -34,7 +40,9 @@ pipeline {
             steps {
                 echo "Pushing image to Docker Hub"
                 sh 'echo $DOCKER_TOKEN | docker login -u alphagamedev --password-stdin'
-                sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION'
+                sh 'docker tag alphagamedev/alphagamebot:latest alphagamedev/alphagamebot:$AGB_VERSION' // point tag latest to most recent version
+                sh 'docker push alphagamedev/alphagamebot:$AGB_VERSION' // push tag latest version
+                sh 'docker push alphagamedev/alphagamebot:latest' // push tag latest
                 sh 'docker logout'
             }
         }
@@ -47,6 +55,7 @@ pipeline {
                                 -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite \
                                 --name alphagamebot \
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
+                                -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
                                 --restart=always \
                                 alphagamedev/alphagamebot:$AGB_VERSION"
             }
