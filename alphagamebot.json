@@ -3,14 +3,10 @@
     "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
   },
   "VERSION": "3.1",
-  "CHANGELOG": {
-    "2.4.1": "Remove Python errors in prod",
-    "2.4": "Add D&D command",
-    "2.3": "Add RSS command",
-    "2.2.2": "Update",
-    "2.1.3": "Make bot more responsible with API usage",
-    "2.1.2": "Add version embed footer stuff"
-  },
+  "SAY_EXCEPTIONS": [
+    1180023544042770533,
+    1179187852601479230 
+  ],
   "API_ENDPOINTS": {
     "meme": {
       "GET_MEME": "https://meme-api.com/gimme"
