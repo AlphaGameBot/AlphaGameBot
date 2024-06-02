@@ -23,11 +23,6 @@ import agb.cogwheel
 
 
 class ModerationCog(agb.cogwheel.Cogwheel):
-    def __init__(self, bot: commands.Bot):
-        self.bot = bot
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.info("ModerationCog has been initalized!")
-    
     group = discord.SlashCommandGroup(name="moderation", description="Moderation-related commands")
 
     @group.command(name="kick", description="Kicks a user.")
