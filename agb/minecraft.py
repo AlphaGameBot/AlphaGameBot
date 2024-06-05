@@ -28,10 +28,10 @@ import agb.cogwheel
 class MinecraftCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="minecraft", description="Minecraft-related commands")
 
-    @group.command(name="mcjava", description="Ping a Minecraft: Java Edition server amd get data!")
+    @group.command(name="java", description="Ping a Minecraft: Java Edition server amd get data!")
     async def _java(self, interaction,
-                         host: discord.Option(str, description="The host IP address of the server"),
-                         port: discord.Option(int, description="The port of the Minecraft server", default=25565)):
+                         host: discord.Option(str, description="The host IP address of the server"), # type: ignore
+                         port: discord.Option(int, description="The port of the Minecraft server", default=25565)): # type: ignore
         if port == 25565:
             addr = "{0}".format(host)
         else:
@@ -80,10 +80,10 @@ class MinecraftCog(agb.cogwheel.Cogwheel):
 
         await interaction.followup.send(embed=embed)
 
-    @group.command(name="mcbedrock", description="Ping a Minecraft: Bedrock Edition server and get data!")
+    @group.command(name="bedrock", description="Ping a Minecraft: Bedrock Edition server and get data!")
     async def _bedrock(self, interaction,
-                       host: discord.Option(str, description="The host IP of the Minecraft server"),
-                       port: discord.Option(int, description="The port that the Minecraft server us running on",
+                       host: discord.Option(str, description="The host IP of the Minecraft server"), # type: ignore
+                       port: discord.Option(int, description="The port that the Minecraft server us running on", # type: ignore
                                             default=19132)):
         if port == 25565:
             addr = "{0}".format(host)

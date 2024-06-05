@@ -30,7 +30,7 @@ class RSSFeedCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="rss", description="Reed a site's RSS feed")
     async def _rss(self, interaction: discord.commands.context.ApplicationContext,
-                   feed: discord.Option(str, description="The Location of the RSS feed")):
+                   feed: discord.Option(str, description="The Location of the RSS feed")): # type: ignore
         # acknowledge Discord's request for the slash command!
         # This gives us some breathing room with the 3-second
         # "Command timed out".  This also gives the "AlphaGameBor

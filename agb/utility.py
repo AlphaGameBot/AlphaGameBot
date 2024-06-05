@@ -41,8 +41,8 @@ class UtilityCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="uuid", description="Get a version 4 UUID")
     async def _uuid(self, interaction, count:int=1):
-        if count > 100:
-            await interaction.response.send_message(":x: Way too spicy!  You can only create 100 UUIDs per request!")
+        if count > 50:
+            await interaction.response.send_message(":x: Way too spicy!  You can only create 50 UUIDs per request!")
             return
         r = ""
         for a in range(count):

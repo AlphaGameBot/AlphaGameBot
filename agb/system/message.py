@@ -5,8 +5,11 @@ import logging
 import os
 
 async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection):
+    cnx.commit() # get new information
     bi = agb.cogwheel.getBotInformation()
     cogw = logging.getLogger("cogwheel")
+    # check for message count consent
+    
     if CAN_USE_DATABASE:
         agb.cogwheel.initalizeNewUser(cnx, ctx.author.id)
         c = cnx.cursor()
@@ -15,6 +18,9 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
         c.execute(query, values)
         cnx.commit()
         c.close()
+    if agb.cogwheel.getUserSetting(cnx, ctx.user.id, "message_tracking_consent") == 0 or not CAN_USE_DATABASE:
+        await ctx.channel.send("not tracking messages because of consent settings owo")
+        return
     #   As this is a public Discord bot, I can see multiple people getting
     #   scared of this function, possibly processing their messages.  I want
     #   to point out the order of the if statements that follow.  Nothing is

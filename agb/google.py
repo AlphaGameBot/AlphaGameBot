@@ -22,10 +22,10 @@ import agb.cogwheel
 class GoogleCog(agb.cogwheel.Cogwheel):
     @discord.command(name="google", description="Search on Google (for those of you who don't wanna open Chrome :/)")
     async def _google(self, interaction,
-                      query: discord.Option(str, description="The search term that you want"),
-                      number: discord.Option(int, description="The number of results you want the bot to yield",
+                      query: discord.Option(str, description="The search term that you want"), # type: ignore
+                      number: discord.Option(int, description="The number of results you want the bot to yield", # type: ignore
                                              default=5),
-                      lang: discord.Option(str, description="The language for the searches!", value="en")):
+                      lang: discord.Option(str, description="The language for the searches!", value="en")): # type: ignore
         self.logger.debug("Google called")
         data = search(query, num_results=number, lang=lang, advanced=True)
         text = ""
