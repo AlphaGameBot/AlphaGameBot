@@ -18,7 +18,7 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
         c.execute(query, values)
         cnx.commit()
         c.close()
-    if agb.cogwheel.getMessageCountingConcent(cnx, ctx.author.id) == 0 or not CAN_USE_DATABASE:
+    if agb.cogwheel.getUserSetting(cnx, ctx.user.id, "message_tracking_consent") == 0 or not CAN_USE_DATABASE:
         await ctx.channel.send("not tracking messages because of consent settings owo")
         return
     #   As this is a public Discord bot, I can see multiple people getting
