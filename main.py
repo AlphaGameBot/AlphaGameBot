@@ -14,6 +14,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
+
+#    This is the main file for the AlphaGameBot Discord bot.  Start the bot using this file.
+#    Most code is in other directories.  Here is a quick overview of the directories:
+
+#    agb/ - The main directory for the bot.  Contains all cogs.
+#    agb/cogwheel.py - Contains miscellaneous functions and variables used throughout the bot.
+#    agb/requestHandler.py - Contains functions for handling requests to external APIs.
+#    agb/system/ - Contains system functions and classes.
+#    agb/tests/ - Contains unit tests for the bot.  Not used in production.
+
+#    This file contains command-line flags to control bot behavior.  Use -h or --help for more information.
+#    Run the command < python3 main.py -h > for some help with command-line flags.
+
 import discord
 from discord.ext import commands
 import os
@@ -30,8 +43,9 @@ import mysql.connector
 # system
 import agb.system.commandError
 import agb.system.message
+import agb.system.applicationCommand
 # commands
-import agb.userstats
+import agb.user
 import agb.utility
 import agb.xkcd
 import agb.memes
@@ -51,32 +65,6 @@ import agb.wikipedia
 import agb.mathematics
 import agb.dog
 import agb.cat
-# import agb.hyrule
-# - - - - - - - - - - - - - - - - - - - - - - -
-# if you wanna set custom logging configs i guess
-# this is in .gitignore and .dockerignore because
-# not everyone needs it, and if they do, it will
-# be automatically loaded. :) --Damien 12.22.23
-# TODO: Add base logging.cfg for people to copy
-logging.config.fileConfig("logging.ini")
-#logging.basicConfig(level=logging.DEBUG)
-intents = discord.Intents.all()
-
-SAY_EXCEPTIONS = [
-    1180023544042770533, # The Nerds with No Life
-    1179187852601479230  # AlphaGameDeveloper
-]
-OWNER = os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690)
-
-global cogw, listener
-cogw = logging.getLogger("cogwheel")
-listener = logging.getLogger("listener")
-#if os.getenv("DEBUG") != None:
-#    logging.basicConfig(level=logging.DEBUG)
-#else:
-#    logging.basicConfig(level=logging.INFO)
-
-bot = commands.Bot(command_prefix="?", intents=intents)
 
 # parsing command line arguments
 if __name__ == "__main__":
@@ -90,7 +78,30 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--environment", help="Automatically load a environment file for the bot.")
     parser.add_argument("-t", "--token", help="Set the bot's token via the command line. (Not recommended)")
     parser.add_argument("-n", "--nodatabase", help="Force database to be disabled regardless of environment", action="store_true")
+    parser.add_argument("-r", "--requiredatabase", help="Force database to be enabled.  This will error if the database is not configured correctly.", action="store_true")
     args = parser.parse_args()
+
+# Initalize logging services
+# TODO: Use different logging files for different loggers depending on if --debug is enabled or disabled
+if args.debug: # args.debug:
+    logging.config.fileConfig("logging/debug.ini")
+else:
+    logging.config.fileConfig("logging/production.ini")
+
+intents = discord.Intents.all()
+
+OWNER = os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690)
+
+global cogw, listener
+cogw = logging.getLogger("cogwheel")
+listener = logging.getLogger("listener")
+#if os.getenv("DEBUG") != None:
+#    logging.basicConfig(level=logging.DEBUG)
+#else:
+#    logging.basicConfig(level=logging.INFO)
+
+bot = commands.Bot(command_prefix="?", intents=intents)
+
 
 @bot.event
 async def on_ready():
@@ -113,40 +124,45 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
     # Essentially a proxy function
     return await agb.system.commandError.handleApplicationCommandError(interaction, error)
 
-
-@bot.listen()
-async def on_application_command(ctx: discord.ApplicationContext):
-    listener.info("Command Called: /{0}".format(ctx.command.name))
-    if CAN_USE_DATABASE:
-        # attempt to make a new user if not already in the database
-        agb.cogwheel.initalizeNewUser(cnx, ctx.author.id)
-
-        # Increase the value of commands_ran by 1 for the given user id
-        query = "UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s"
-        values = [ctx.author.id]
-        cursor = cnx.cursor()
-        cursor.execute(query, values)
-        cnx.commit()
-        cursor.close()
-
-
 @bot.event
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
+    listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
     return await agb.system.message.handleOnMessage(ctx, CAN_USE_DATABASE, cnx)
+
+@bot.listen()
+async def on_application_command(ctx: discord.context.ApplicationContext):
+    listener.debug("Dispatching slash command /{0} to agb.system.applicationCommand.handleApplicationCommand".format(ctx.command))
+    return await agb.system.applicationCommand.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx)
+
+
+
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)
 MYSQL_USER = os.getenv("MYSQL_USER", False)
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", False)
 
+# helper function for human-readable strings (uses lambda because it's a one-liner)
+humanString = lambda x: "[  SET]" if x else "[UNSET]"
+
+# we rely on the fact that all strings are True, and if not found, default is the boolean False.
+if args.nodatabase and args.requiredatabase:
+    logging.warning("Conflicting flags!  You cannot have --nodatabase and --requiredatabase at the same time.  Please fix that!")
+    sys.exit(1)
+
 if not (MYSQL_SERVER and MYSQL_DATABASE and MYSQL_USER and MYSQL_PASSWORD) and not args.nodatabase:
     logging.warning("MySQL connection information is invalid!  MySQL connection is required to use specific commands.")
     logging.warning("These environment variables must be set:")
-    logging.warning("* MYSQL_HOST")
-    logging.warning("* MYSQL_DATABASE")
-    logging.warning("* MYSQL_USER")
-    logging.warning("* MYSQL_PASSWORD")
+    logging.warning(f"{humanString(MYSQL_SERVER)} * MYSQL_HOST")
+    logging.warning(f"{humanString(MYSQL_DATABASE)} * MYSQL_DATABASE")
+    logging.warning(f"{humanString(MYSQL_USER)} * MYSQL_USER")
+    logging.warning(f"{humanString(MYSQL_PASSWORD)} * MYSQL_PASSWORD")
+    logging.warning("If you do not want to use the database, use the '-n' or '--nodatabase' flag.")
+
+    if args.requiredatabase:
+        logging.fatal("Database was force-enabled with '-r' or '--requiredatabase', but the database is not configured correctly.  Please check the environment variables and try again.")
+        sys.exit(1)
     CAN_USE_DATABASE = False
     cnx = None
 elif args.nodatabase:
@@ -179,7 +195,7 @@ bot.add_cog(agb.wikipedia.WikipediaCog(bot))
 bot.add_cog(agb.mathematics.MathematicsCog(bot))
 bot.add_cog(agb.dog.DogCog(bot))
 bot.add_cog(agb.cat.CatCog(bot))
-bot.add_cog(agb.userstats.UserStatsCog(bot, cnx, CAN_USE_DATABASE))
+bot.add_cog(agb.user.UserStatsCog(bot, cnx, CAN_USE_DATABASE))
 # bot.add_cog(agb.hyrule.HyruleCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
