@@ -54,14 +54,33 @@ def isDebug(argp=None) -> bool:
     return r
 
 def initalizeNewUser(cnx, user_id):
+    l = logging.getLogger("cogwheel")
     c = cnx.cursor()
-    c.execute("SELECT * FROM user_stats WHERE userid = %s" % str(user_id))
+    c.execute("SELECT * FROM user_settings WHERE userid = %s" % str(user_id))
     result = c.fetchone()
     if result is None:
+
+        l.debug(f"Adding user {user_id} to the database because they are not in it already.")
+        
+        # User Stats
         c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) VALUES (%s, %s, %s)", (user_id,0,0))
+
+        # User Settings
+        c.execute("INSERT INTO user_settings (userid) VALUES (%s)", (user_id))
         cnx.commit()
     c.close()
+
 isDebugEnv = isDebug()
+
+def getUserSetting(cnx, user_id, setting):
+    cnx.commit() # GET NEW INFORMATION
+    c = cnx.cursor()
+    c.execute("SELECT %s FROM user_settings WHERE userid = %s", (setting, user_id))
+    result = c.fetchone()
+    if result is None:
+        initalizeNewUser(cnx, user_id)
+        return 
+    return result[0]
 
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
@@ -125,7 +144,7 @@ class Cogwheel(commands.Cog):
         self.init()
         # init can be overwritten when needed
 
-        self.logger.info("Cog has successfully initalized!")
+        self.logger.debug("Cog has successfully initalized!")
 
     def init(self):
         """This is a function that can be used in place of `__init__`.
