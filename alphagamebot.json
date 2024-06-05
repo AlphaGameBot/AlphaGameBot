@@ -8,6 +8,9 @@
     1179187852601479230 
   ],
   "API_ENDPOINTS": {
+    "webui": {
+      "USER_SETTINGS": "https://alphagamebot.alphagame.dev/user/settings"
+    },
     "meme": {
       "GET_MEME": "https://meme-api.com/gimme"
     },
