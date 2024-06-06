@@ -7,6 +7,16 @@
     1180023544042770533,
     1179187852601479230 
   ],
+  "ROTATING_STATUS": [
+    "With the Discord API",
+    "Currently on version {version}",
+    "Build number {build}",
+    "Proudly serving {guilds} servers",
+    "with new features!",
+    "GitHub/AlphaGameBot",
+    "Proudly serving {users} users"
+  ],
+  "ROTATING_STATUS_INTERVAL": 10,
   "API_ENDPOINTS": {
     "webui": {
       "USER_SETTINGS": "https://alphagamebot.alphagame.dev/user/settings"
