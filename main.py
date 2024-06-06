@@ -29,8 +29,9 @@
 
 import discord
 from discord.ext import commands
+from discord.ext import tasks
 import os
-import nltk
+import time
 import logging
 import logging.config
 import agb.cogwheel
@@ -40,10 +41,12 @@ from aiohttp import client_exceptions
 import datetime
 import argparse
 import mysql.connector
+import threading
 # system
 import agb.system.commandError
 import agb.system.message
 import agb.system.applicationCommand
+import agb.system.rotatingStatus
 # commands
 import agb.user
 import agb.utility
@@ -102,19 +105,16 @@ listener = logging.getLogger("listener")
 
 bot = commands.Bot(command_prefix="?", intents=intents)
 
+@tasks.loop(seconds=10)
+async def rotate_status():
+    logging.debug("Dispatching RotateStatus task to agb.system.rotatingStatus.rotatingStatus")
+    await agb.system.rotatingStatus.rotatingStatus(bot)
 
 @bot.event
 async def on_ready():
-    if agb.cogwheel.isDebugEnv:
-        game_name = os.getenv("DISCORD_STATUS", "Whack A Bug!")
-    else:
-        logging.debug("note: Using debug Discord activity")
-        game_name = os.getenv("DISCORD_STATUS", "With the Discord API.")
-    
-    status = discord.Game(game_name)
-    await bot.change_presence(activity=status)
-    logging.info(f"Set the bot's Discord activity to playing \"{game_name}\".")
     bot.auto_sync_commands = True
+    if not rotate_status.is_running():
+      rotate_status.start()
     logging.info("Bot is now ready!")
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
 
