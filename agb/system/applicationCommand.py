@@ -16,18 +16,21 @@
 
 import discord
 import agb.cogwheel
-
+import logging
 async def handleApplicationCommand(interaction: discord.context.ApplicationContext, CAN_USE_DATABASE, cnx):
-    if not agb.cogwheel.getUserSetting(cnx, interaction.user.id, "message_tracking_consent"):
-        await interaction.channel.send("not tracking commands because of consent settings owo")
+    l = logging.getLogger("system")
     if CAN_USE_DATABASE:
         # attempt to make a new user if not already in the database
         agb.cogwheel.initalizeNewUser(cnx, interaction.author.id)
 
-        # Increase the value of commands_ran by 1 for the given user id
-        query = "UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s"
-        values = [interaction.author.id]
-        cursor = cnx.cursor()
-        cursor.execute(query, values)
-        cnx.commit()
-        cursor.close()
+        if agb.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
+
+            # Increase the value of commands_ran by 1 for the given user id
+            query = "UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s"
+            values = [interaction.author.id]
+            cursor = cnx.cursor()
+            cursor.execute(query, values)
+            cnx.commit()
+            cursor.close()
+        else:
+            l.debug("Not tracking command usage for /{0} because user {1} has not consented to message tracking.".format(interaction.command.name, interaction.author.id))
