@@ -66,7 +66,7 @@ def initalizeNewUser(cnx, user_id):
         c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) VALUES (%s, %s, %s)", (user_id,0,0))
 
         # User Settings
-        c.execute("INSERT INTO user_settings (userid) VALUES (%s)", (user_id))
+        c.execute("INSERT INTO user_settings (userid) VALUES (%s)", [user_id])
         cnx.commit()
     c.close()
 

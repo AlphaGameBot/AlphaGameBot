@@ -22,25 +22,33 @@ from discord.ext import commands
 
 class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
     group = discord.SlashCommandGroup(name="user", description="user-related commands")
-    @group.command(name="userstats", description="Get user stats")
-    async def _userstats(self, interaction: discord.commands.context.ApplicationContext):
+    @group.command(name="stats", description="Get user stats")
+    async def _userstats(self, interaction: discord.commands.context.ApplicationContext,
+                         user: discord.Option(discord.User, "User to get stats for", required=False)): # type: ignore
+        
+        await interaction.response.defer()
+        
         # note, if using agb.cogwheel.MySQLEnabledCogwheel, BE SURE TO INCLUDE THIS CHECK
         if not self.canUseDatabase:
-            await interaction.response.send_message(":x: Database is not enabled.  This command cannot be used.")
+            await interaction.followup.send(":x: Database is not enabled.  This command cannot be used.")
             return
 
+        if user == None:
+            user = interaction.user
+        else:
+            user = user
         c = self.cnx.cursor()
 
-        c.execute("SELECT messages_sent, commands_ran from user_stats WHERE userid = %s", [interaction.user.id])
+        c.execute("SELECT messages_sent, commands_ran from user_stats WHERE userid = %s", [user.id])
 
 
-        user = interaction.user.name
-        nick = interaction.user.nick
+        username = user.name
+        nick = user.nick
 
         if nick != None:
-            presented_username = "{0} ({1})".format(nick, user)
+            presented_username = "{0} ({1})".format(nick, username)
         else:
-            presented_username = "{0}".format(user)
+            presented_username = "{0}".format(username)
         
         (messages_sent, commands_ran) = c.fetchall()[0]
         embed = agb.cogwheel.embed(
@@ -50,7 +58,7 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
         embed.add_field(name="Messages Sent", value=messages_sent)
         embed.add_field(name="Commands Ran", value=commands_ran)
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @group.command(name="settings", description="User Settings Web Interface")
     async def _settings(self, interaction: discord.context.ApplicationContext):
