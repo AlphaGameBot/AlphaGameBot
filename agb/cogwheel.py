@@ -72,14 +72,19 @@ def initalizeNewUser(cnx, user_id):
 
 isDebugEnv = isDebug()
 
-def getUserSetting(cnx, user_id, setting):
+def getUserSetting(cnx: mysql.connector.MySQLConnection, user_id, setting):
+    l = logging.getLogger("system")
     cnx.commit() # GET NEW INFORMATION
     c = cnx.cursor()
-    c.execute("SELECT %s FROM user_settings WHERE userid = %s", (setting, user_id))
+    query = "SELECT {} FROM user_settings WHERE userid = %s".format(setting)
+    fq = query % str(user_id)
+    c.execute(query, [user_id])
     result = c.fetchone()
     if result is None:
         initalizeNewUser(cnx, user_id)
         return 
+    r = result[0]
+    l.debug("SQL Query for user {0} (\"{1}\") returned {2}".format(user_id, fq, r))
     return result[0]
 
 def embed(**kwargs) -> discord.Embed:

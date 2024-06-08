@@ -6,21 +6,21 @@ import os
 
 async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection):
     cnx.commit() # get new information
-    bi = agb.cogwheel.getBotInformation()
-    li = logging.getLogger("listener")
+    bot_information = agb.cogwheel.getBotInformation()
+    logger = logging.getLogger("system")
     # check for message count consent
     if CAN_USE_DATABASE:
         if agb.cogwheel.getUserSetting(cnx, ctx.author.id, "message_tracking_consent") == 0:
-            li.debug("Not tracking message {} because user {} has not consented to message tracking.".format(ctx.id, ctx.author.id))
+            logger.debug("Not tracking message {} because user {} has not consented to message tracking.".format(ctx.id, ctx.author.id))
             return
         else:
             agb.cogwheel.initalizeNewUser(cnx, ctx.author.id)
-            c = cnx.cursor()
+            cursor = cnx.cursor()
             query = "UPDATE user_stats SET messages_sent = messages_sent + 1 WHERE userid = %s"
             values = [ctx.author.id]
-            c.execute(query, values)
+            cursor.execute(query, values)
             cnx.commit()
-            c.close()
+            cursor.close()
         
     #   As this is a public Discord bot, I can see multiple people getting
     #   scared of this function, possibly processing their messages.  I want
@@ -38,18 +38,18 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
 
     # Disable the say command for all servers except for the ones in which they are explicitly
     # enabled in alphagamebot.json, key "SAY_EXCEPTIONS"
-    if ctx.guild.id not in bi["SAY_EXCEPTIONS"]:
+    if ctx.guild.id not in bot_information["SAY_EXCEPTIONS"]:
         return
     
     # When I run 2 instances of AlphaGameBot at the same time, both will reply to my message.
     # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
     # I will just remove the `DEBUG=1` environment variable.
     if agb.cogwheel.isDebugEnv:
-        li.info("Say was ignored as I think this is a development build.")
+        logger.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
     
     if ctx.author.id != os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690):
-        li.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
+        logger.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
                                                                                                ctx.content))
         await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
         return
@@ -61,7 +61,7 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
         return
     
     # Put in the console that it was told to say something!
-    li.info("I was told to say: \"%s\"." % text)
+    logger.info("I was told to say: \"%s\"." % text)
     await ctx.channel.send(text)
 
     # Delete the original message, so it looks better in the application!
