@@ -19,13 +19,13 @@ import discord
 import time
 import uuid
 from discord.ext import commands
+from mysql.connector import OperationalError
 
 class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
     group = discord.SlashCommandGroup(name="user", description="user-related commands")
     @group.command(name="stats", description="Get user stats")
     async def _userstats(self, interaction: discord.commands.context.ApplicationContext,
                          user: discord.Option(discord.User, "User to get stats for", required=False)): # type: ignore
-        
         await interaction.response.defer()
         
         # note, if using agb.cogwheel.MySQLEnabledCogwheel, BE SURE TO INCLUDE THIS CHECK
@@ -37,6 +37,10 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
             user = interaction.user
         else:
             user = user
+
+        if not agb.cogwheel.getUserSetting(self.cnx, user.id, "message_tracking_consent"):
+            await interaction.followup.send(":x: This user has not consented to message tracking.")
+            return
         c = self.cnx.cursor()
 
         c.execute("SELECT messages_sent, commands_ran from user_stats WHERE userid = %s", [user.id])
@@ -66,16 +70,14 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
             await interaction.response.send_message(":x: Database is not enabled.  This command cannot be used.")
             return
         
-        await interaction.response.defer()
         c = self.cnx.cursor()
         # create a token
         expires = int(time.time()) + 3600 # 1 hour
         token = str(uuid.uuid4())
         c.execute("INSERT INTO webui_tokens VALUES (%s, %s, %s)", [interaction.user.id, token, time.time()])
-        self.cnx.commit()
         c.close()
 
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label="User Settings", url=f"{agb.cogwheel.getAPIEndpoint('webui', 'USER_SETTINGS')}?token={token}"))
 
-        await interaction.followup.send(view=view)
+        await interaction.response.send_message("Here is your WebUI link.\n*(Do NOT share it with anyone, as it will let them change your user settings!)*", view=view, ephemeral=True)

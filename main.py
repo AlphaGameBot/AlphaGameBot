@@ -47,6 +47,7 @@ import agb.system.commandError
 import agb.system.message
 import agb.system.applicationCommand
 import agb.system.rotatingStatus
+import agb.system.databaseUpdate
 # commands
 import agb.user
 import agb.utility
@@ -105,16 +106,23 @@ listener = logging.getLogger("listener")
 
 bot = commands.Bot(command_prefix="?", intents=intents)
 
-@tasks.loop(seconds=10)
+@tasks.loop() # run forever when the function completes.
 async def rotate_status():
-    logging.debug("Dispatching RotateStatus task to agb.system.rotatingStatus.rotatingStatus")
+    logging.getLogger("listener").debug("Dispatching RotateStatus task to agb.system.rotatingStatus.rotatingStatus")
     await agb.system.rotatingStatus.rotatingStatus(bot)
+
+@tasks.loop(minutes=1)
+async def database_update():
+    logging.getLogger("listener").debug("Dispatching DatabaseUpdate task to agb.system.databaseUpdate.handleDatabaseUpdate")
+    agb.system.databaseUpdate.handleDatabaseUpdate(cnx, CAN_USE_DATABASE)
 
 @bot.event
 async def on_ready():
     bot.auto_sync_commands = True
     if not rotate_status.is_running():
       rotate_status.start()
+    if not database_update.is_running():
+        database_update.start()
     logging.info("Bot is now ready!")
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
 
@@ -232,7 +240,7 @@ if __name__ == "__main__":
 
     if agb.cogwheel.isDebug(argp=args) == True:
         logging.warning("Debug mode is ENABLED.  This is a development build.  Do not use this in a production environment.")
-    
+        
     try:
         logging.info("Logging in using static token from %s" % tokenSource)
         bot.run(token)

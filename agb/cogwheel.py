@@ -67,7 +67,7 @@ def initalizeNewUser(cnx, user_id):
 
         # User Settings
         c.execute("INSERT INTO user_settings (userid) VALUES (%s)", [user_id])
-        cnx.commit()
+#        cnx.commit()
     c.close()
 
 isDebugEnv = isDebug()
@@ -83,7 +83,7 @@ def getUserSetting(cnx: mysql.connector.MySQLConnection, user_id, setting):
     if result is None:
         initalizeNewUser(cnx, user_id)
         return 
-    r = result[0]
+    r = result[0] 
     l.debug("SQL Query for user {0} (\"{1}\") returned {2}".format(user_id, fq, r))
     return result[0]
 
@@ -166,5 +166,6 @@ class MySQLEnabledCogwheel(Cogwheel):
         self.canUseDatabase = canUseDatabase
         if canUseDatabase:
             self.cursor = cnx.cursor()
+            self.logger.debug("")
         else:
             self.cursor = None

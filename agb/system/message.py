@@ -5,9 +5,12 @@ import logging
 import os
 
 async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection):
-    cnx.commit() # get new information
+    
     bot_information = agb.cogwheel.getBotInformation()
     logger = logging.getLogger("system")
+    if ctx.author.bot:
+        logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
+        return
     # check for message count consent
     if CAN_USE_DATABASE:
         if agb.cogwheel.getUserSetting(cnx, ctx.author.id, "message_tracking_consent") == 0:
@@ -19,7 +22,6 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
             query = "UPDATE user_stats SET messages_sent = messages_sent + 1 WHERE userid = %s"
             values = [ctx.author.id]
             cursor.execute(query, values)
-            cnx.commit()
             cursor.close()
         
     #   As this is a public Discord bot, I can see multiple people getting
