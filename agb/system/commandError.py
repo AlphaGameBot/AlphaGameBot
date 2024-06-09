@@ -18,7 +18,7 @@ import os
 import random
 import traceback
 import discord
-from discord import commands
+from discord.ext import commands
 import agb.cogwheel
 import agb.requestHandler
 import time
@@ -134,7 +134,7 @@ class ErrorOptionView(discord.ui.View):
         self.logger = logging.getLogger('listener')
 
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
-    async def reportError(self, button: discord.ui.Button, interaction: commands.context.ApplicationContext):
+    async def reportError(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
         # Set the button to be disabled to prevent spamming. (button.disabled)
 
         # Check if the user is the same one who originally did the command!
@@ -240,7 +240,22 @@ Cheers,
         await dm.send(embed=sent_embed, view=view)
 
 
-async def handleApplicationCommandError(interaction: commands.context.ApplicationContext, error):
+async def handleApplicationCommandError(interaction: discord.ApplicationContext, error):
+    try:
+        # big booty errors like this
+        if isinstance(error.original, discord.Forbidden):
+            await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
+            return
+        if isinstance(error.original, discord.errors.NotFound):
+            await interaction.response.send_message(":x: The bot took too long to respond.  Please try again.")
+            return
+    except AttributeError:
+        # commands.xxx error
+        
+        if isinstance(error, commands.MissingPermissions):
+            await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
+            return
+        
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
                                                                        to make it work by trying again.\nSorry about that! (awkward face emoji)",
                                color=discord.Color.red())
