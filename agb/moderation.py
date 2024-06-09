@@ -18,7 +18,7 @@ import discord
 from discord.ext import commands
 from discord import Permissions
 import logging
-
+import datetime
 import agb.cogwheel
 
 
@@ -55,14 +55,38 @@ class ModerationCog(agb.cogwheel.Cogwheel):
         embed.set_footer(text="Reason: " + reason)
 
         await interaction.response.send_message(embed=embed)
-    
+
+    @group.command(name="purge", description="Purges a certain number of messages from a channel")
+    @commands.has_permissions(manage_messages = True)
+    @commands.has_permissions(read_message_history = True)
+    async def _purge(interaction, 
+                     number: discord.Option(int, description="Maximum number of messages to purge.")):
+        await interaction.channel.purge(limit=number)
+        await interaction.response.send_message(":white_check_mark:  Purged **{}** messages.".format(number))
+        
+    @group.command(name="timeout", description="Timeout a user.")
+    @commands.has_permissions(moderate_members=True)
+    async def _timeout(interaction, user: discord.Option(discord.Member, description="User to timeout."),
+                                    minutes: discord.Option(int, description="Time (in minutes) to time-out the user..", default=5)):
+        await user.timeout_for(datetime.timedelta(minutes=minutes))
+        await interaction.response.send_message(":white_check_mark:  {} has been put on timeout.".format(user.mention))
+        
+    @group.command(name="untimeout", description="Removes a timeout from a user.")
+    @commands.has_permissions(moderate_members=True)
+    async def _untimeout(interaction, user: discord.Option(discord.Member, description="User to remove timeout from.", required=True)):
+        await user.remove_timeout()
+        await interaction.response.send_message(":white_check_mark:  {}'s timeout has been removed.".format(user.mention))
+
     @_kick.error
     @_ban.error
+    @_purge.error
+    @_timeout.error
+    @_untimeout.error
     async def _error(self, interaction, error):
         if isinstance(error, discord.Forbidden):
             await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
             return
-        elif isinstance(error, discord.MissingPermissions):
+        elif isinstance(error, commands.MissingPermissions):
             await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
             return
         else: # what the junk is this error?  pass it on to global bot handler
