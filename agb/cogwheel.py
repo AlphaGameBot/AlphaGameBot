@@ -74,7 +74,6 @@ isDebugEnv = isDebug()
 
 def getUserSetting(cnx: mysql.connector.MySQLConnection, user_id, setting):
     l = logging.getLogger("system")
-    cnx.commit() # GET NEW INFORMATION
     c = cnx.cursor()
     query = "SELECT {} FROM user_settings WHERE userid = %s".format(setting)
     fq = query % str(user_id)
