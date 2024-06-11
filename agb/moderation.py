@@ -28,33 +28,20 @@ class ModerationCog(agb.cogwheel.Cogwheel):
     @group.command(name="kick", description="Kicks a user.")
     @commands.has_permissions(kick_members = True)
     async def _kick(self, interaction, user: discord.Option(discord.Member, description="User to kick", required=True),  # type: ignore
-                  reason: discord.Option(str, description="Reason for ban", required=True)): # type: ignore # type: ignore
+                  reason: discord.Option(str, description="Reason for ban", required=False, default=None)): # type: ignore # type: ignore
         
-        await user.kick(reason = reason)
-        
-        embed = discord.Embed(
-        title="User Kicked",
-        description="The user " + str(user) + " has been kicked from the server.",
-        color=discord.Colour.red(),
-        )
-        embed.set_footer(text="Reason: " + reason)
+        await user.kick(reason = reason) # reason will be None if not set
+        await interaction.response.send_message(":white_check_mark:  {} has been kicked. {}".format(user.mention, "(Reason: *%s*)" % reason if reason else ""))
 
-        await interaction.response.send_message(embed=embed)
 
     @group.command(name="ban", description="Ban a user!")
     @commands.has_permissions(ban_members=True)
     async def _ban(self, interaction,
             user: discord.Option(discord.Member, description="The user to ban"), # type: ignore
-            reason: discord.Option(str, description="The reason for the ban", required=False, default="No Reason Given")): # type: ignore
+            reason: discord.Option(str, description="The reason for the ban", required=False, default=None)): # type: ignore
         await user.ban(reason=reason)
-        embed = discord.Embed(
-        title="User Kicked",
-        description="The user " + str(user) + " has been kicked from the server.",
-        color=discord.Colour.red(),
-        )
-        embed.set_footer(text="Reason: " + reason)
+        await interaction.response.send_message(":white_check_mark:  {} has been kicked. {}".format(user.mention, "(Reason: *%s*)" % reason if reason else ""))
 
-        await interaction.response.send_message(embed=embed)
 
     @group.command(name="purge", description="Purges a certain number of messages from a channel")
     @commands.has_permissions(manage_messages = True)
