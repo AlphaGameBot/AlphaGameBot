@@ -61,7 +61,6 @@ import agb.google
 import agb.moderation
 import agb.fun
 import agb.botinfo
-
 import agb.rssFeedCog
 import agb.suntsu 
 import agb.myersbriggs
@@ -69,6 +68,7 @@ import agb.wikipedia
 import agb.mathematics
 import agb.dog
 import agb.cat
+import agb.hyrule
 
 # parsing command line arguments
 if __name__ == "__main__":
@@ -86,7 +86,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # Initalize logging services
-# TODO: Use different logging files for different loggers depending on if --debug is enabled or disabled
 if args.debug: # args.debug:
     logging.config.fileConfig("logging/debug.ini")
 else:
@@ -128,7 +127,7 @@ async def on_ready():
 
 @bot.event
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
-    listener.error("Error in slash command /{0} - \"{1}\"".format(interaction.command, repr(error)))
+    listener.debug("Dispatching ApplicationCommandError (/{0}) to agb.system.commandError.handleApplicationCommandError".format(interaction.command))
     # Essentially a proxy function
     return await agb.system.commandError.handleApplicationCommandError(interaction, error)
 
@@ -142,9 +141,6 @@ async def on_message(ctx: discord.Message):
 async def on_application_command(ctx: discord.context.ApplicationContext):
     listener.debug("Dispatching slash command /{0} to agb.system.applicationCommand.handleApplicationCommand".format(ctx.command))
     return await agb.system.applicationCommand.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx)
-
-
-
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)
@@ -204,7 +200,7 @@ bot.add_cog(agb.mathematics.MathematicsCog(bot))
 bot.add_cog(agb.dog.DogCog(bot))
 bot.add_cog(agb.cat.CatCog(bot))
 bot.add_cog(agb.user.UserStatsCog(bot, cnx, CAN_USE_DATABASE))
-# bot.add_cog(agb.hyrule.HyruleCog(bot))
+bot.add_cog(agb.hyrule.HyruleCog(bot))
 # don't want to put half-working code in production
 # Uncomment this line if you want to use the /google
 # command.
