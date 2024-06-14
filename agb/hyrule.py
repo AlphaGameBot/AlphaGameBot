@@ -18,7 +18,7 @@ from agb.requestHandler import handler as requesthandler
 from json import loads
 import agb.cogwheel
 import discord
-
+import random
 import agb.requestHandler
 
 
@@ -103,13 +103,11 @@ class CompodiumMaterial(CompodiumEntrySchema):
         super().__init__(apiResponse)
         self.hearts_recovered = apiResponse["hearts_recovered"]
         self.cooking_effect = apiResponse["cooking_effect"]
-        self.fuse_attack_power = apiResponse["fuse_attack_power"]
-
+        # TODO: add fuse attack power to the embed
     def getEmbed(self):
         embed = self.createBaseEmbed()
         embed.add_field(name="Hearts Recovered", value=self.hearts_recovered)
         embed.add_field(name="Cooking Effect", value=self.cooking_effect)
-        embed.add_field(name="Fuse Attack Power", value=self.fuse_attack_power)
         return embed
     
 class CompodiumCreature(CompodiumEntrySchema):
@@ -197,9 +195,9 @@ class HyruleCog(agb.cogwheel.Cogwheel):
             compendiumEntry = CompodiumMonster(apiresponse)
         elif apiresponse["category"] == "equipment":
             compendiumEntry = CompodiumEquipment(apiresponse)
-        elif apiresponse["category"] == "material":
+        elif apiresponse["category"] == "materials":
             compendiumEntry = CompodiumMaterial(apiresponse)
-        elif apiresponse["category"] == "creature":
+        elif apiresponse["category"] == "creatures":
             compendiumEntry = CompodiumCreature(apiresponse)
         elif apiresponse["category"] == "treasure":
             compendiumEntry = CompodiumTreasure(apiresponse)
@@ -208,3 +206,9 @@ class HyruleCog(agb.cogwheel.Cogwheel):
             return
     
         await interaction.response.send_message(embed=compendiumEntry.getEmbed())
+
+    @group.command(name="random", description="Get a random compendium entry.")
+    async def _random(self, interaction: discord.ApplicationContext):
+        n = random.randint(0, len(self.compodiumEntries) - 1)
+        entry = self.compodiumEntries[n]
+        await self._compendium(interaction, entry=entry["id"]) 
