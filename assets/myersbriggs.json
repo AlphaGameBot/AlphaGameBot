@@ -1,0 +1,122 @@
+[
+    {
+        "question": "I prefer to be around others usually.",
+        "yes": "I",
+        "no": "E"
+    },
+    {
+        "question": "I get more energy from my close friends than other people.",
+        "yes": "I",
+        "no": "E"
+    },
+    {
+        "question": "I always love when I'm the center of attention.",
+        "yes": "E",
+        "no": "I"
+    },
+    {
+        "question": "I get anxious and overwhelmed if I'm in a crowd of people for long enough.",
+        "yes": "I",
+        "no": "E"
+    },
+    {
+        "question": "I am quite popular in my respective social group.",
+        "yes": "E",
+        "no": "I"
+    },
+    {
+        "question": "I like to participate in sports.",
+        "yes": "S",
+        "no": "N"
+    },
+    {
+        "question": "I'm always thinking about other things when I do things.",
+        "yes": "N",
+        "no": "S"
+    },
+    {
+        "question": "I'm able to think quickly in intense situations.",
+        "yes": "S",
+        "no": "N"
+    },
+    {
+        "question": "I like to make up stories and realities in my head.",
+        "yes": "N",
+        "no": "S"
+    },
+    {
+        "question": "I can tell very well what other people are thinking just by looking at them.",
+        "yes": "N",
+        "no": "S"
+    },
+    {
+        "question": "I honor tradition.",
+        "yes": "S",
+        "no": "N"
+    },
+    {
+        "question": "I prefer to use trusted methods than innovate.",
+        "yes": "S",
+        "no": "N"
+    },
+    {
+        "question": "I like to come up with a lot of ideas",
+        "yes": "N",
+        "no": "S"
+    },
+    {
+        "question": "I am good at puzzles.",
+        "yes": "T",
+        "no": "F"
+    },
+    {
+        "question": "My emotions control me more than I control them.",
+        "yes": "F",
+        "no": "T"
+    },
+    {
+        "question": "I tend to feel insecure/depressed often.",
+        "yes": "F",
+        "no": "T"
+    },
+    {
+        "question": "I like to focus on science and the facts rather than my own beliefs.",
+        "yes": "T",
+        "no": "F"
+    },
+    {
+        "question": "I always need someone to rely on for things.",
+        "yes": "F",
+        "no": "T"
+    },
+    {
+        "question": "I like solutions that are efficient rather than ones that make people happy.",
+        "yes": "T",
+        "no": "F"
+    },
+    {
+        "question": "I like to make a lot of backup plans to make sure there's a way for everything.",
+        "yes": "J",
+        "no": "P"
+    },
+    {
+        "question": "I like to just do whatever I feel like doing instead of having a schedule.",
+        "yes": "P",
+        "no": "J"
+    },
+    {
+        "question": "I am always organized with access to everything.",
+        "yes": "J",
+        "no": "P"
+    },
+    {
+        "question": "I get distracted very easily.",
+        "yes": "P",
+        "no": "J"
+    },
+    {
+        "question": "I usually do the bare minimum needed for things and not put in extra effort.",
+        "yes": "P",
+        "no": "J"
+    }
+]
