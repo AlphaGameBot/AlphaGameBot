@@ -69,7 +69,7 @@ import agb.mathematics
 import agb.dog
 import agb.cat
 import agb.hyrule
-import agb.anneagram
+import agb.enneagram
 
 # parsing command line arguments
 if __name__ == "__main__":
@@ -202,7 +202,7 @@ bot.add_cog(agb.dog.DogCog(bot))
 bot.add_cog(agb.cat.CatCog(bot))
 bot.add_cog(agb.user.UserStatsCog(bot, cnx, CAN_USE_DATABASE))
 bot.add_cog(agb.hyrule.HyruleCog(bot))
-bot.add_cog(agb.anneagram.AnneagramCog(bot))
+bot.add_cog(agb.enneagram.EnneagramCog(bot))
 
 if __name__ == "__main__":
     logging.info("Starting the bot...")

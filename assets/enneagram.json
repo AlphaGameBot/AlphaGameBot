@@ -10,11 +10,6 @@
         
     },
     {
-        "question": "I always love when I'm the center of attention.",
-        "type": "1"
-        
-    },
-    {
         "question": "You want to be useful.",
         "type": "1"
         
@@ -28,6 +23,10 @@
         "question": "You have a set of principles that must be followed at all times.",
         "type": "1"
         
+    },
+    {
+        "question": "I try my best to please those around me.",
+        "type": "2"
     },
     {
         "question": "I always put others first.",
@@ -81,7 +80,7 @@
     },
     {
         "question": "I like to look at myself as different from other people.",
-        "type": "5"
+        "type": "4"
         
     },
     {
