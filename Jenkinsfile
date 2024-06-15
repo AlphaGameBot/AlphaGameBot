@@ -13,7 +13,7 @@ pipeline {
 	    COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
 
         // MySQL stuff
-        MYSQL_HOST = "192.168.0.6"
+        MYSQL_HOST = "hubby.internal"
         MYSQL_DATABASE = "alphagamebot"
         MYSQL_USER = "alphagamebot" 
         MYSQL_PASSWORD = credentials('alphagamebot-mysql-password')
