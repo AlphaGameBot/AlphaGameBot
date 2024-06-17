@@ -24,6 +24,7 @@ import agb.requestHandler
 import time
 import nltk
 from dhooks import Webhook
+from mysql.connector.errors import OperationalError
 logger = logging.getLogger("listener")
 
 ERROR_JOKES = [
@@ -241,19 +242,27 @@ Cheers,
 
 
 async def handleApplicationCommandError(interaction: discord.ApplicationContext, error):
+    errmsg = None
     try:
         # big booty errors like this
         if isinstance(error.original, discord.Forbidden):
-            await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
-            return
+            errmsg = "The bot does not have sufficient permissions to do that."
         if isinstance(error.original, discord.errors.NotFound):
-            await interaction.response.send_message(":x: The bot took too long to respond.  Please try again.")
-            return
+            errmsg = "The bot took too long to respond.  Please try again."
+        if isinstance(error.original, OperationalError):
+            errmsg = "Internal database error.  Please try again later."
     except AttributeError:
         # commands.xxx error
         
         if isinstance(error, commands.MissingPermissions):
-            await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
+            errmsg = ":x: Sorry, but you don't have sufficient permissions to do that!"
+            return
+    if errmsg != None:
+        try:
+            await interaction.response.send_message(":x: {0}".format(errmsg))
+            return
+        except discord.errors.InteractionResponded:
+            await interaction.followup.send(":x: {0}".format(errmsg))
             return
         
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \

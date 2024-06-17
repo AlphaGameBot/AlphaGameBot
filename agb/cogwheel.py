@@ -73,19 +73,24 @@ def initalizeNewUser(cnx, user_id):
 isDebugEnv = isDebug()
 
 def getUserSetting(cnx: mysql.connector.MySQLConnection, user_id, setting):
-    l = logging.getLogger("system")
-    c = cnx.cursor()
-    query = "SELECT {} FROM user_settings WHERE userid = %s".format(setting)
-    fq = query % str(user_id)
-    c.execute(query, [user_id])
-    result = c.fetchone()
-    if result is None:
-        initalizeNewUser(cnx, user_id)
-        return 
-    r = result[0] 
-    l.debug("SQL Query for user {0} (\"{1}\") returned {2}".format(user_id, fq, r))
-    return result[0]
-
+    if cnx == None: return
+    try:
+        l = logging.getLogger("system")
+        c = cnx.cursor()
+        query = "SELECT {} FROM user_settings WHERE userid = %s".format(setting)
+        fq = query % str(user_id)
+        c.execute(query, [user_id])
+        result = c.fetchone()
+        if result is None:
+            initalizeNewUser(cnx, user_id)
+            return 
+        r = result[0] 
+        l.debug("SQL Query for user {0} (\"{1}\") returned {2}".format(user_id, fq, r))
+        return result[0]
+    except mysql.connector.errors.OperationalError as e:
+        l.error("Cannot get user setting because the database connection is not working.  Error: '%s'" % repr(e))
+        return None
+    
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
