@@ -56,7 +56,7 @@ pipeline {
                                 --name alphagamebot \
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
                                 -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
-                                --restart=always \
+                                --restart=always --net=host \
                                 alphagamedev/alphagamebot:$AGB_VERSION"
             }
         }
