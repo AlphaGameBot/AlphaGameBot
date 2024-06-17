@@ -63,29 +63,34 @@ def initalizeNewUser(cnx, user_id):
         l.debug(f"Adding user {user_id} to the database because they are not in it already.")
         
         # User Stats
-        c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) VALUES (%s, %s, %s)", (user_id,0,0))
+        c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) SELECT %s AS userid, %s AS messages_sent, %s AS commands_ran FROM DUAL WHERE NOT EXISTS ( SELECT 1 FROM user_stats WHERE userid = %s);", (user_id,0,0))
 
         # User Settings
-        c.execute("INSERT INTO user_settings (userid) VALUES (%s)", [user_id])
+        c.execute("INSERT INTO user_settings (userid) SELECT %s AS userid WHERE NOT EXISTS (SELECT 1 FROM user_settings WHERE userid = %s)", [user_id,user_id])
 #        cnx.commit()
     c.close()
 
 isDebugEnv = isDebug()
 
 def getUserSetting(cnx: mysql.connector.MySQLConnection, user_id, setting):
-    l = logging.getLogger("system")
-    c = cnx.cursor()
-    query = "SELECT {} FROM user_settings WHERE userid = %s".format(setting)
-    fq = query % str(user_id)
-    c.execute(query, [user_id])
-    result = c.fetchone()
-    if result is None:
-        initalizeNewUser(cnx, user_id)
-        return 
-    r = result[0] 
-    l.debug("SQL Query for user {0} (\"{1}\") returned {2}".format(user_id, fq, r))
-    return result[0]
-
+    if cnx == None: return
+    try:
+        l = logging.getLogger("system")
+        c = cnx.cursor()
+        query = "SELECT {} FROM user_settings WHERE userid = %s".format(setting)
+        fq = query % str(user_id)
+        c.execute(query, [user_id])
+        result = c.fetchone()
+        if result is None:
+            initalizeNewUser(cnx, user_id)
+            return 
+        r = result[0] 
+        l.debug("SQL Query for user {0} (\"{1}\") returned {2}".format(user_id, fq, r))
+        return result[0]
+    except mysql.connector.errors.OperationalError as e:
+        l.error("Cannot get user setting because the database connection is not working.  Error: '%s'" % repr(e))
+        return None
+    
 def embed(**kwargs) -> discord.Embed:
     """Easy way to set default embed characteristics.  Rather than using discord.Embed, you use cogwheel.embed which
     returns the discord.Embed, with default settings.  These can be overwritten after initalization.
