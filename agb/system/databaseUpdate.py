@@ -25,6 +25,7 @@ def handleDatabaseUpdate(cnx, CAN_USE_DATABASE: bool):
     # Get the latest database data, and current DB writes
     # will be written to the DB.  Makes the bot less loud with
     # DB usage.
+    cnx.reconnect()
     cnx.commit()
 
     
