@@ -24,107 +24,11 @@ import agb.requestHandler
 import time
 import nltk
 from dhooks import Webhook
-from mysql.connector.errors import OperationalError
+from json import load
 logger = logging.getLogger("listener")
 
-ERROR_JOKES = [
-    "Looks like someone tripped over the cables again. Let's try that command one more time, shall we?",
-    "Whoops! Gremlins must have invaded our servers. Let's hope they're more cooperative next time.",
-    "Error 404: Command not found... because it's hiding from its responsibilities! 😄",
-    "Houston, we have a problem. But don't worry, I've sent a team of highly trained bots to investigate.",
-    "Well, that's embarrassing. Seems like our bot decided to take a coffee break instead of executing the command.",
-    "Hold on, let me check the manual... Oh wait, we don't have one! Looks like we're improvising today.",
-    "Looks like someone forgot to feed the hamsters powering our servers. No worries, we'll get them some snacks ASAP.",
-    "Unexpected error: Our bot got stage fright! It happens to the best of us.",
-    "Ah, the classic case of 'Oops, I did it again' - our bot's favorite song when it messes up.",
-    "Well, that's a new one! Our bot just pulled a disappearing act. Don't worry, we'll track it down.",
-    "Command failed due to a quantum fluctuation in the server matrix. Don't worry, we're recalibrating.",
-    "Looks like our bot is taking a quick nap. Wakey-wakey, bot! Time to get back to work.",
-    "Error: Command execution terminated unexpectedly. Our bot might need some caffeine to wake up.",
-    "Oops! Our bot went on a coffee run instead of executing the command. We'll have it back on track in no time.",
-    "Hold tight! Our bot is currently solving the mystery of the missing semicolon. It might take a moment.",
-    "Looks like our bot is experiencing a moment of existential crisis. It'll be back once it figures out the meaning of life.",
-    "Command failed due to a cosmic alignment issue. We're waiting for Mercury to get out of retrograde.",
-    "Our bot is currently attending a crash course on error handling. It'll be a pro in no time.",
-    "Error: Command execution encountered a black hole in the code. We're sending in reinforcements.",
-    "Command failed due to a disagreement between our bot and its inner workings. We're working on conflict resolution.",
-    "Oops! Our bot's GPS malfunctioned, and it took a wrong turn in the code. We'll reroute it ASAP.",
-    "Looks like our bot took a detour through the Bermuda Triangle of coding. We'll guide it back to safety.",
-    "Error: Command execution encountered a glitch in the matrix. Neo is on standby to help us out.",
-    "Our bot tried to juggle too many commands at once and dropped the ball. We're picking up the pieces.",
-    "Command failed due to a syntax error. Our bot is brushing up on its grammar skills.",
-    "Oops! Our bot tried to do a backflip but ended up crashing instead. We'll get it back on its feet.",
-    "Looks like our bot encountered a wild Pikachu in the code. We're calling in Ash Ketchum for assistance.",
-    "Error: Command execution encountered a hiccup in the space-time continuum. We're waiting for the fabric of reality to settle.",
-    "Our bot tried to do a barrel roll but ended up crashing instead. We'll roll it back to safety.",
-    "Command failed due to a coding hiccup. Our bot is holding its breath until it passes.",
-    "Oops! Our bot mistook the command for a recipe and started cooking up a storm. We'll clean up the kitchen.",
-    "Looks like our bot wandered into the wrong neighborhood in the code. We'll escort it back to safety.",
-    "Error: Command execution encountered a hiccup in the server space-time continuum. We're recalibrating.",
-    "Our bot tried to do a cartwheel but ended up crashing instead. We'll flip it back to reality.",
-    "Command failed due to a quantum entanglement issue. We're untangling the mess as we speak.",
-    "Oops! Our bot got caught in a time loop. We're breaking the cycle as we speak.",
-    "Looks like our bot encountered a glitch in the matrix. We're rebooting it to clear the system.",
-    "Error: Command execution encountered a cosmic anomaly. Our bot is investigating the anomaly.",
-    "Our bot tried to do a magic trick but ended up pulling a disappearing act. We'll bring it back.",
-    "Command failed due to a coding conundrum. Our bot is solving the puzzle as we speak.",
-    "Oops! Our bot got caught in a time warp. We're untangling the timeline as we speak.",
-    "Looks like our bot wandered into the Bermuda Triangle of coding. We're sending in a rescue team.",
-    "Error: Command execution encountered a ghost in the machine. We're calling in the Ghostbusters.",
-    "Our bot tried to do a moonwalk but ended up crashing instead. We'll smooth out the steps.",
-    "Command failed due to a cosmic alignment issue. We're waiting for the stars to align.",
-    "Oops! Our bot got tangled up in a web of code. We're unraveling the mess as we speak.",
-    "Looks like our bot stumbled into a parallel universe. We're bringing it back to reality.",
-    "Error: Command execution encountered a glitch in the matrix. We're reprogramming the code.",
-    "Our bot tried to do a somersault but ended up crashing instead. We'll cushion the landing.",
-    "Command failed due to a hiccup in the server matrix. We're recalibrating the system.",
-    "Oops! Our bot got caught in a time loop. We're breaking the cycle as we speak.",
-    "Looks like our bot took a wrong turn at the intersection of code. We'll reroute it.",
-    "Error: Command execution encountered a hiccup in the server space-time continuum. We're recalibrating.",
-    "Our bot tried to do a cartwheel but ended up crashing instead. We'll flip it back to reality.",
-    "Command failed due to a quantum entanglement issue. We're untangling the mess as we speak.",
-    "Oops! Our bot got lost in the labyrinth of code. We're sending in Theseus to rescue it.",
-    "Looks like our bot encountered a glitch in the matrix. We're rebooting it to clear the system.",
-    "Error: Command execution encountered a cosmic anomaly. Our bot is investigating the anomaly.",
-    "Our bot tried to do a magic trick but ended up pulling a disappearing act. We'll bring it back.",
-    "Command failed due to a coding conundrum. Our bot is solving the puzzle as we speak.",
-    "Oops! Our bot got caught in a time warp. We're untangling the timeline as we speak.",
-    "Looks like our bot wandered into the Bermuda Triangle of coding. We're sending in a rescue team.",
-    "Error: Command execution encountered a ghost in the machine. We're calling in the Ghostbusters.",
-    "Our bot tried to do a moonwalk but ended up crashing instead. We'll smooth out the steps.",
-    "Command failed due to a cosmic alignment issue. We're waiting for the stars to align.",
-    "Oops! Our bot got tangled up in a web of code. We're unraveling the mess as we speak.",
-    "Looks like our bot stumbled into a parallel universe. We're bringing it back to reality.",
-    "Error: Command execution encountered a glitch in the matrix. We're reprogramming the code.",
-    "Our bot tried to do a somersault but ended up crashing instead. We'll cushion the landing.",
-    "Command failed due to a hiccup in the server matrix. We're recalibrating the system.",
-    "Oops! Our bot got caught in a time loop. We're breaking the cycle as we speak.",
-    "Looks like our bot took a wrong turn at the intersection of code. We'll reroute it.",
-    "Error: Command execution encountered a hiccup in the server space-time continuum. We're recalibrating.",
-    "Our bot tried to do a cartwheel but ended up crashing instead. We'll flip it back to reality.",
-    "Command failed due to a quantum entanglement issue. We're untangling the mess as we speak.",
-    "Oops! Our bot got lost in the labyrinth of code. We're sending in Theseus to rescue it.",
-    "Looks like our bot encountered a glitch in the matrix. We're rebooting it to clear the system.",
-    "Error: Command execution encountered a cosmic anomaly. Our bot is investigating the anomaly.",
-    "Our bot tried to do a magic trick but ended up pulling a disappearing act. We'll bring it back.",
-    "Command failed due to a coding conundrum. Our bot is solving the puzzle as we speak.",
-    "Oops! Our bot got caught in a time warp. We're untangling the timeline as we speak.",
-    "Looks like our bot wandered into the Bermuda Triangle of coding. We're sending in a rescue team.",
-    "Error: Command execution encountered a ghost in the machine. We're calling in the Ghostbusters.",
-    "Our bot tried to do a moonwalk but ended up crashing instead. We'll smooth out the steps.",
-    "Command failed due to a cosmic alignment issue. We're waiting for the stars to align.",
-    "Oops! Our bot got tangled up in a web of code. We're unraveling the mess as we speak.",
-    "Looks like our bot stumbled into a parallel universe. We're bringing it back to reality.",
-    "Error: Command execution encountered a glitch in the matrix. We're reprogramming the code.",
-    "Our bot tried to do a somersault but ended up crashing instead. We'll cushion the landing.",
-    "Command failed due to a hiccup in the server matrix. We're recalibrating the system.",
-    "Oops! Our bot got caught in a time loop. We're breaking the cycle as we speak.",
-    "Looks like our bot took a wrong turn at the intersection of code. We'll reroute it.",
-    "Error: Command execution encountered a hiccup in the server space-time continuum. We're recalibrating.",
-    "Our bot tried to do a cartwheel but ended up crashing instead. We'll flip it back to reality.",
-    "Command failed due to a quantum entanglement issue. We're untangling the mess as we speak."
-]
-
+with open("assets/error_jokes.json", "r") as f:
+    ERROR_JOKES = load(f)
 
 class ErrorOptionView(discord.ui.View):
     def __init__(self, error, interaction, user: discord.User):
@@ -242,27 +146,19 @@ Cheers,
 
 
 async def handleApplicationCommandError(interaction: discord.ApplicationContext, error):
-    errmsg = None
     try:
         # big booty errors like this
         if isinstance(error.original, discord.Forbidden):
-            errmsg = "The bot does not have sufficient permissions to do that."
+            await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
+            return
         if isinstance(error.original, discord.errors.NotFound):
-            errmsg = "The bot took too long to respond.  Please try again."
-        if isinstance(error.original, OperationalError):
-            errmsg = "Internal database error.  Please try again later."
+            await interaction.response.send_message(":x: The bot took too long to respond.  Please try again.")
+            return
     except AttributeError:
         # commands.xxx error
         
         if isinstance(error, commands.MissingPermissions):
-            errmsg = ":x: Sorry, but you don't have sufficient permissions to do that!"
-            return
-    if errmsg != None:
-        try:
-            await interaction.response.send_message(":x: {0}".format(errmsg))
-            return
-        except discord.errors.InteractionResponded:
-            await interaction.followup.send(":x: {0}".format(errmsg))
+            await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
             return
         
     embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
