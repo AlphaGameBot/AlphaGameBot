@@ -22,9 +22,9 @@ from discord.ext import commands
 import agb.cogwheel
 import agb.requestHandler
 import time
-import nltk
-from dhooks import Webhook
 from json import load
+from mysql.connector.errors import OperationalError
+
 logger = logging.getLogger("listener")
 
 with open("assets/error_jokes.json", "r") as f:
@@ -40,18 +40,16 @@ class ErrorOptionView(discord.ui.View):
 
     @discord.ui.button(label="Report this Bug!", style=discord.ButtonStyle.green, emoji="📢")
     async def reportError(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
-        # Set the button to be disabled to prevent spamming. (button.disabled)
-
         # Check if the user is the same one who originally did the command!
         if interaction.user.id != self.user.id:
             # ephemeral=True adds the "Only you can see this message" message
-            await interaction.response.send_message("Only the person who originally ran the command can send a bug report :(", ephemeral=True)
+            await interaction.response.send_message(":x: Only the person who originally ran the command can send a bug report!", ephemeral=True)
             return
         
         if agb.cogwheel.isDebugEnv:
             # well this is kind of useless
             self.logger.info("Bug reporting was disabled, as this is a debug build.  If you need to test bug reporting, remove the 'DEBUG' environment variable.  Also, be sure to set the 'WEBHOOK' so you can actually send the report!")
-            await interaction.response.send_message("Naturally, you shouldn't be able to send a bug report in a debug build, as there are lots of bugs in this.", ephemeral=True)
+            await interaction.response.send_message(":x: Naturally, you shouldn't be able to send a bug report in a debug build, as there is no real benefit of doing so.  If you are the developer, please check the Python console.  Otherwise, please inform the developer of this bug!.", ephemeral=True)
             return
 
         data = self.realinteraction.interaction.to_dict()
@@ -96,7 +94,7 @@ An error was reported.  Here is some information!
         # Just use 'disabled=True' to disable it, and also change the button text to alert the user of the status.
 
         # We define a success by getting a 200 (OK) or 204 (No Content) response code.  Anything else, we would call
-        # an error.  I've only seen Discord send 204 in their webhooks, but I also include 200 because it is better.
+        # an error.  I've only seen Discord send 204 in their webhooks, but I also include 200 just in case.
         if response.status_code in [200, 204]: # Success!
             ok = True
             button.label = "Error Reported!"
@@ -151,8 +149,11 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
         if isinstance(error.original, discord.Forbidden):
             await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
             return
-        if isinstance(error.original, discord.errors.NotFound):
+        elif isinstance(error.original, discord.errors.NotFound):
             await interaction.response.send_message(":x: The bot took too long to respond.  Please try again.")
+            return
+        elif isinstance(error.original, OperationalError):
+            await interaction.response.send_message(":x: Internal Database Error.  Please try again later!")
             return
     except AttributeError:
         # commands.xxx error
