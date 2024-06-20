@@ -71,6 +71,29 @@ import agb.cat
 import agb.hyrule
 import agb.enneagram
 
+##### LIST OF COGS #####
+BOT_LOADED_COGS = [
+    agb.utility.UtilityCog,
+    agb.xkcd.xkcdCog,
+    agb.memes.MemesCog,
+    agb.jokes.jokesCog,
+    agb.jojo.JojoCog,
+    agb.rps.rpsCog,
+    agb.minecraft.MinecraftCog,
+    agb.moderation.ModerationCog,
+    agb.rssFeedCog.RSSFeedCog,
+    agb.fun.FunCog,
+    agb.botinfo.BotInformationCog,
+    agb.suntsu.SunTsuCog,
+    agb.myersbriggs.MyersBriggsTypeIndicatorCog,
+    agb.wikipedia.WikipediaCog,
+    agb.mathematics.MathematicsCog,
+    agb.dog.DogCog,
+    agb.cat.CatCog,
+    agb.user.UserStatsCog,
+    agb.hyrule.HyruleCog,
+    agb.enneagram.EnneagramCog,
+]
 # parsing command line arguments
 if __name__ == "__main__":
     d = datetime.date.today()
@@ -106,6 +129,7 @@ listener = logging.getLogger("listener")
 
 bot = commands.Bot(command_prefix="?", intents=intents)
 
+##### BOT RECURRING BOT TASKS #####
 @tasks.loop() # run forever when the function completes.
 async def rotate_status():
     logging.getLogger("listener").debug("Dispatching RotateStatus task to agb.system.rotatingStatus.rotatingStatus")
@@ -116,23 +140,27 @@ async def database_update():
     logging.getLogger("listener").debug("Dispatching DatabaseUpdate task to agb.system.databaseUpdate.handleDatabaseUpdate")
     agb.system.databaseUpdate.handleDatabaseUpdate(cnx, CAN_USE_DATABASE)
 
-@bot.event
+##### BOT EVENTS #####
+@bot.listen('on_ready', once=True)
 async def on_ready():
-    bot.auto_sync_commands = True
-    if not rotate_status.is_running():
-      rotate_status.start()
-    if not database_update.is_running():
-        database_update.start()
+    bot.auto_sync_commands = True # Sync new commands with Discord.
+    BOT_TASKS = [database_update, rotate_status]
+    for task in BOT_TASKS:
+        if not task.is_running():
+            task.start()
+
+
     logging.info("Bot is now ready!")
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
-
-@bot.event
+    logging.info(f"Application ID is \"{bot.application_id}\".")
+    logging.info(f"Syncronized {len(bot.application_commands)} commands.")
+@bot.listen('on_application_command_error')
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.debug("Dispatching ApplicationCommandError (/{0}) to agb.system.commandError.handleApplicationCommandError".format(interaction.command))
     # Essentially a proxy function
     return await agb.system.commandError.handleApplicationCommandError(interaction, error)
 
-@bot.event
+@bot.listen('on_message')
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
@@ -183,26 +211,31 @@ else:
         database=MYSQL_DATABASE
     )
 # set command cogs
-bot.add_cog(agb.utility.UtilityCog(bot))
-bot.add_cog(agb.xkcd.xkcdCog(bot))
-bot.add_cog(agb.memes.MemesCog(bot))
-bot.add_cog(agb.jokes.jokesCog(bot))
-bot.add_cog(agb.jojo.JojoCog(bot))
-bot.add_cog(agb.rps.rpsCog(bot))
-bot.add_cog(agb.minecraft.MinecraftCog(bot))
-bot.add_cog(agb.moderation.ModerationCog(bot))
-bot.add_cog(agb.rssFeedCog.RSSFeedCog(bot))
-bot.add_cog(agb.fun.FunCog(bot))
-bot.add_cog(agb.botinfo.BotInformationCog(bot))
-bot.add_cog(agb.suntsu.SunTsuCog(bot))
-bot.add_cog(agb.myersbriggs.MyersBriggsTypeIndicatorCog(bot))
-bot.add_cog(agb.wikipedia.WikipediaCog(bot))
-bot.add_cog(agb.mathematics.MathematicsCog(bot))
-bot.add_cog(agb.dog.DogCog(bot))
-bot.add_cog(agb.cat.CatCog(bot))
-bot.add_cog(agb.user.UserStatsCog(bot, cnx, CAN_USE_DATABASE))
-bot.add_cog(agb.hyrule.HyruleCog(bot))
-bot.add_cog(agb.enneagram.EnneagramCog(bot))
+mysql_cogs = 0
+normal_cogs = 0
+invalid_cogs = 0
+for cog in BOT_LOADED_COGS:
+    # this is first b/c MySQLEnabledCogwheel inherits Cogwheel.
+    logging.debug(f"Loading cog \"{cog.__name__}\"...")
+    if issubclass(cog, agb.cogwheel.MySQLEnabledCogwheel):
+        mysql_cogs += 1
+
+        bot.add_cog(cog(bot, cnx, CAN_USE_DATABASE))
+    elif issubclass(cog, agb.cogwheel.Cogwheel):
+        normal_cogs += 1
+        bot.add_cog(cog(bot))
+    else:
+        invalid_cogs += 1
+        logging.warning(f"Cog \"{cog.__name__}\" is of invalid type {cog}!  Skipping it...")
+
+logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, with {3} invalid cogs.".format(
+    mysql_cogs + normal_cogs + invalid_cogs,
+    mysql_cogs,
+    normal_cogs,
+    invalid_cogs
+))
+if invalid_cogs > 0:
+    logging.warning(f"{invalid_cogs} failed to initalize: They're not decendants of Cogwheel!")
 
 if __name__ == "__main__":
     logging.info("Starting the bot...")
@@ -228,8 +261,6 @@ if __name__ == "__main__":
         logging.error("No token was given via the environment variable 'TOKEN', nor was one given via the commandline using '-t' or '--token'!")
         logging.error("Use '-e' or '--environment' to automatically load your .env file.")
         sys.exit(1)
-
-
 
     if agb.cogwheel.isDebug(argp=args) == True:
         logging.warning("Debug mode is ENABLED.  This is a development build.  Do not use this in a production environment.")

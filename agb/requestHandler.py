@@ -21,23 +21,12 @@ import json
 import agb.cogwheel
 import urllib.parse
 
-global responses
-
-
 class RequestHandler:
     def __init__(self):
-        self.RESPONSES = {200: 'OK', 201: 'Created', 202: 'Accepted', 203: 'Non-Authoritative Information',
-             204: 'No Content', 205: 'Reset Content', 206: 'Partial Content', 400: 'Bad Request', 401: 'Unauthorized',
-             402: 'Payment Required', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed',
-             406: 'Not Acceptable', 407: 'Proxy Authentication Required', 408: 'Request Timeout', 409: 'Conflict',
-             410: 'Gone', 411: 'Length Required', 412: 'Precondition Failed', 413: 'Request Entity Too Large',
-             414: 'Request-URI Too Long', 415: 'Unsupported Media Type', 416: 'Requested Range Not Satisfiable',
-             417: 'Expectation Failed', 100: 'Continue', 101: 'Switching Protocols', 300: 'Multiple Choices',
-             301: 'Moved Permanently', 302: 'Found', 303: 'See Other', 304: 'Not Modified', 305: 'Use Proxy',
-             306: '(Unused)', 307: 'Temporary Redirect', 500: 'Internal Server Error', 501: 'Not Implemented',
-             502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout', 505: 'HTTP Version Not Supported'}
-
         self.logger = logging.getLogger("requesthandler")
+        with open("assets/http_codes.json", "r") as f:
+            self.RESPONSES = json.load(f)
+            self.logger.debug("Loaded %s HTTP Responses!" % len(self.RESPONSES.keys()))
         self.session = requests_cache.CachedSession("request-handler", cache_control=True, expire_after=43200) # 43200 seconds = 12 hours
         self.logger.info("RequestHandler has been initalized!")
         with open("alphagamebot.json", "r") as f:
@@ -52,6 +41,7 @@ class RequestHandler:
                 )),  # this can be changed in the config (alphagamebot.json)
             "Accept": "application/json,text/plain,application/xml",
             "x-alphagamebot-version": self.BOT_INFORMATION["VERSION"],
+            "x-python-requests-version": requests.__version__,
             "Upgrade-Insecure-Requests": "1",
             "Accept-Encoding": "gzip",
             "Connection": "close" # we dont need a constant connection :)

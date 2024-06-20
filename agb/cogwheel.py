@@ -59,11 +59,11 @@ def initalizeNewUser(cnx, user_id):
     c.execute("SELECT * FROM user_settings WHERE userid = %s" % str(user_id))
     result = c.fetchone()
     if result is None:
-
+        l.info("Adding user {0} to the database because they are not in it already.".format(user_id))
         l.debug(f"Adding user {user_id} to the database because they are not in it already.")
         
         # User Stats
-        c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) SELECT %s AS userid, %s AS messages_sent, %s AS commands_ran FROM DUAL WHERE NOT EXISTS ( SELECT 1 FROM user_stats WHERE userid = %s);", (user_id,0,0))
+        c.execute("INSERT INTO user_stats (userid, messages_sent, commands_ran) SELECT %s AS userid, %s AS messages_sent, %s AS commands_ran FROM DUAL WHERE NOT EXISTS ( SELECT 1 FROM user_stats WHERE userid = %s);", (user_id,0,0,user_id))
 
         # User Settings
         c.execute("INSERT INTO user_settings (userid) SELECT %s AS userid WHERE NOT EXISTS (SELECT 1 FROM user_settings WHERE userid = %s)", [user_id,user_id])
