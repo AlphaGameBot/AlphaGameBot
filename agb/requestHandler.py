@@ -55,7 +55,7 @@ class RequestHandler:
             r = requests.get(url, headers=self.REQUEST_HEADERS)  # some sites / APIs don't work well with caching,
             # especially /meme.  It always returns same because of the cache.
         self.logger.info("Web request finished.  StatusCode={0} ({1}), time={2}ms, from_cache:{3}".format(r.status_code,
-                                                                                          self.RESPONSES[r.status_code],
+                                                                                          self.RESPONSES[str(r.status_code)],
                                                                                           round(r.elapsed.total_seconds() * 100),
                                                                                                           ("yes" if r.from_cache else "no") if attemptCache == True else "disabled"))
         return r
@@ -66,7 +66,7 @@ class RequestHandler:
         )))
         r = requests.post(url, data, headers=self.REQUEST_HEADERS)
         self.logger.info("POST request finished.  StatusCode={0} ({1}), time={2}ms".format(
-            r.status_code, self.RESPONSES[r.status_code], round(r.elapsed.total_seconds() * 100)
+            r.status_code, self.RESPONSES[str(r.status_code)], round(r.elapsed.total_seconds() * 100)
         ))
         return r
 
