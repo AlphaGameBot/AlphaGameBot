@@ -10,7 +10,7 @@
   "STATUS": "idle",
   "ROTATING_STATUS": [
     {
-      "type": "STREAMING",
+      "type": "PLAYING",
       "status": "With the Discord API!"
     },
     {
@@ -62,7 +62,7 @@
       "status": "to my {commands} commands"
     }
   ],
-  "ROTATING_STATUS_INTERVAL": 5,
+  "ROTATING_STATUS_INTERVAL": 30,
   "API_ENDPOINTS": {
     "webui": {
       "USER_SETTINGS": "https://alphagamebot.alphagame.dev/user/settings"
