@@ -23,7 +23,7 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
             values = [ctx.author.id]
             cursor.execute(query, values)
             cursor.close()
-        
+    cnx.commit()
     #   As this is a public Discord bot, I can see multiple people getting
     #   scared of this function, possibly processing their messages.  I want
     #   to point out the order of the if statements that follow.  Nothing is
