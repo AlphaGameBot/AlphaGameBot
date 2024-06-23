@@ -21,7 +21,7 @@ import agb.cogwheel
 import os
 import logging
 
-async def rotatingStatus(bot: commands.Bot):
+async def rotatingStatus(bot: commands.Bot, cnx, CAN_USE_DATABASE: bool):
     logger = logging.getLogger("system")
     botinfo = agb.cogwheel.getBotInformation()
     
@@ -30,13 +30,23 @@ async def rotatingStatus(bot: commands.Bot):
     #   "type": "PLAYING", (can be PLAYING, LISTENING or WATCHING)
     #   "status": "a super fun game!",
     #}
+    if CAN_USE_DATABASE:
+        c = cnx.cursor()
+        c.execute("SELECT COUNT(*) FROM user_settings")
+        usercount = c.fetchone()[0]
+        c.close()
+    else:
+        usercount = 0
+        for user in bot.get_all_members():
+            if user.bot:
+                continue
+            usercount += 1
+    
+    logger.debug(f"Got user count of {usercount}.")
 
+    
     for status in botinfo["ROTATING_STATUS"]:
         # get user count
-        usercount = 0
-        for user in bot.users:
-            if not user.bot:
-                usercount += 1
         
         activity = discord.ActivityType.unknown
         if status["type"] == "PLAYING":

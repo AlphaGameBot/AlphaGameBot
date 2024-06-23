@@ -133,9 +133,9 @@ bot = commands.Bot(command_prefix="?", intents=intents)
 @tasks.loop() # run forever when the function completes.
 async def rotate_status():
     logging.getLogger("listener").debug("Dispatching RotateStatus task to agb.system.rotatingStatus.rotatingStatus")
-    await agb.system.rotatingStatus.rotatingStatus(bot)
+    await agb.system.rotatingStatus.rotatingStatus(bot, cnx, CAN_USE_DATABASE)
 
-@tasks.loop(minutes=1)
+@tasks.loop(seconds=15)
 async def database_update():
     logging.getLogger("listener").debug("Dispatching DatabaseUpdate task to agb.system.databaseUpdate.handleDatabaseUpdate")
     agb.system.databaseUpdate.handleDatabaseUpdate(cnx, CAN_USE_DATABASE)
@@ -170,6 +170,10 @@ async def on_message(ctx: discord.Message):
 async def on_application_command(ctx: discord.context.ApplicationContext):
     listener.debug("Dispatching slash command /{0} to agb.system.applicationCommand.handleApplicationCommand".format(ctx.command))
     return await agb.system.applicationCommand.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx)
+
+@bot.listen()
+async def on_application_command_completion(interaction):
+    cnx.commit()
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)
