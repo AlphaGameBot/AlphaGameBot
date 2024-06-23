@@ -104,6 +104,10 @@
     "hyrule": {
       "GET_ALL": "https://botw-compendium.herokuapp.com/api/v3/compendium/all",
       "GET_ONE": "https://botw-compendium.herokuapp.com/api/v3/compendium/entry/{}"
+    },
+    "trivia": {
+      "API_ENDPOINT": "https://opentdb.com/api.php",
+      "GET_CATEGORIES": "https://opentdb.com/api_category.php"
     }
   },
   "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"

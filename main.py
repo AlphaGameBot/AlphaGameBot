@@ -70,6 +70,7 @@ import agb.dog
 import agb.cat
 import agb.hyrule
 import agb.enneagram
+import agb.trivia
 
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
@@ -93,6 +94,7 @@ BOT_LOADED_COGS = [
     agb.user.UserStatsCog,
     agb.hyrule.HyruleCog,
     agb.enneagram.EnneagramCog,
+    agb.trivia.TriviaCog
 ]
 # parsing command line arguments
 if __name__ == "__main__":

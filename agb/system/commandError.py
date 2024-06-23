@@ -146,6 +146,7 @@ Cheers,
 async def handleApplicationCommandError(interaction: discord.ApplicationContext, error):
     try:
         # big booty errors like this
+        trueerror = error.original
         if isinstance(error.original, discord.Forbidden):
             await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
             return
@@ -157,7 +158,7 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             return
     except AttributeError:
         # commands.xxx error
-        
+        trueerror = error
         if isinstance(error, commands.MissingPermissions):
             await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
             return
@@ -168,7 +169,7 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
     if not agb.cogwheel.isDebugEnv:
         embed.add_field(name="Joke", value=random.choice(ERROR_JOKES))
     if agb.cogwheel.isDebugEnv:
-        embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
+        embed.add_field(name="Error message", value="`{0}`".format(repr(trueerror)))
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
     try:
         await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
