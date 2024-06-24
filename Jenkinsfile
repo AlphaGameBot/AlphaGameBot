@@ -57,7 +57,7 @@ pipeline {
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
                                 -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
                                 --restart=always --net=host \
-                                alphagamedev/alphagamebot:$AGB_VERSION"
+                                alphagamedev/alphagamebot:$AGB_VERSION python /docker/main.py -r" // add alphagamebot flags
             }
         }
     } // stages

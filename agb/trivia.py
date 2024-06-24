@@ -21,7 +21,8 @@ import discord
 import json
 
 class TriviaOptionDisplayView(discord.ui.View):
-
+    pass
+    
 class TriviaCog(agb.cogwheel.Cogwheel):
     def __init__(self, bot):
         super().__init__(bot)
