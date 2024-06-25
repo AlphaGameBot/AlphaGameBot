@@ -19,7 +19,7 @@ import discord
 import os
 from discord.ext import commands
 
-class BotInformationCog(agb.cogwheel.Cogwheel):
+class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
 
     def getCommitMessage(self):
         """Get the most recent commit message
@@ -38,14 +38,31 @@ class BotInformationCog(agb.cogwheel.Cogwheel):
         _d = agb.cogwheel.getBotInformation()
         view = discord.ui.View()
         linkStyle = discord.ButtonStyle.link
-        addTheBot = discord.ui.Button(style=linkStyle, label="Add the Bot!",
-                                      url="https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=8&scope=bot")
+        addTheBot = discord.ui.Button(
+            style=discord.ButtonStyle.green, 
+            label="Add the Bot!",                          
+            url=_d["BOT_INFORMATION"]["INVITE_URL"])
         checkItOut = discord.ui.Button(style=linkStyle, label="Learn More!", url="https://alphagame.dev/alphagamebot/")
         githubBtn = discord.ui.Button(style=linkStyle, label="GitHub",
                                       url="https://github.com/AlphaGameDeveloper/AlphaGameBot")
         view.add_item(item=addTheBot)
         view.add_item(item=checkItOut)
         view.add_item(item=githubBtn)
+
+        # get users
+        if self.canUseDatabase:
+            c = self.cnx.cursor()
+            c.execute("SELECT COUNT(*) FROM user_settings")
+            usercount = c.fetchone()[0]
+            c.close()
+        else: # use the bot's number (sucks but oh well)
+            usercount = 0
+            for user in self.bot.get_all_members():
+                if user.bot:
+                    continue
+                usercount += 1
+        
+        self.logger.debug(f"Got user count of {usercount}.")
 
         build = os.getenv("BUILD_NUMBER")
         if build != None:
@@ -57,7 +74,8 @@ class BotInformationCog(agb.cogwheel.Cogwheel):
                               colour=discord.Colour.dark_blue())
         embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
         embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())
-
+        embed.add_field(name="User Count", value=usercount)
+        embed.add_field(name="Server Count", value=len(self.bot.guilds))
         embed.add_field(name="Latest Commit Message", value=self.getCommitMessage())
 
         await interaction.response.send_message(embed=embed, view=view)

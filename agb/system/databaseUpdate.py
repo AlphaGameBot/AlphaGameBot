@@ -17,7 +17,7 @@
 import mysql.connector
 import logging
 
-def handleDatabaseUpdate(cnx, CAN_USE_DATABASE: bool):
+def handleDatabaseUpdate(cnx: mysql.connector.MySQLConnection, CAN_USE_DATABASE: bool):
     l = logging.getLogger("system")
     if not CAN_USE_DATABASE:
         l.debug("handleDatabaseUpdate: Database is not enabled... Skipping the task.")
@@ -25,7 +25,18 @@ def handleDatabaseUpdate(cnx, CAN_USE_DATABASE: bool):
     # Get the latest database data, and current DB writes
     # will be written to the DB.  Makes the bot less loud with
     # DB usage.
-    cnx.reconnect()
+
+    # NOTE - 6.24.2024
+    # ================
+
+    # This is *not* a good way to handle database updates, or rather, database
+    # writes.  The reason is that this function is called periodically is that
+    # we can GET the latest data from the database.  This isn't intended to do writes.
+
+    # please make a pr if you know a way to improve it.
+    if cnx.is_connected() == False:
+        l.debug("handleDatabaseUpdate: Connection is not open.  Reconnecting.")
+        cnx.reconnect()
     cnx.commit()
 
     

@@ -20,6 +20,7 @@ py-cord
 requests~=2.31.0
 requests-cache
 nltk~=3.8.1
+pynacl
 
 # MySQL connection
 mysql-connector-python

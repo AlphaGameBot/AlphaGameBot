@@ -1,8 +1,10 @@
 {
   "BOT_INFORMATION": {
-    "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
+    "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!",
+    "INVITE_URL": "https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=1494850219126&integration_type=0&scope=bot%20applications.commands"
+
   },
-  "VERSION": "3.4.3",
+  "VERSION": "3.5",
   "SAY_EXCEPTIONS": [
     1180023544042770533,
     1179187852601479230
@@ -104,7 +106,11 @@
     "hyrule": {
       "GET_ALL": "https://botw-compendium.herokuapp.com/api/v3/compendium/all",
       "GET_ONE": "https://botw-compendium.herokuapp.com/api/v3/compendium/entry/{}"
+    },
+    "trivia": {
+      "API_ENDPOINT": "https://opentdb.com/api.php",
+      "GET_CATEGORIES": "https://opentdb.com/api_category.php"
     }
   },
-  "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
+  "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot/spamming +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
 }

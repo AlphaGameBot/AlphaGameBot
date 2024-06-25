@@ -70,6 +70,7 @@ import agb.dog
 import agb.cat
 import agb.hyrule
 import agb.enneagram
+import agb.trivia
 
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
@@ -93,6 +94,7 @@ BOT_LOADED_COGS = [
     agb.user.UserStatsCog,
     agb.hyrule.HyruleCog,
     agb.enneagram.EnneagramCog,
+    agb.trivia.TriviaCog
 ]
 # parsing command line arguments
 if __name__ == "__main__":
@@ -107,13 +109,19 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--token", help="Set the bot's token via the command line. (Not recommended)")
     parser.add_argument("-n", "--nodatabase", help="Force database to be disabled regardless of environment", action="store_true")
     parser.add_argument("-r", "--requiredatabase", help="Force database to be enabled.  This will error if the database is not configured correctly.", action="store_true")
+    parser.add_argument("-v", "--version", help="Print the version of the bot and exit.", action="store_true")
+    parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
     args = parser.parse_args()
-
 # Initalize logging services
 if args.debug: # args.debug:
     logging.config.fileConfig("logging/debug.ini")
 else:
     logging.config.fileConfig("logging/production.ini")
+
+if args.version:
+    print(f"AlphaGameBot Discord Bot Version {agb.cogwheel.getBotInformation()['VERSION']}")
+    print(f"Copyright (C) {d.year}  Damien Boisvert (AlphaGameDeveloper); See LICENSE for licensing information.")
+    sys.exit(0)
 
 intents = discord.Intents.all()
 
@@ -153,7 +161,7 @@ async def on_ready():
     logging.info("Bot is now ready!")
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
     logging.info(f"Application ID is \"{bot.application_id}\".")
-    logging.info(f"Syncronized {len(bot.application_commands)} commands.")
+    logging.info(f"Syncronized {len(bot.application_commands)} application (slash) commands.")
 @bot.listen('on_application_command_error')
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.debug("Dispatching ApplicationCommandError (/{0}) to agb.system.commandError.handleApplicationCommandError".format(interaction.command))
@@ -164,12 +172,12 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
-    return await agb.system.message.handleOnMessage(ctx, CAN_USE_DATABASE, cnx)
+    return await agb.system.message.handleOnMessage(ctx, CAN_USE_DATABASE, cnx, args.notracking)
 
 @bot.listen()
 async def on_application_command(ctx: discord.context.ApplicationContext):
     listener.debug("Dispatching slash command /{0} to agb.system.applicationCommand.handleApplicationCommand".format(ctx.command))
-    return await agb.system.applicationCommand.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx)
+    return await agb.system.applicationCommand.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx, args.notracking)
 
 @bot.listen()
 async def on_application_command_completion(interaction):
@@ -207,6 +215,7 @@ elif args.nodatabase:
     CAN_USE_DATABASE = False
     cnx = None
 else:
+    logging.info(f"Connecting to MySQL server at \"{MYSQL_SERVER}\" using database \"{MYSQL_DATABASE}\" as DB user \"{MYSQL_USER}\".  MySQL/Connector version is {mysql.connector.__version__}.")
     CAN_USE_DATABASE = True
     cnx = mysql.connector.connect(
         user=MYSQL_USER,
@@ -217,6 +226,7 @@ else:
 # set command cogs
 mysql_cogs = 0
 normal_cogs = 0
+base_cogs = 0
 invalid_cogs = 0
 for cog in BOT_LOADED_COGS:
     # this is first b/c MySQLEnabledCogwheel inherits Cogwheel.
@@ -228,14 +238,18 @@ for cog in BOT_LOADED_COGS:
     elif issubclass(cog, agb.cogwheel.Cogwheel):
         normal_cogs += 1
         bot.add_cog(cog(bot))
+    elif issubclass(cog, commands.Cog):
+        base_cogs += 1
+        bot.add_cog(cog(bot))
     else:
         invalid_cogs += 1
         logging.warning(f"Cog \"{cog.__name__}\" is of invalid type {cog}!  Skipping it...")
 
-logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, with {3} invalid cogs.".format(
+logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, Commands.Cog: {3}, with {4} invalid cogs.".format(
     mysql_cogs + normal_cogs + invalid_cogs,
     mysql_cogs,
     normal_cogs,
+    base_cogs,
     invalid_cogs
 ))
 if invalid_cogs > 0:

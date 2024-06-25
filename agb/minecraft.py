@@ -41,42 +41,32 @@ class MinecraftCog(agb.cogwheel.Cogwheel):
         try:
             status = server.status()
         except gaierror as e:  # socket.gaierror: [Errno -2] Name or service not known
-            embed = agb.cogwheel.embed(title="Error!",
-                                       description="The server data cannot be found!  Check the domain name and/or the port.\n\nThe reason for this is:\n`{0}`".format(
-                                           repr(e)))
-            embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft-error.png")
-            await interaction.followup.send(embed=embed)
+            interaction.followup.send(":x: The server data cannot be found!  Check the domain name and/or the port.")
             return 1
         except TimeoutError as e:
-            embed = agb.cogwheel.embed(title="Error!",
-                                       description="The server timed out!\n`{0}`".format(repr(e)))
-            embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft-error.png")
-            await interaction.followup.send(embed=embed)
-            return e
-
+            await interaction.followup.send(":x: Timed Out.  The server took too long to respond.")
+            return
+        #except ConnectionRefusedError as e:
+        #    await interaction.followup.send(":x: The server refused the connection.  Is the server running?")
+        #    return
         enableQuery = False
+        query = None
         try:
             query = server.query()
             enableQuery = True
         except TimeoutError:
             pass
 
-        online = status.players.online
-        maximum = status.players.max
-        latency = status.latency
-        version = status.version.name
-        protocol = status.version.protocol
-
         embed = agb.cogwheel.embed(title="Server info for {}".format(addr),
-                                   description="Server information is limited as server disabled advanced query." if enableQuery == False else "")
+                       description="Server information is limited as server disabled advanced query." if enableQuery == False else "")
 
         embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft.png")
-        embed.add_field(name="Players Online", value="{0}/{1}".format(online, maximum))
-        embed.add_field(name="Latency", value=round(latency/10, 2))
-        embed.add_field(name="Version", value="{0} (Protocol {1})".format(version, protocol))
+        embed.add_field(name="Players Online", value="{}/{}".format(status.players.online, status.players.max))
+        embed.add_field(name="Latency", value=round(status.latency/10, 2))
+        embed.add_field(name="Version", value="{} (Protocol {})".format(status.version.name, status.version.protocol))
         embed.add_field(name="Secure Chat", value=str(status.enforces_secure_chat))
         if enableQuery:
-            embed.add_field(name="Software", value="{0} {1}".format(query.software.brand, query.software.version))
+            embed.add_field(name="Software", value="{} {}".format(query.software.brand, query.software.version))
 
         await interaction.followup.send(embed=embed)
 
@@ -111,15 +101,8 @@ class MinecraftCog(agb.cogwheel.Cogwheel):
                                    description=status.description)
         embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft.png")
 
-        online = status.players.online
-        maximum = status.players.max
-        version = status.version.name
-        protocol = status.version.protocol
-        mapname = status.map_name
-        gamemode = status.gamemode
-        # add info
-        embed.add_field(name="Players online", value="{0}/{1}".format(online, maximum))
-        embed.add_field(name="Version", value="{0} (Protocol {1})".format(version, protocol))
-        embed.add_field(name="Map Name", value=mapname)
-        embed.add_field(name="Gamemode", value=gamemode)
+        embed.add_field(name="Players online", value="{0}/{1}".format(status.players.online, status.players.max))
+        embed.add_field(name="Version", value="{0} (Protocol {1})".format(status.version.name, status.version.protocol))
+        embed.add_field(name="Map Name", value=status.map_name)
+        embed.add_field(name="Gamemode", value=status.gamemode)
 
