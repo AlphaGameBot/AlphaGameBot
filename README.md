@@ -9,8 +9,7 @@
   <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/AlphaGameDeveloper/AlphaGameBot">
   <img alt="GitHub repo file count (file type)" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file">
   <img alt="GitHub repo Python files" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file&logo=python&label=Python%20files&extension=py">
-  <img alt="Build Status" src="https://jenkins.alphagame.dev/buildStatus/icon?job=AlphaGameBot+Discord+Bot%2Fmaster?style=plastic" />
-</p>
+  <img src='https://jenkins.alphagame.dev/buildStatus/icon?job=AlphaGameBot+Discord+Bot%2Fmaster'></p>
 <p align="center">Made by a <b>ENTP</b> with love ❤️</p>
 
 Check out AlphaGameBot's [website](https://alphagame.dev/alphagamebot/)!
@@ -30,3 +29,39 @@ I'm so glad you asked!  AlphaGameBot is available for *anyone* to add to their s
 
 ## Can I contribute?
 Of course!  Any contribution, big or small, is very much welcome!  Check out my requirements for commits [here](https://alphagame.dev/alphagamebot/faq#can-i-contribute-to-alphagamebot).
+
+## Run the bot
+### Command Usage
+```
+usage: AlphaGameBot Discord Bot [-h] [-d] [-e ENVIRONMENT] [-t TOKEN] [-n] [-r] [-v] [-q]
+
+A Discord Bot that's free and (hopefully) doesn't suck.
+
+options:
+  -h, --help            show this help message and exit
+  -d, --debug           Enable debug mode for the bot.
+  -e ENVIRONMENT, --environment ENVIRONMENT
+                        Automatically load a environment file for the bot.
+  -t TOKEN, --token TOKEN
+                        Set the bot's token via the command line. (Not recommended)
+  -n, --nodatabase      Force database to be disabled regardless of environment
+  -r, --requiredatabase
+                        Force database to be enabled. This will error if the database is not configured correctly.
+  -v, --version         Print the version of the bot and exit.
+  -q, --notracking      Disable tracking of user data
+
+(c) Damien Boisvert (AlphaGameDeveloper) 2024. Licensed under GNU GPL v3
+```
+**Note: Passing in your bot token via `-t` or `--token` is supported, but *strongly* discouraged.**
+
+If you do not have a database for the bot, that's fine.  Just use `-n` or `--nodatabase` to tell the bot that.
+
+### Example configurations
+`python main.py -re .env` - Run the bot WITH database enabled, and also load environment variables from a file called `.env`.
+
+`python main.py -drqe .env` - Run bot in debug mode, but do not track message counts (for **/user stats**)
+
+### Docker :)
+Prebuilt images are available on [Docker Hub](https://hub.docker.com/r/alphagamedev/alphagamebot).  More information can be found there.
+
+**QuickStart**: `docker run -d --restart unless-stopped --name some-alphagamebot -e TOKEN="..." alphagamedev/alphagamebot:latest /docker/main.py -n`

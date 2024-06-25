@@ -14,12 +14,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
+import random
 import agb.cogwheel
 import agb.requestHandler
 from discord.ext import commands
 import discord
 import json
 import logging
+import html
 
 class TriviaOptionDisplayView(discord.ui.View):
     def __init__(self, options: list[str], correctValueIndex: int, intendedUser: discord.User):
@@ -64,7 +66,7 @@ class TriviaOptionDisplayView(discord.ui.View):
             child.disabled = True
         self.stop()    
 
-        
+
 class TriviaCog(agb.cogwheel.Cogwheel):
     def __init__(self, bot):
         super().__init__(bot)
@@ -109,15 +111,28 @@ class TriviaCog(agb.cogwheel.Cogwheel):
         u = agb.requestHandler.formatQueryString(agb.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
                                                  api_args)
 
-        with agb.requestHandler.handler.get(u) as r:
+        with agb.requestHandler.handler.get(u, attemptCache=False) as r:
             data = json.loads(r.text)
-            if len(data["results"]) == 0:
+            if len(data["response_code"]) == 1:
                 await interaction.followup.send("No results found.")
                 return
-            question = data["results"][0]["question"]
-            answers = data["results"][0]["incorrect_answers"]
-            answers.append(data["results"][0]["correct_answer"])
-            answers = sorted(answers)
-            embed = agb.cogwheel.embed(title="Trivia", description=question)
-            v = TriviaOptionDisplayView(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
-            await interaction.followup.send(embed=embed, view=v)
+            elif data["response_code"] == 2:
+                await interaction.followup.send("Invalid parameter.")
+                return
+            elif data["response_code"] == 3:
+                await interaction.followup.send("Token not found.")
+                return
+            elif data["response_code"] == 4:
+                await interaction.followup.send("Token empty.")
+                return
+            elif data["response_code"] == 5:
+                await interaction.followup.send(":x: Hold it!  I'm currently being rate limited.  Give me a sec...")
+                return
+            
+        question = data["results"][0]["question"]
+        answers = data["results"][0]["incorrect_answers"]
+        answers.append(data["results"][0]["correct_answer"])
+        answers = random.shuffle(answers)
+        embed = agb.cogwheel.embed(title="Trivia", description=html.unescape(question))
+        answerView = TriviaOptionDisplayView(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
+        await interaction.followup.send(embed=embed, view=answerView)
