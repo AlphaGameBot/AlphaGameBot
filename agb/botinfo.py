@@ -38,8 +38,10 @@ class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
         _d = agb.cogwheel.getBotInformation()
         view = discord.ui.View()
         linkStyle = discord.ButtonStyle.link
-        addTheBot = discord.ui.Button(style=linkStyle, label="Add the Bot!",
-                                      url=_d["BOT_INFORMATION"]["INVITE_URL"])
+        addTheBot = discord.ui.Button(
+            style=discord.ButtonStyle.green, 
+            label="Add the Bot!",                          
+            url=_d["BOT_INFORMATION"]["INVITE_URL"])
         checkItOut = discord.ui.Button(style=linkStyle, label="Learn More!", url="https://alphagame.dev/alphagamebot/")
         githubBtn = discord.ui.Button(style=linkStyle, label="GitHub",
                                       url="https://github.com/AlphaGameDeveloper/AlphaGameBot")

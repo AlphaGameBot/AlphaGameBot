@@ -4,7 +4,7 @@ import discord
 import logging
 import os
 
-async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection):
+async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection, tracking):
     
     bot_information = agb.cogwheel.getBotInformation()
     logger = logging.getLogger("system")
@@ -12,7 +12,7 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
         logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
         return
     # check for message count consent
-    if CAN_USE_DATABASE:
+    if CAN_USE_DATABASE and tracking:
         if agb.cogwheel.getUserSetting(cnx, ctx.author.id, "message_tracking_consent") == 0:
             logger.debug("Not tracking message {} because user {} has not consented to message tracking.".format(ctx.id, ctx.author.id))
             return
@@ -23,7 +23,9 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
             values = [ctx.author.id]
             cursor.execute(query, values)
             cursor.close()
-    cnx.commit()
+        cnx.commit()
+    else:
+        logging.debug("handleOnMessage: Not tracking message count because CAN_USE_DATABASE is False or tracking is False.")
     #   As this is a public Discord bot, I can see multiple people getting
     #   scared of this function, possibly processing their messages.  I want
     #   to point out the order of the if statements that follow.  Nothing is

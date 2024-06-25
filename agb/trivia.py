@@ -19,10 +19,52 @@ import agb.requestHandler
 from discord.ext import commands
 import discord
 import json
+import logging
 
 class TriviaOptionDisplayView(discord.ui.View):
-    pass
-    
+    def __init__(self, options: list[str], correctValueIndex: int, intendedUser: discord.User):
+        super().__init__()
+        self.options = options
+        self.correctValueIndex = correctValueIndex
+        self._option_button_1.label = options[0]
+        self._option_button_2.label = options[1]
+        self._option_button_3.label = options[2]
+        self._option_button_4.label = options[3]
+        self.intendedUser = intendedUser
+
+    async def handle_response(self, interaction, button_option_index: int):
+        if interaction.user.id != self.intendedUser.id:
+            await interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for `{self.intendedUser.name}`!", ephemeral=True)
+            return
+        if button_option_index - 1 == self.correctValueIndex:
+            await interaction.response.send_message(":white_check_mark: Correct!")
+        else:
+            await interaction.response.send_message(f":x: Incorrect!  The correct answer was `{self.options[self.correctValueIndex]}`")
+        self.disable_all_items()
+        await interaction.message.edit(view=self)
+
+    @discord.ui.button(label="Placeholder Value 1", style=discord.ButtonStyle.primary)
+    async def _option_button_1(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
+        return await self.handle_response(interaction, 1)
+
+    @discord.ui.button(label="Placeholder Value 2", style=discord.ButtonStyle.primary)
+    async def _option_button_2(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
+        return await self.handle_response(interaction, 2)
+
+    @discord.ui.button(label="Placeholder Value 3", style=discord.ButtonStyle.primary)
+    async def _option_button_3(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
+        return await self.handle_response(interaction, 3)
+
+    @discord.ui.button(label="Placeholder Value 4", style=discord.ButtonStyle.primary)
+    async def _option_button_4(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
+        return await self.handle_response(interaction, 4)
+
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+        self.stop()    
+
+        
 class TriviaCog(agb.cogwheel.Cogwheel):
     def __init__(self, bot):
         super().__init__(bot)
@@ -67,7 +109,6 @@ class TriviaCog(agb.cogwheel.Cogwheel):
         u = agb.requestHandler.formatQueryString(agb.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
                                                  api_args)
 
-        await interaction.followup.send(u)
         with agb.requestHandler.handler.get(u) as r:
             data = json.loads(r.text)
             if len(data["results"]) == 0:
@@ -78,7 +119,5 @@ class TriviaCog(agb.cogwheel.Cogwheel):
             answers.append(data["results"][0]["correct_answer"])
             answers = sorted(answers)
             embed = agb.cogwheel.embed(title="Trivia", description=question)
-            for i, answer in enumerate(answers):
-                embed.add_field(name=f"Answer {i+1}", value=answer, inline=False)
-            await interaction.followup.send(embed=embed)
-            return
+            v = TriviaOptionDisplayView(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
+            await interaction.followup.send(embed=embed, view=v)

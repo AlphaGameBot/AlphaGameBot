@@ -1,6 +1,8 @@
 {
   "BOT_INFORMATION": {
-    "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!"
+    "DESCRIPTION": "AlphaGameBot is a discord bot made by AlphaGameDeveloper. Featuring many high-quality commands, AlphaGameBot is a must-have for any friend-group on Discord!",
+    "INVITE_URL": "https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=1494850219126&integration_type=0&scope=bot%20applications.commands"
+
   },
   "VERSION": "3.5",
   "SAY_EXCEPTIONS": [
@@ -110,5 +112,5 @@
       "GET_CATEGORIES": "https://opentdb.com/api_category.php"
     }
   },
-  "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
+  "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot/spamming +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
 }
