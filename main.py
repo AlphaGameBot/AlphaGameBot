@@ -153,11 +153,11 @@ async def database_update():
 async def on_ready():
     bot.auto_sync_commands = True # Sync new commands with Discord.
     BOT_TASKS = [database_update, rotate_status]
+    logging.debug("Starting tasks...")
     for task in BOT_TASKS:
         if not task.is_running():
             task.start()
-
-
+    logging.debug("%s tasks started." % len(BOT_TASKS))
     logging.info("Bot is now ready!")
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
     logging.info(f"Application ID is \"{bot.application_id}\".")
@@ -181,7 +181,8 @@ async def on_application_command(ctx: discord.context.ApplicationContext):
 
 @bot.listen()
 async def on_application_command_completion(interaction):
-    cnx.commit()
+    if CAN_USE_DATABASE:
+        cnx.commit()
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)

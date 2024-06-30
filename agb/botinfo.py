@@ -31,12 +31,12 @@ class FeedbackModal(discord.ui.Modal):
         owner_embed.add_field(name="Feedback", value=self.children[0].value)
         owner_embed.add_field(name='Username', value=interaction.user.name)
         owner_embed.add_field(name='User ID', value=interaction.user.id)
-        await interaction.response.send_message(embeds=[owner_embed])
 
         OWNER_ID = _d["OWNER_ID"]
         owner = self.bot.get_user(OWNER_ID)
         dms = await owner.create_dm()
-        await dms.send(f"Feedback from {interaction.user.name} ({interaction.user.id}): {self.children[0].value}")
+        await dms.send(embed=owner_embed)
+        await interaction.response.send_message("Feedback sent!", ephemeral=True)
 
 class AboutView(discord.ui.View):
     def __init__(self, bot) -> None:
@@ -56,7 +56,10 @@ class AboutView(discord.ui.View):
     
     @discord.ui.button(label="Feedback", style=discord.ButtonStyle.primary)
     async def feedback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.disabled = True
         await interaction.response.send_modal(FeedbackModal(self.bot, title="AlphaGameBot Feedback"))
+        interaction.followup.edit(view=self)
+
 class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
 
     def getCommitMessage(self):
@@ -70,10 +73,6 @@ class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
             # womp womp we cannot get the message so we are screwed...
             return "Unable to get latest commit message :("
         return message
-
-    @commands.slash_command(name="modaltest", description="debugging modal")
-    async def _modaltest(self, interaction):
-        await interaction.response.send_modal(FeedbackModal(title="test modal owo"))
 
     @commands.slash_command(name="about", description="About AlphaGameBot!")
     async def _about(self, interaction):
