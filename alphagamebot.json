@@ -4,7 +4,7 @@
     "INVITE_URL": "https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=1494850219126&integration_type=0&scope=bot%20applications.commands"
 
   },
-  "VERSION": "3.5",
+  "VERSION": "3.5.1",
   "SAY_EXCEPTIONS": [
     1180023544042770533,
     1179187852601479230
@@ -67,7 +67,7 @@
   "ROTATING_STATUS_INTERVAL": 30,
   "API_ENDPOINTS": {
     "webui": {
-      "USER_SETTINGS": "https://alphagamebot.alphagame.dev/user/settings"
+      "USER_SETTINGS": "https://alphagamebot.alphagame.dev/webui/user/settings"
     },
     "meme": {
       "GET_MEME": "https://meme-api.com/gimme"
