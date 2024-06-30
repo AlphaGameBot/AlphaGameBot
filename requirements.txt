@@ -22,6 +22,9 @@ requests-cache
 nltk~=3.8.1
 pynacl
 
+# (P)ython (R)eddit (A)pi (W)rapper
+praw
+
 # MySQL connection
 mysql-connector-python
 # For development stuff

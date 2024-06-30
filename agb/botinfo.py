@@ -36,7 +36,7 @@ class FeedbackModal(discord.ui.Modal):
         OWNER_ID = _d["OWNER_ID"]
         owner = self.bot.get_user(OWNER_ID)
         dms = await owner.create_dm()
-        await dms.send(f"Feedback from {interaction.user.name} ({interaction.user.id}): {self.children[0].value}")
+        await dms.send(embed=embed)
 
 class AboutView(discord.ui.View):
     def __init__(self, bot) -> None:

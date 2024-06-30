@@ -107,10 +107,12 @@ def embed(**kwargs) -> discord.Embed:
 
 
 class CogwheelLoggerHelper:
+    """In hindsight, this was kind of a dumb idea.  This will """
     def __init__(self, logger, cogname):
         self.logger = logger
         self.cogname = cogname
         self.constructor = "{0}: %s".format(self.cogname)
+        self.logger.warning("CogwheelLoggerHelper is DEPRICATED.  All Cogwheel loggers should be moved over.")
 
     def info(self, text: str = ""):
         """Proxy for `logging.info` but only for Cogs.  This will give a unified
@@ -144,9 +146,8 @@ class Cogwheel(commands.Cog):
     :param bot: Bot instance of which the cog is being deployed upon.
     :returns: Cogwheel (`agb.cogwheel.Cogwheel`) derived from `discord.ext.commands.Cog`"""
     def __init__(self, bot: commands.Bot):
-        self.loggerInstance = logging.getLogger("cogwheel")
+        self.logger = logging.getLogger("cogwheel")
         self.cogName = type(self).__name__
-        self.logger = CogwheelLoggerHelper(self.loggerInstance, self.cogName)
         self.bot = bot
 
         # Attempt to run cog-specific tasks in self.init (NOT __init__)
