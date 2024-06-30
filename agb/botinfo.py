@@ -36,6 +36,7 @@ class FeedbackModal(discord.ui.Modal):
         owner = self.bot.get_user(OWNER_ID)
         dms = await owner.create_dm()
         await dms.send(embed=owner_embed)
+        
         await interaction.response.send_message("Feedback sent!", ephemeral=True)
 
 class AboutView(discord.ui.View):
@@ -44,7 +45,7 @@ class AboutView(discord.ui.View):
         self.bot = bot
         _d = agb.cogwheel.getBotInformation()
         addTheBot = discord.ui.Button(
-            style=discord.ButtonStyle.green, 
+            style=discord.ButtonStyle.success, 
             label="Add the Bot!",                          
             url=_d["BOT_INFORMATION"]["INVITE_URL"])
         checkItOut = discord.ui.Button(style=discord.ButtonStyle.link, label="Learn More!", url="https://alphagame.dev/alphagamebot/")
@@ -57,8 +58,10 @@ class AboutView(discord.ui.View):
     @discord.ui.button(label="Feedback", style=discord.ButtonStyle.primary)
     async def feedback(self, button: discord.ui.Button, interaction: discord.Interaction):
         button.disabled = True
+        button.label = "Feedback Sent!"
         await interaction.response.send_modal(FeedbackModal(self.bot, title="AlphaGameBot Feedback"))
-        interaction.followup.edit(view=self)
+
+        
 
 class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
 

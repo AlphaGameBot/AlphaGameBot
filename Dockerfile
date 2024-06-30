@@ -49,4 +49,4 @@ RUN /usr/local/bin/python3 /setup.py inContainer
 
 COPY . /docker
 
-CMD ["python3", "/docker/main.py"]
+ENTRYPOINT [ "/docker/docker/entrypoint.sh" ]
