@@ -17,6 +17,9 @@ pipeline {
         MYSQL_DATABASE = "alphagamebot"
         MYSQL_USER = "alphagamebot" 
         MYSQL_PASSWORD = credentials('alphagamebot-mysql-password')
+
+        REDDIT_API_SECRET = credentials('alphagamebot-reddit-secret')
+        REDDIT_API_ID = "q2WqT5ZGLhdiyjKZO0P9Og"
     }
     stages {
         stage('build') {
@@ -56,8 +59,8 @@ pipeline {
                                 --name alphagamebot \
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
                                 -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
-                                --restart=always --net=host \
-                                alphagamedev/alphagamebot:$AGB_VERSION python /docker/main.py -r" // add alphagamebot flags
+                                -e REDDIT_API_SECRET -e REDDIT_API_ID --restart=always --net=host \
+                                alphagamedev/alphagamebot:$AGB_VERSION -r" // add alphagamebot flags
             }
         }
     } // stages

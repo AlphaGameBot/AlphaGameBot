@@ -113,16 +113,35 @@ if __name__ == "__main__":
     parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
     args = parser.parse_args()
 # Initalize logging services
+LOG_LEVEL = logging.INFO
 if args.debug: # args.debug:
-    logging.config.fileConfig("logging/debug.ini")
-else:
-    logging.config.fileConfig("logging/production.ini")
+    LOG_LEVEL = logging.DEBUG
 
+# Load the logging file (logging/main.ini)
+logging.lastResort.setLevel(logging.INFO)
+logging.config.fileConfig("logging/main.ini") # load the config
+
+CONFIGURED_LOGGERS = [
+	"root",
+	"cogwheel",
+	"requesthandler",
+	"listener",
+	"system"
+]
+
+for l in CONFIGURED_LOGGERS:
+	logging.getLogger(l).setLevel(LOG_LEVEL)
 if args.version:
     print(f"AlphaGameBot Discord Bot Version {agb.cogwheel.getBotInformation()['VERSION']}")
     print(f"Copyright (C) {d.year}  Damien Boisvert (AlphaGameDeveloper); See LICENSE for licensing information.")
     sys.exit(0)
 
+if args.environment != None:
+    if not os.path.isfile(args.environment):
+        logging.error("Environment file %s doesn't exist." % args.environment)
+    else:
+        load_dotenv(args.environment)
+        logging.info("Loaded environment file %s" % args.environment)
 intents = discord.Intents.all()
 
 OWNER = os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690)
@@ -153,11 +172,11 @@ async def database_update():
 async def on_ready():
     bot.auto_sync_commands = True # Sync new commands with Discord.
     BOT_TASKS = [database_update, rotate_status]
+    logging.debug("Starting tasks...")
     for task in BOT_TASKS:
         if not task.is_running():
             task.start()
-
-
+    logging.debug("%s tasks started." % len(BOT_TASKS))
     logging.info("Bot is now ready!")
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
     logging.info(f"Application ID is \"{bot.application_id}\".")
@@ -181,7 +200,8 @@ async def on_application_command(ctx: discord.context.ApplicationContext):
 
 @bot.listen()
 async def on_application_command_completion(interaction):
-    cnx.commit()
+    if CAN_USE_DATABASE:
+        cnx.commit()
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)

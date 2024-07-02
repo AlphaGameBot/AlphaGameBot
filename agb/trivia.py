@@ -23,6 +23,27 @@ import json
 import logging
 import html
 
+class TrueFalseTriviaOptionDisplayView(discord.ui.View):
+    def __init__(self, options: list[str], correctAnswer: bool, intendedUser: discord.User):
+        self.correctAnswer = correctAnswer
+        super().__init__()
+        
+    async def handleAnswer(self, interaction, answer):
+        if answer == correctAnswer:
+            await interaction.response.send_message(":white_check_mark: Correct!")
+        else:
+            await interaction.response.send_message(":x: Incorrect!")
+        self.disable_all_items()
+        await interaction.message.edit(view=self)
+        
+    @discord.ui.button(label="False", style=discord.ButtonStyle.red)
+    async def _false(self, button, interaction):
+        return await self.handleAnswer(interaction, False)
+
+    @discord.ui.button(label="True", style=discord.ButtonStyle.green)
+    async def _true(self, button, interaction):
+        return await self.handleAnswer(interaction, True)
+        
 class TriviaOptionDisplayView(discord.ui.View):
     def __init__(self, options: list[str], correctValueIndex: int, intendedUser: discord.User):
         super().__init__()
@@ -39,7 +60,7 @@ class TriviaOptionDisplayView(discord.ui.View):
             await interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for `{self.intendedUser.name}`!", ephemeral=True)
             return
         if button_option_index - 1 == self.correctValueIndex:
-            await interaction.response.send_message(":white_check_mark: Correct!")
+            await interaction.response.send_message(":white_check_mark: Correct!  The answer was **%s**." % self.options[self.correctValueIndex])
         else:
             await interaction.response.send_message(f":x: Incorrect!  The correct answer was `{self.options[self.correctValueIndex]}`")
         self.disable_all_items()
@@ -113,7 +134,7 @@ class TriviaCog(agb.cogwheel.Cogwheel):
 
         with agb.requestHandler.handler.get(u, attemptCache=False) as r:
             data = json.loads(r.text)
-            if len(data["response_code"]) == 1:
+            if data["response_code"] == 1:
                 await interaction.followup.send("No results found.")
                 return
             elif data["response_code"] == 2:
@@ -132,7 +153,7 @@ class TriviaCog(agb.cogwheel.Cogwheel):
         question = data["results"][0]["question"]
         answers = data["results"][0]["incorrect_answers"]
         answers.append(data["results"][0]["correct_answer"])
-        answers = random.shuffle(answers)
-        embed = agb.cogwheel.embed(title="Trivia", description=html.unescape(question))
-        answerView = TriviaOptionDisplayView(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
-        await interaction.followup.send(embed=embed, view=answerView)
+        random.shuffle(answers)
+
+        answerView = (TrueFalseTriviaOptionDisplayView if type == "boolean" else TriviaOptionDisplayView)(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
+        await interaction.followup.send(html.unescape(question), view=answerView)

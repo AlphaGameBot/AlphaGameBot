@@ -45,6 +45,11 @@ class ErrorOptionView(discord.ui.View):
             # ephemeral=True adds the "Only you can see this message" message
             await interaction.response.send_message(":x: Only the person who originally ran the command can send a bug report!", ephemeral=True)
             return
+
+        if isinstance(self._error, discord.ApplicationCommandInvokeError):
+            error = self._error.original
+        else:
+            error = self._error
         
         if agb.cogwheel.isDebugEnv:
             # well this is kind of useless
@@ -54,16 +59,19 @@ class ErrorOptionView(discord.ui.View):
 
         data = self.realinteraction.interaction.to_dict()
         arguments = ""
-        for x in data["data"]["options"]:
-            rtype = type(x["value"])
-            if isinstance(x["value"], bool):
-                rtype = "Boolean"
-            elif isinstance(x["value"], int):
-                rtype = "Integer"
-            elif isinstance(x["value"], str):
-                rtype = "String"
-            
-            arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
+        try:
+            for x in data["data"]["options"]:
+                rtype = type(x["value"])
+                if isinstance(x["value"], bool):
+                    rtype = "Boolean"
+                elif isinstance(x["value"], int):
+                    rtype = "Integer"
+                elif isinstance(x["value"], str):
+                    rtype = "String"
+                
+                arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
+        except KeyError:
+            arguments = "*No Arguments.*"
         response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
@@ -83,10 +91,10 @@ An error was reported.  Here is some information!
 **Reported At** {6}
         """.format(interaction.user.name,
                    interaction.user.nick,
-                   repr(self._error),
+                   repr(error),
                    self.realinteraction.command,
                    arguments,
-                   ''.join(traceback.format_tb(self._error.__traceback__)),
+                   ''.join(traceback.format_tb(error.__traceback__)),
                    time.ctime())}, "Error report by %s" % self.user.name)
         
         
@@ -143,39 +151,62 @@ Cheers,
         await dm.send(embed=sent_embed, view=view)
 
 
+class DebugErrorOptionView(ErrorOptionView):
+    @discord.ui.button(label="Error Traceback", style=discord.ButtonStyle.red)
+    async def _traceback(self, button, interaction):
+        error = None
+        if isinstance(self._error, discord.ApplicationCommandInvokeError):
+            error = self._error.original
+        else:
+            error = self._error
+
+        await interaction.response.send_message("```\n%s\n```" % ''.join(traceback.format_tb(error.traceback)))
+        
 async def handleApplicationCommandError(interaction: discord.ApplicationContext, error):
-    try:
+    # get original error if possible
+    o_error = error
+    if isinstance(error, discord.ApplicationCommandInvokeError):
+        error = error.original
+        usingOriginal = True
+    else:
+        usingOriginal = False
+        
+    if usingOriginal:
         # big booty errors like this
-        trueerror = error.original
-        if isinstance(error.original, discord.Forbidden):
+        if isinstance(error, discord.Forbidden):
             await interaction.response.send_message(":x: The bot does not have sufficient permissions to do that.")
             return
-        elif isinstance(error.original, discord.errors.NotFound):
+        elif isinstance(error, discord.errors.NotFound):
             await interaction.response.send_message(":x: The bot took too long to respond.  Please try again.")
             return
-        elif isinstance(error.original, OperationalError):
+        elif isinstance(error, OperationalError):
             await interaction.response.send_message(":x: Internal Database Error.  Please try again later!")
             return
-    except AttributeError:
+    else:
         # commands.xxx error
-        trueerror = error
         if isinstance(error, commands.MissingPermissions):
             await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
             return
         
-    embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able \
-                                                                       to make it work by trying again.\nSorry about that! (awkward face emoji)",
+    embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able to make it work by trying again.\nSorry about that! (awkward face emoji)",
                                color=discord.Color.red())
     if not agb.cogwheel.isDebugEnv:
         embed.add_field(name="Joke", value=random.choice(ERROR_JOKES))
-    if agb.cogwheel.isDebugEnv:
-        embed.add_field(name="Error message", value="`{0}`".format(repr(trueerror)))
+    else:
+        embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
+
     embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
+    tb = "```\n%s\n```" % ''.join(traceback.format_tb(error.__traceback__))
+
+    v = DebugErrorOptionView #(ErrorOptionView if not agb.cogwheel.isDebugEnv else DebugErrorOptionView)
+
     try:
-        await interaction.response.send_message(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
+        await interaction.response.send_message(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=v(error, interaction, interaction.user))
+
     except discord.errors.InteractionResponded:
         logging.debug("Using a followup message to send the error message because the interaction was already responded to.")
-        await interaction.followup.send(embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
+        await interaction.followup.send(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
+
     if agb.cogwheel.isDebugEnv:
         # Pass the error along to the Python Error Handler (console)
         raise error 

@@ -19,6 +19,73 @@ import discord
 import os
 from discord.ext import commands
 
+async def sendToOwner(bot, *args, **kwargs):
+    _d = agb.cogwheel.getBotInformation()
+    owner = bot.get_user(_d["OWNER_ID"])
+    owner_dm = await owner.create_dm()
+
+    await owner_dm.send(*args, **kwargs)
+    
+class FeedbackModal(discord.ui.Modal):
+    def __init__(self, bot, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.bot = bot
+        self.add_item(discord.ui.InputText(label="Feedback", style=discord.InputTextStyle.long))
+
+    async def callback(self, interaction: discord.Interaction):
+        _d = agb.cogwheel.getBotInformation()
+        owner_embed = agb.cogwheel.embed(title="AlphaGameBot Feedback", description="A user has submitted feedback!", colour=discord.Colour.dark_blue())
+        owner_embed.add_field(name="Feedback", value=self.children[0].value)
+        owner_embed.add_field(name='Username', value=interaction.user.name)
+        owner_embed.add_field(name='User ID', value=interaction.user.id)
+
+        await sendToOwner(self.bot, embed=owner_embed)
+        
+        await interaction.response.send_message("Feedback sent!", ephemeral=True)
+
+class CommandSuggestionModal(discord.ui.Modal):
+    def __init__(self, bot, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bot = bot
+
+        self.add_item(discord.ui.InputText(label="Command Name", style=discord.InputTextStyle.short, placeholder="/amazing-command-idea-generator"))
+        self.add_item(discord.ui.InputText(label="Command Description", style=discord.InputTextStyle.long, placeholder="What is your command?  What would it do?  Tell me, tell me! :)"))
+
+    async def callback(self, interaction: discord.ApplicationContext):
+        description = "**Command Name**: %s\n\n**Command Description**: %s" % (self.children[0].value, self.children[1].value)
+        owner_embed = agb.cogwheel.embed(title="AlphaGameBot Command Suggestion", description=description)
+        owner_embed.add_field(name="User Name", value=interaction.user.name)
+        owner_embed.add_field(name="User ID", value=interaction.user.id)
+
+        await sendToOwner(self.bot, embed=owner_embed)
+        await interaction.response.send_message("Command Suggestion Sent.  Thank you!", ephemeral=True)
+class AboutView(discord.ui.View):
+    def __init__(self, bot) -> None:
+        super().__init__()
+        self.bot = bot
+        _d = agb.cogwheel.getBotInformation()
+        addTheBot = discord.ui.Button(
+            label="Add the Bot!",                          
+            url=_d["BOT_INFORMATION"]["INVITE_URL"], row=1)
+        checkItOut = discord.ui.Button(label="Learn More!", url="https://alphagame.dev/alphagamebot/", row=1)
+        githubBtn = discord.ui.Button(label="GitHub",
+                                      url="https://github.com/AlphaGameDeveloper/AlphaGameBot", row=1)
+        self.add_item(item=addTheBot)
+        self.add_item(item=checkItOut)
+        self.add_item(item=githubBtn)
+    
+    @discord.ui.button(label="Feedback", style=discord.ButtonStyle.primary, row=0)
+    async def feedback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.disabled = True
+        button.label = "Feedback Sent!"
+        await interaction.response.send_modal(FeedbackModal(self.bot, title="AlphaGameBot Feedback"))
+
+    @discord.ui.button(label="Command Suggestions", style=discord.ButtonStyle.primary, row=0)
+    async def command_suggestions(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
+        button.disabled = True
+        button.label = "Thanks for the suggestion!"
+        await interaction.response.send_modal(CommandSuggestionModal(self.bot, title="AlphaGameBot Command Suggestion"))
+
 class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
 
     def getCommitMessage(self):
@@ -36,18 +103,7 @@ class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
     @commands.slash_command(name="about", description="About AlphaGameBot!")
     async def _about(self, interaction):
         _d = agb.cogwheel.getBotInformation()
-        view = discord.ui.View()
-        linkStyle = discord.ButtonStyle.link
-        addTheBot = discord.ui.Button(
-            style=discord.ButtonStyle.green, 
-            label="Add the Bot!",                          
-            url=_d["BOT_INFORMATION"]["INVITE_URL"])
-        checkItOut = discord.ui.Button(style=linkStyle, label="Learn More!", url="https://alphagame.dev/alphagamebot/")
-        githubBtn = discord.ui.Button(style=linkStyle, label="GitHub",
-                                      url="https://github.com/AlphaGameDeveloper/AlphaGameBot")
-        view.add_item(item=addTheBot)
-        view.add_item(item=checkItOut)
-        view.add_item(item=githubBtn)
+        view = AboutView(self.bot)        
 
         # get users
         if self.canUseDatabase:
