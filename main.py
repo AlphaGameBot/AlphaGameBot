@@ -136,6 +136,12 @@ if args.version:
     print(f"Copyright (C) {d.year}  Damien Boisvert (AlphaGameDeveloper); See LICENSE for licensing information.")
     sys.exit(0)
 
+if args.environment != None:
+    if not os.path.isfile(args.environment):
+        logging.error("Environment file %s doesn't exist." % args.environment)
+    else:
+        load_dotenv(args.environment)
+        logging.info("Loaded environment file %s" % args.environment)
 intents = discord.Intents.all()
 
 OWNER = os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690)

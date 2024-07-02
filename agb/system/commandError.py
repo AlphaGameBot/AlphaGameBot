@@ -45,8 +45,13 @@ class ErrorOptionView(discord.ui.View):
             # ephemeral=True adds the "Only you can see this message" message
             await interaction.response.send_message(":x: Only the person who originally ran the command can send a bug report!", ephemeral=True)
             return
+
+        if isinstance(self._error, discord.ApplicationCommandInvokeError):
+            error = self._error.original
+        else:
+            error = self._error
         
-        if agb.cogwheel.isDebugEnv:
+        if False: # agb.cogwheel.isDebugEnv:
             # well this is kind of useless
             self.logger.info("Bug reporting was disabled, as this is a debug build.  If you need to test bug reporting, remove the 'DEBUG' environment variable.  Also, be sure to set the 'WEBHOOK' so you can actually send the report!")
             await interaction.response.send_message(":x: Naturally, you shouldn't be able to send a bug report in a debug build, as there is no real benefit of doing so.  If you are the developer, please check the Python console.  Otherwise, please inform the developer of this bug!.", ephemeral=True)
@@ -54,16 +59,19 @@ class ErrorOptionView(discord.ui.View):
 
         data = self.realinteraction.interaction.to_dict()
         arguments = ""
-        for x in data["data"]["options"]:
-            rtype = type(x["value"])
-            if isinstance(x["value"], bool):
-                rtype = "Boolean"
-            elif isinstance(x["value"], int):
-                rtype = "Integer"
-            elif isinstance(x["value"], str):
-                rtype = "String"
-            
-            arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
+        try:
+            for x in data["data"]["options"]:
+                rtype = type(x["value"])
+                if isinstance(x["value"], bool):
+                    rtype = "Boolean"
+                elif isinstance(x["value"], int):
+                    rtype = "Integer"
+                elif isinstance(x["value"], str):
+                    rtype = "String"
+                
+                arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
+        except KeyError:
+            arguments = "*No Arguments.*"
         response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
@@ -83,10 +91,10 @@ An error was reported.  Here is some information!
 **Reported At** {6}
         """.format(interaction.user.name,
                    interaction.user.nick,
-                   repr(self._error),
+                   repr(error),
                    self.realinteraction.command,
                    arguments,
-                   ''.join(traceback.format_tb(self._error.__traceback__)),
+                   ''.join(traceback.format_tb(error.__traceback__)),
                    time.ctime())}, "Error report by %s" % self.user.name)
         
         
