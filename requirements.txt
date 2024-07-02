@@ -17,7 +17,7 @@
 #    Note: These libraries used are licensed under their own respective licenses.
 
 py-cord
-requests~=2.31.0
+requests~=2.32.2
 requests-cache
 nltk~=3.8.1
 pynacl
@@ -62,3 +62,4 @@ feedparser~=6.0.11
 # the import to GoogleCog in main.py!
 
 googlesearch-python
+urllib3>=2.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
