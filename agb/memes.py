@@ -24,15 +24,26 @@ import agb.cogwheel
 class MemesCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
-    async def meme(self, interaction):
+    async def meme(self, interaction, subreddit: discord.Option(str, description="The subreddit that you want to get a meme from", default=None, required=False)):
         # get the meme from the memes api
-        endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME")
+        if subreddit == None:
+            endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME")
+        else:
+            endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME_BY_SUBREDDIT").format(subreddit)
+            
         r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
         d = json.loads(r.text)
-        embed = discord.Embed(title=d["title"], description="Subreddit: r/{0}".format(d["subreddit"]))
-        embed.set_footer(text="By: u/{}".format(d["author"]))
-        i = d["preview"][len(d["preview"])-1]
-        embed.set_image(url=i)
+        if r.status_code != 200:
+            await interaction.response.send_message(":x: `%s`" % d["message"])
+            return
+        if d["nsfw"] and not interaction.channel.nsfw:
+            self.logger.debug("Rejecting this meme because it is a NSFW meme sent in a non-age-restricted channel.")
+            await interaction.response.send_message(":x: NSFW memes can only be sent in NSFW channels.")
+            return
+        embed = agb.cogwheel.embed(title=d["title"])
+        embed.set_footer(text="Sent in r/{0} by u/{1}".format(d["subreddit"], d["author"]))
+        embed.set_image(url=d["preview"][len(d["preview"])-1])
+        
         await interaction.response.send_message(embed=embed)
 
     @commands.slash_command(name="helloworld", description="It's industry standard, right?")
