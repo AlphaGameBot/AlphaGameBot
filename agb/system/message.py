@@ -61,7 +61,7 @@ async def handleOnMessage(bot: commands.Bot, ctx: discord.Message, CAN_USE_DATAB
     
     if ctx.author.id != os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690):
         logger.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
-                                                                                               ctx.content) 
+                                                                                               ctx.content))
 #        await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
         return
 
