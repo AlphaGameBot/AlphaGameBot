@@ -111,6 +111,7 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--requiredatabase", help="Force database to be enabled.  This will error if the database is not configured correctly.", action="store_true")
     parser.add_argument("-v", "--version", help="Print the version of the bot and exit.", action="store_true")
     parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
+    parser.add_argument("--discord-debug", help="Show debug discord gateway/client information, this will be noisy!", action="store_true")
     args = parser.parse_args()
 # Initalize logging services
 LOG_LEVEL = logging.INFO
@@ -120,7 +121,10 @@ if args.debug: # args.debug:
 # Load the logging file (logging/main.ini)
 logging.lastResort.setLevel(logging.INFO)
 logging.config.fileConfig("logging/main.ini") # load the config
-
+if args.discord_debug:
+    logging.getLogger("discord.client").setLevel(logging.DEBUG)
+    logging.getLogger("discord.gateway").setLevel(logging.DEBUG)
+    
 CONFIGURED_LOGGERS = [
 	"root",
 	"cogwheel",
@@ -142,7 +146,6 @@ if args.environment != None:
     else:
         load_dotenv(args.environment)
         logging.info("Loaded environment file %s" % args.environment)
-intents = discord.Intents.all()
 
 OWNER = os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690)
 
@@ -154,6 +157,8 @@ listener = logging.getLogger("listener")
 #else:
 #    logging.basicConfig(level=logging.INFO)
 
+# DISCORD GATEWAY ITENTS
+intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="?", intents=intents)
 
 ##### BOT RECURRING BOT TASKS #####
@@ -191,7 +196,7 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
-    return await agb.system.message.handleOnMessage(ctx, CAN_USE_DATABASE, cnx, args.notracking)
+    return await agb.system.message.handleOnMessage(bot, ctx, CAN_USE_DATABASE, cnx, args.notracking)
 
 @bot.listen()
 async def on_application_command(ctx: discord.context.ApplicationContext):

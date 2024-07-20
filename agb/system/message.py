@@ -1,13 +1,20 @@
 import agb.cogwheel
 import mysql.connector
 import discord
+from discord.ext import commands
 import logging
 import os
 
-async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection, tracking):
+async def handleOnMessage(bot: commands.Bot, ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.connector.connection.MySQLConnection, tracking):
     
     bot_information = agb.cogwheel.getBotInformation()
     logger = logging.getLogger("system")
+    bot_mention_string = f"<@{bot.application_id}>"
+    print(bot_mention_string)
+    isSay = False
+    isSay = (ctx.content).startswith(bot_mention_string)
+    ctx.content = ctx.content.strip(bot_mention_string).strip()
+    print(ctx.content, isSay)
     if ctx.author.bot:
         logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
         return
@@ -31,7 +38,7 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
     #   to point out the order of the if statements that follow.  Nothing is
     #   processed, (except for message count) unless the discord server is in 
     #   SAY_EXCEPTIONS.
-    if ctx.content.startswith("..") == False:
+    if ctx.content.startswith("..") == False and not isSay:
         return
     if ctx.content.startswith("...") == True: 
         # Sometimes, I make sarcastic comments, starting with ...
@@ -55,11 +62,12 @@ async def handleOnMessage(ctx: discord.Message, CAN_USE_DATABASE, cnx: mysql.con
     if ctx.author.id != os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690):
         logger.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
                                                                                                ctx.content))
-        await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
+#        await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
         return
 
     text = ctx.content
-    text = text[2:]
+    if not isSay:
+        text = text[2:]
     if text == None:
         # No text given, so give up...
         return
