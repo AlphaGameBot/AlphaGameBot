@@ -9,7 +9,9 @@
   <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/AlphaGameDeveloper/AlphaGameBot">
   <img alt="GitHub repo file count (file type)" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file">
   <img alt="GitHub repo Python files" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file&logo=python&label=Python%20files&extension=py">
-  <img src='https://jenkins.alphagame.dev/buildStatus/icon?job=AlphaGameBot+Discord+Bot%2Fmaster'></p>
+  <img src='https://jenkins.alphagame.dev/buildStatus/icon?job=AlphaGameBot+Discord+Bot%2Fmaster'>
+  <a href="https://wakatime.com/badge/user/018e9fea-539d-4562-81f6-d55ad2a18943/project/9f9a0d50-fc89-49b4-a8cf-b3012ba4f4ed"> <img src="https://wakatime.com/badge/user/018e9fea-539d-4562-81f6-d55ad2a18943/project/9f9a0d50-fc89-49b4-a8cf-b3012ba4f4ed.svg" alt="wakatime"></a>
+</p>
 <p align="center">Made by a <b>ENTP</b> with love ❤️</p>
 
 Check out AlphaGameBot's [website](https://alphagame.dev/alphagamebot/)!
