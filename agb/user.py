@@ -41,6 +41,11 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
         if not agb.cogwheel.getUserSetting(self.cnx, user.id, "message_tracking_consent"):
             await interaction.followup.send(":x: This user has not consented to message tracking.")
             return
+
+        if user.bot:
+            await interaction.followup.send(":x: This user is a bot.  Support for bot tracking *may* be added in the future.")
+            return
+            
         c = self.cnx.cursor()
 
         c.execute("SELECT messages_sent, commands_ran from user_stats WHERE userid = %s", [user.id])
