@@ -43,9 +43,9 @@ import argparse
 import mysql.connector
 import threading
 # system
-import agb.system.commandError
-import agb.system.message
-import agb.system.applicationCommand
+import agb.system.commands.error
+import agb.system.commands.command
+import agb.system.message.message
 import agb.system.rotatingStatus
 import agb.system.databaseUpdate
 # commands
@@ -112,6 +112,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", help="Print the version of the bot and exit.", action="store_true")
     parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
     parser.add_argument("--discord-debug", help="Show debug discord gateway/client information, this will be noisy!", action="store_true")
+    parser.add_argument("-s", "--enable-say", help="Enable the say functionality regardless of environment or debuug mode.", action="store_true")
     args = parser.parse_args()
 # Initalize logging services
 LOG_LEVEL = logging.INFO
@@ -121,6 +122,7 @@ if args.debug: # args.debug:
 # Load the logging file (logging/main.ini)
 logging.lastResort.setLevel(logging.INFO)
 logging.config.fileConfig("logging/main.ini") # load the config
+
 if args.discord_debug:
     logging.getLogger("discord.client").setLevel(logging.DEBUG)
     logging.getLogger("discord.gateway").setLevel(logging.DEBUG)
@@ -186,6 +188,7 @@ async def on_ready():
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
     logging.info(f"Application ID is \"{bot.application_id}\".")
     logging.info(f"Syncronized {len(bot.application_commands)} application (slash) commands.")
+
 @bot.listen('on_application_command_error')
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.debug("Dispatching ApplicationCommandError (/{0}) to agb.system.commandError.handleApplicationCommandError".format(interaction.command))
@@ -196,12 +199,12 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
-    return await agb.system.message.handleOnMessage(bot, ctx, CAN_USE_DATABASE, cnx, args.notracking)
+    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say)
 
 @bot.listen()
 async def on_application_command(ctx: discord.context.ApplicationContext):
     listener.debug("Dispatching slash command /{0} to agb.system.applicationCommand.handleApplicationCommand".format(ctx.command))
-    return await agb.system.applicationCommand.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx, args.notracking)
+    return await agb.system.commands.command.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx, args.notracking)
 
 @bot.listen()
 async def on_application_command_completion(interaction):
@@ -248,6 +251,7 @@ else:
         host=MYSQL_SERVER,
         database=MYSQL_DATABASE
     )
+    cnx.autocommit = True
 # set command cogs
 mysql_cogs = 0
 normal_cogs = 0
@@ -260,16 +264,20 @@ for cog in BOT_LOADED_COGS:
         mysql_cogs += 1
 
         bot.add_cog(cog(bot, cnx, CAN_USE_DATABASE))
+        t = "MySQLEnabledCogwheel"
     elif issubclass(cog, agb.cogwheel.Cogwheel):
         normal_cogs += 1
         bot.add_cog(cog(bot))
+        t = "Cogwheel"
     elif issubclass(cog, commands.Cog):
         base_cogs += 1
         bot.add_cog(cog(bot))
+        t = "DiscordBaseCog"
     else:
         invalid_cogs += 1
+        t = "Unknown"
         logging.warning(f"Cog \"{cog.__name__}\" is of invalid type {cog}!  Skipping it...")
-
+    logging.debug("The type of this cog is %s" % t)
 logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, Commands.Cog: {3}, with {4} invalid cogs.".format(
     mysql_cogs + normal_cogs + invalid_cogs,
     mysql_cogs,
