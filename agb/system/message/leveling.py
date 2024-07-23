@@ -1,0 +1,81 @@
+#      AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
+#      Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
+#
+#      AlphaGameBot is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      AlphaGameBot is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
+
+import discord
+import agb.cogwheel
+import json
+import logging
+from mysql.connector import (connection)
+
+def get_level_from_message_count(levels: list[dict],
+                                 messages: int) -> int:
+    # Lame how we need <levels> to passed in, oh well.
+    levelNumber = 0 # to show errors in the code, we set a value that will 100% be overwritten
+    for level in reversed(levels):
+        if level["messages_required"] > messages:
+            continue
+        else:
+            levelNumber = level["level"]
+            logging.getLogger('system').debug("get_level_from_message_count: Level %s (Requirement %s), Messages %s" % (
+                                                levelNumber, 
+                                                level["messages_required"],
+                                                messages)
+                                             )
+            break
+            
+    return levelNumber
+
+async def handleMessageLevelUp( ctx: discord.Message,
+                                cnx: connection.MySQLConnection | None,
+                                CAN_USE_DATABASE: bool,
+                                CAN_DO_TRACKING: bool) -> None:
+    # This function assumes that the message counter was invoked.
+
+    # We need the database, and if none, game over :(
+    if not CAN_USE_DATABASE: return
+
+    # We also need the ability to track messages...
+    if not CAN_DO_TRACKING: return
+    
+    # Load the levels in
+    with open("assets/levels.json", "r") as f:
+        levels = json.load(f)["levels"]
+        # 'levels' is an iterable of dict, with structure
+        # [{"level": int, "messages_required": int}, etc, etc, etc]
+        
+    logger = logging.getLogger('system')
+    
+    cursor = cnx.cursor()
+
+    # Get message count
+    cursor.execute("SELECT messages_sent,user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s", [ctx.author.id, ctx.guild.id])
+    messages, level = cursor.fetchone() # _ is commands_ran... Don't need it.  
+
+    # check if there is any change to the level
+    c_level = get_level_from_message_count(levels, messages)
+
+
+    if c_level == level:
+        # nothing to do!
+        return
+
+    # update level in DB
+    cursor.execute("UPDATE guild_user_stats SET user_level = %s WHERE userid = %s AND guildid = %s", (c_level, ctx.author.id, ctx.guild.id))
+
+    logger.debug("Current data is: (Calculated Level = %s, Database Level = %s, Rows Affected = %s)", c_level, level, cursor.rowcount)
+        
+    cnx.commit()    
+    await ctx.reply(":tada: Congrats, %s, you just advanced to level **%s**!  Nice!" % (ctx.author.mention, c_level))

@@ -74,7 +74,7 @@ async def rotatingStatus(bot: commands.Bot, cnx, CAN_USE_DATABASE: bool):
         else:
             logger.error(f"Unknown online status type: {botinfo['STATUS']}.  Defaulting to online.")
             online_status = discord.Status.online
-        status = status["status"].format( # to allow for placeholders in the status
+        statusText = status["status"].format( # to allow for placeholders in the status
             version=agb.cogwheel.getVersion(), 
             build=os.getenv("BUILD_NUMBER"), 
             guilds=len(bot.guilds),
@@ -82,6 +82,9 @@ async def rotatingStatus(bot: commands.Bot, cnx, CAN_USE_DATABASE: bool):
             commands=len(bot.application_commands)
         )
 
-        real_activity = discord.Activity(type=activity, name=status)
+        real_activity = discord.Activity(type=activity, name=statusText)
+        
+        logger.debug(f"Changing the bot's Discord status to: (Type: '{status['type']}', message: {statusText}).  Global bot online status is {botinfo['STATUS']}.")
         await bot.change_presence(activity=real_activity, status=online_status)
+        
         await asyncio.sleep(botinfo["ROTATING_STATUS_INTERVAL"])
