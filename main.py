@@ -45,6 +45,7 @@ import threading
 # system
 import agb.system.commands.error
 import agb.system.commands.command
+import agb.system.guild.available
 import agb.system.message.message
 import agb.system.rotatingStatus
 import agb.system.databaseUpdate
@@ -71,6 +72,7 @@ import agb.cat
 import agb.hyrule
 import agb.enneagram
 import agb.trivia
+import agb.guild
 
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
@@ -94,7 +96,8 @@ BOT_LOADED_COGS = [
     agb.user.UserStatsCog,
     agb.hyrule.HyruleCog,
     agb.enneagram.EnneagramCog,
-    agb.trivia.TriviaCog
+    agb.trivia.TriviaCog,
+    agb.guild.GuildCog
 ]
 # parsing command line arguments
 if __name__ == "__main__":
@@ -193,7 +196,7 @@ async def on_ready():
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.debug("Dispatching ApplicationCommandError (/{0}) to agb.system.commandError.handleApplicationCommandError".format(interaction.command))
     # Essentially a proxy function
-    return await agb.system.commandError.handleApplicationCommandError(interaction, error)
+    return await agb.system.commands.error.handleApplicationCommandError(interaction, error)
 
 @bot.listen('on_message')
 async def on_message(ctx: discord.Message):
@@ -210,6 +213,12 @@ async def on_application_command(ctx: discord.context.ApplicationContext):
 async def on_application_command_completion(interaction):
     if CAN_USE_DATABASE:
         cnx.commit()
+
+@bot.listen('on_guild_available')
+async def guild_available(ctx):
+    listener.debug("Dispatching guild_availiable to agb.system.guild.availiable.handleGuildAvailiable (GuildID: %s)", ctx.id)
+    # Essentially a proxy function
+    return await agb.system.guild.available.handleGuildAvailiable(ctx, cnx, CAN_USE_DATABASE)
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)
@@ -333,3 +342,6 @@ if __name__ == "__main__":
         logging.fatal("Error Type: %s" % str(type(e).__name__))
         logging.fatal("Error Message: %s" % repr(e))
         sys.exit(1)
+    finally:
+        if CAN_USE_DATABASE:
+            cnx.close()
