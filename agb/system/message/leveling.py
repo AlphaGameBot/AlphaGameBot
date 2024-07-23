@@ -20,9 +20,11 @@ import json
 import logging
 from mysql.connector import (connection)
 
-def get_level_from_message_count(levels: list[dict],
-                                 messages: int) -> int:
-    # Lame how we need <levels> to passed in, oh well.
+global levels
+with open("assets/levels.json", "r") as f:
+    levels = json.load(f)["levels"]
+    
+def get_level_from_message_count(messages: int) -> int:
     levelNumber = 0 # to show errors in the code, we set a value that will 100% be overwritten
     for level in reversed(levels):
         if level["messages_required"] > messages:
@@ -51,21 +53,28 @@ async def handleMessageLevelUp( ctx: discord.Message,
     if not CAN_DO_TRACKING: return
     
     # Load the levels in
-    with open("assets/levels.json", "r") as f:
-        levels = json.load(f)["levels"]
-        # 'levels' is an iterable of dict, with structure
+    # 'levels' is an iterable of dict, with structure
         # [{"level": int, "messages_required": int}, etc, etc, etc]
         
     logger = logging.getLogger('system')
-    
+    guild = ctx.guild    
     cursor = cnx.cursor()
 
+
+    # Check if the leveling feature should be enabled in the first place
+    cursor.execute("SELECT leveling_enabled FROM guild_settings WHERE guildid = %s", [ctx.id])
+
+    enabled = bool(cursor.fetchone()) # 1 or 0
+
+    if not enabled:
+        logger.debug("handleMessageLevelUp: This guild has disabled leveling.")
+        return
     # Get message count
     cursor.execute("SELECT messages_sent,user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s", [ctx.author.id, ctx.guild.id])
     messages, level = cursor.fetchone() # _ is commands_ran... Don't need it.  
 
     # check if there is any change to the level
-    c_level = get_level_from_message_count(levels, messages)
+    c_level = get_level_from_message_count(messages)
 
 
     if c_level == level:
