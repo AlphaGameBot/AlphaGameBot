@@ -72,6 +72,7 @@ import agb.cat
 import agb.hyrule
 import agb.enneagram
 import agb.trivia
+import agb.guild
 
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
@@ -95,7 +96,8 @@ BOT_LOADED_COGS = [
     agb.user.UserStatsCog,
     agb.hyrule.HyruleCog,
     agb.enneagram.EnneagramCog,
-    agb.trivia.TriviaCog
+    agb.trivia.TriviaCog,
+    agb.guild.GuildCog
 ]
 # parsing command line arguments
 if __name__ == "__main__":
@@ -194,7 +196,7 @@ async def on_ready():
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
     listener.debug("Dispatching ApplicationCommandError (/{0}) to agb.system.commandError.handleApplicationCommandError".format(interaction.command))
     # Essentially a proxy function
-    return await agb.system.commandError.handleApplicationCommandError(interaction, error)
+    return await agb.system.commands.error.handleApplicationCommandError(interaction, error)
 
 @bot.listen('on_message')
 async def on_message(ctx: discord.Message):
@@ -340,3 +342,6 @@ if __name__ == "__main__":
         logging.fatal("Error Type: %s" % str(type(e).__name__))
         logging.fatal("Error Message: %s" % repr(e))
         sys.exit(1)
+    finally:
+        if CAN_USE_DATABASE:
+            cnx.close()

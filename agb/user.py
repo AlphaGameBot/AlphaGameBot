@@ -79,7 +79,7 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
         # create a token
         expires = int(time.time()) + 3600 # 1 hour
         token = str(uuid.uuid4())
-        c.execute("INSERT INTO webui_tokens VALUES (%s, %s, %s)", [interaction.user.id, token, time.time()])
+        c.execute("INSERT INTO webui_tokens VALUES (%s, %s, %s, %s, %s)", [interaction.user.id, interaction.guild.id, token, time.time(), "USER_SETTINGS"])
         c.close()
 
         view = discord.ui.View()

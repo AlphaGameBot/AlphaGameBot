@@ -68,7 +68,8 @@
   "ROTATING_STATUS_INTERVAL": 30,
   "API_ENDPOINTS": {
     "webui": {
-      "USER_SETTINGS": "https://alphagamebot.alphagame.dev/webui/user/settings"
+      "USER_SETTINGS": "https://alphagamebot.alphagame.dev/webui/user/settings",
+      "GUILD_SETTINGS": "https://alphagamebot.alphagame.dev/webui/guild/settings"
     },
     "meme": {
       "GET_MEME": "https://meme-api.com/gimme",
