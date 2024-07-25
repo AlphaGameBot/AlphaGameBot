@@ -62,12 +62,19 @@ async def handleMessageLevelUp( ctx: discord.Message,
 
 
     # Check if the leveling feature should be enabled in the first place
-    cursor.execute("SELECT leveling_enabled FROM guild_settings WHERE guildid = %s", [ctx.id])
+    cursor.execute("SELECT leveling_enabled FROM guild_settings WHERE guildid = %s", [ctx.guild.id])
 
     enabled = bool(cursor.fetchone()) # 1 or 0
-
+    # 3.8.1: bug (fixed):
+    #           The fact that ctx.guild.id was mistakenly set to
+    #           ctx.id, the message ID, exposed a problem where
+    #           it assumes that the guild disabled leveling
+    #           (because None evaluates to False). This should
+    #           not happen because agb.system.message.onboarding
+    #           runs before this, and initializes everything in the
+    #           database.
     if not enabled:
-        logger.debug("handleMessageLevelUp: This guild has disabled leveling.")
+        logger.debug("handleMessageLevelUp: This guild has disabled leveling. (Got %s from database)", enabled)
         return
     # Get message count
     cursor.execute("SELECT messages_sent,user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s", [ctx.author.id, ctx.guild.id])
