@@ -60,7 +60,7 @@ pipeline {
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
                                 -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
                                 -e REDDIT_API_SECRET -e REDDIT_API_ID --restart=always --net=host \
-                                alphagamedev/alphagamebot:$AGB_VERSION -r" // add alphagamebot flags
+                                alphagamedev/alphagamebot:$AGB_VERSION -rs" // add alphagamebot flags
             }
         }
     } // stages

@@ -47,5 +47,9 @@ class CogwheelTests(unittest.TestCase):
             self.assertEqual(agb.cogwheel.isDebug(), False)
         with patch.dict(os.environ, {"DEBUG": "false"}):
             self.assertEqual(agb.cogwheel.isDebug(), False)
+
+        argp = MagicMock()
+        argp.debug = False
+        self.assertEqual(agb.cogwheel.isDebug(argp), False)
 if __name__ == "__main__":
     unittest.main()
