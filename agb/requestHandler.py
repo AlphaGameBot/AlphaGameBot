@@ -22,13 +22,12 @@ import agb.cogwheel
 import urllib.parse
 
 class RequestHandler:
-    def __init__(self):
+    def initialize(self):
         self.logger = logging.getLogger("requesthandler")
         with open("assets/http_codes.json", "r") as f:
             self.RESPONSES = json.load(f)
             self.logger.debug("Loaded %s HTTP Responses!" % len(self.RESPONSES.keys()))
         self.session = requests_cache.CachedSession("request-handler", cache_control=True, expire_after=43200) # 43200 seconds = 12 hours
-        self.logger.info("RequestHandler has been initalized!")
         with open("alphagamebot.json", "r") as f:
             self.BOT_INFORMATION = json.load(f)
 
@@ -46,6 +45,9 @@ class RequestHandler:
             "Accept-Encoding": "gzip",
             "Connection": "close" # we dont need a constant connection :)
         }
+        self.logger.debug("Using User-Agent '%s'", self.REQUEST_HEADERS["User-Agent"])
+        self.logger.info("RequestHandler has been initalized!")
+
     def get(self, url: str, attemptCache=True):
         self.logger.debug("Web request was called with URL \"{0}\".  {1}".format(url,
                                                                                  "(CACHING WAS DISABLED)" if attemptCache == False else ""))

@@ -104,7 +104,9 @@
       "RANDOM_IMAGE": "https://api.thecatapi.com/v1/images/search",
       "GET_HTTP_CAT": "https://http.cat/{}.jpg",
       "GET_RANDOM_CAT_FACT": "https://cat-fact.herokuapp.com/facts/random",
-      "GET_CAT_FACT": "https://cat-fact.herokuapp.com/facts/{}"
+      "GET_CAT_FACT": "https://cat-fact.herokuapp.com/facts/{}",
+      "GET_RANDOM_CAT_JSON": "https://cataas.com/cat?json=true",
+      "GET_CAT_IMAGE": "https://cataas.com/cat/{}"
     },
     "hyrule": {
       "GET_ALL": "https://botw-compendium.herokuapp.com/api/v3/compendium/all",

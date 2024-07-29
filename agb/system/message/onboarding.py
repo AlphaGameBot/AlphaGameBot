@@ -2,6 +2,7 @@ import logging
 from mysql.connector import connection
 
 async def initalizeNewUser(cnx: connection.MySQLConnection,
+                           CAN_USE_DATABASE: bool,
                            user_id: int, 
                            guild_id: int = None):
     l = logging.getLogger("cogwheel")

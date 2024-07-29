@@ -22,7 +22,7 @@ from json import loads
 class CatCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="cat", description="For all your kitty needs!")
 
-    @group.command(name="image", description="Get a random cat image!")
+    @group.command(name="image", description="Get a cat image!")
     async def _image(self, interaction: discord.context.ApplicationContext):
         endpoint = agb.cogwheel.getAPIEndpoint("cat", "RANDOM_IMAGE")
 
@@ -49,3 +49,20 @@ class CatCog(agb.cogwheel.Cogwheel):
         response = loads(handler.get(endpoint, attemptCache=False).text)
 
         await interaction.response.send_message(response["text"])
+
+    @group.command(name="random", description="Get a random cat image!")
+    async def _random(self, interaction: discord.context.ApplicationContext):
+        endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_RANDOM_CAT_JSON")
+        api_json = json.loads(
+            handler.get(endpoint, attemptCache=False).text
+        )[0]
+
+        # API Endpoint result:
+        # tags: List[string]
+        # mimetype: string
+        # size: int, size in bytes
+        # _id: string, append to 'https://cataas.com/cat/(_id)' to get the actual image URL
+
+        await interaction.response.send_message(
+            agb.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE").format(api_json["_id"])
+        )

@@ -49,6 +49,8 @@ import agb.system.guild.available
 import agb.system.message.message
 import agb.system.rotatingStatus
 import agb.system.databaseUpdate
+# RequestHandler
+import agb.requestHandler
 # commands
 import agb.user
 import agb.utility
@@ -73,7 +75,6 @@ import agb.hyrule
 import agb.enneagram
 import agb.trivia
 import agb.guild
-
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
     agb.utility.UtilityCog,
@@ -145,6 +146,9 @@ if args.version:
     print(f"Copyright (C) {d.year}  Damien Boisvert (AlphaGameDeveloper); See LICENSE for licensing information.")
     sys.exit(0)
 
+# ----- Initialize RequestHandler -----
+agb.requestHandler.handler.initialize()
+# ----- -----
 if args.environment != None:
     if not os.path.isfile(args.environment):
         logging.error("Environment file %s doesn't exist." % args.environment)

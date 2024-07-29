@@ -11,9 +11,13 @@
 
 ### Developers
 * **Damien Boisvert (AlphaGameDeveloper)** - [alphagame.dev](https://alphagame.dev/)
-  * Programmer
+  * Programmer (Bot and WebUI)
+  * Code Maintainer
   * Public Bot Instance Hosting
-
+  
 ### Honorable Mentions
 * **Holden Latta (CombineSoldier14)** - [combinesoldier14.blogspot.com](https://combinesoldier14.blogspot.com)
   * Testing, ideas
+
+### AlphaGameBot Icon
+AlphaGameBot's primary blue icon was created by [*juicy_fish* on Flaticon](https://www.flaticon.com/free-icons/game-development).

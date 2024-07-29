@@ -51,11 +51,7 @@ async def handleOnMessage(bot: commands.Bot,
         
     else:
         logging.debug("handleOnMessage: Not tracking message count because CAN_USE_DATABASE is False or tracking is False.")
-    #   As this is a public Discord bot, I can see multiple people getting
-    #   scared of this function, possibly processing their messages.  I want
-    #   to point out the order of the if statements that follow.  Nothing is
-    #   processed, (except for message count) unless the discord server is in 
-    #   SAY_EXCEPTIONS.
+
     if ctx.content.startswith("..") == False and not isSay:
         return
     if ctx.content.startswith("...") == True: 
