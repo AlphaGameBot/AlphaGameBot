@@ -36,7 +36,7 @@ def handleDatabaseUpdate(cnx: mysql.connector.MySQLConnection, CAN_USE_DATABASE:
     # please make a pr if you know a way to improve it.
     if cnx.is_connected() == False:
         l.debug("handleDatabaseUpdate: Connection is not open.  Reconnecting.")
-        cnx.reconnect()
+    cnx.reconnect()
     cnx.commit()
 
     
