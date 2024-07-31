@@ -53,9 +53,9 @@ class CatCog(agb.cogwheel.Cogwheel):
     @group.command(name="random", description="Get a random cat image!")
     async def _random(self, interaction: discord.context.ApplicationContext):
         endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_RANDOM_CAT_JSON")
-        api_json = json.loads(
+        api_json = loads(
             handler.get(endpoint, attemptCache=False).text
-        )[0]
+        )
 
         # API Endpoint result:
         # tags: List[string]
@@ -66,3 +66,10 @@ class CatCog(agb.cogwheel.Cogwheel):
         await interaction.response.send_message(
             agb.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE").format(api_json["_id"])
         )
+
+    @group.command(name="says", description="Get a cat image with a custom message!")
+    async def _says(self, interaction: discord.context.ApplicationContext,
+                        message: discord.Option(str, description="The message to display on the cat image")): # type: ignore
+        endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE_WITH_MESSAGE").format(message)
+
+        await interaction.response.send_message(endpoint)
