@@ -23,7 +23,7 @@ from discord.ext import commands
 class GuildCog(agb.cogwheel.MySQLEnabledCogwheel):
     group = discord.SlashCommandGroup(name="guild", description="Current Discord Server commands")
 
-    @group.command(name="settings", description="d")
+    @group.command(name="settings", description="Open your server settings in the WebUI")
     @commands.has_permissions(administrator = True)
     async def _settings(self, interaction: discord.context.ApplicationContext):
         if not self.canUseDatabase:

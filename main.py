@@ -47,8 +47,10 @@ import agb.system.commands.error
 import agb.system.commands.command
 import agb.system.guild.available
 import agb.system.message.message
+import agb.system.message.dms
 import agb.system.rotatingStatus
 import agb.system.databaseUpdate
+
 # RequestHandler
 import agb.requestHandler
 # commands
@@ -206,6 +208,9 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
+    if not ctx.guild:
+        return await agb.system.message.dms.handleDMMessage(ctx)
+    
     return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say)
 
 @bot.listen()

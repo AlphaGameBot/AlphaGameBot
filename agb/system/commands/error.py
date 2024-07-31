@@ -53,7 +53,7 @@ class ErrorOptionView(discord.ui.View):
         
         if agb.cogwheel.isDebugEnv:
             # well this is kind of useless
-            self.logger.info("Bug reporting was disabled, as this is a debug build.  If you need to test bug reporting, remove the 'DEBUG' environment variable.  Also, be sure to set the 'WEBHOOK' so you can actually send the report!")
+            self.logger.info("Bug reporting was disabled, as this is a debug build.  If you need to test bug reporting, disable debug mode.  Also, be sure to set the 'WEBHOOK' so you can actually send the report!")
             await interaction.response.send_message(":x: Naturally, you shouldn't be able to send a bug report in a debug build, as there is no real benefit of doing so.  If you are the developer, please check the Python console.  Otherwise, please inform the developer of this bug!.", ephemeral=True)
             return
 
@@ -90,7 +90,7 @@ An error was reported.  Here is some information!
 
 **Reported At** {6}
         """.format(interaction.user.name,
-                   interaction.user.nick,
+                   (interaction.user.nick if isinstance(interaction.user, discord.Member) else "No Nick Available"),
                    repr(error),
                    self.realinteraction.command,
                    arguments,
