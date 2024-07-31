@@ -207,10 +207,11 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
 @bot.listen('on_message')
 async def on_message(ctx: discord.Message):
     # Essentially a proxy function
-    listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
     if not ctx.guild:
-        return await agb.system.message.dms.handleDMMessage(ctx)
+        listener.debug(f"Dispatching DM {ctx.id} to agb.system.dms.handleDMMessage")
+        return await agb.system.message.dms.handleDMMessage(bot, ctx, cnx, CAN_USE_DATABASE)
     
+    listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
     return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say)
 
 @bot.listen()
