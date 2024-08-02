@@ -58,4 +58,9 @@ async def blast_announcement(
         except discord.Forbidden:
             logger.warning("blast_announcement: Can't send message to user %s (Forbidden)", user_id)
     
-    return "Announcement sent to all users who have opted in. (len: %s, NotFound: %s, Forbidden: %s)" % (len(db_users), errNotFound, errForbidden)
+    return """## Announcement Blast Results
+Results of the announcement blast: **SUCCESS**
+Users Sent To (Total): {total}
+Users Not Found: {notfound}
+Users Forbidden: {forbidden}
+""".format(total=len(db_users), notfound=errNotFound, forbidden=errForbidden)

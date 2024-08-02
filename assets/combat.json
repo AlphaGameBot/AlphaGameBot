@@ -1,0 +1,97 @@
+{
+	"STRINGS": {
+		"SMALL_ATTACK_SUCCESS_PAIN_EFFECTS": [
+			"pushed them back a little",
+			"caused them to cry out in pain",
+			"making a bleeding wound on their arm",
+			"making them fall to the floor",
+			"left a bruise on their side",
+			"they staggered back a few steps",
+			"knocked the wind out of them",
+			"leaving a gash on their leg",
+			"causing them to wince",
+			"forcing them to take a step back"
+		],
+		"SMALL_ATTACK_FAILURE_MISS_EFFECTS": [
+			"just missed their chest",
+			"tripped on a tree root",
+			"dust got in their eye",
+			"they slipped on a patch of mud",
+			"were distracted by a noise",
+			"lost their balance",
+			"misjudged the distance",
+			"were startled by a sudden movement",
+			"felt a sudden cramp in their arm",
+			"was temporarily blinded by the sun"
+		],
+		"LARGE_ATTACK_SUCCESS_PAIN_EFFECTS": [
+			"stabbed them hard, with a gush of blood pouring out of the wound",
+			"causing them to cry out in agony as blood poured from the open wound",
+			"fell on the ground, unbalanced by the blow from the sword",
+			"pushed them back, causing them to hit their head on a tree root",
+			"leaving a deep and bleeding gash",
+			"forcing them to drop their weapon in pain",
+			"knocking them off their feet",
+			"leaving them clutching a severe wound",
+			"causing a deep wound that bled profusely",
+			"making them stagger backwards, nearly falling"
+		],
+		"LARGE_ATTACK_FAILURE_MISS_EFFECTS": [
+			"the weight of their weapon caused them to miss",
+			"they tripped while trying to deal a blow",
+			"they got distracted watching a pair of squirrels wrestling",
+			"they overextended and lost their balance",
+			"their weapon got caught in a nearby branch",
+			"they slipped on some loose gravel",
+			"their opponent dodged at the last second",
+			"their weapon was too heavy to swing effectively",
+			"they hesitated at the last moment",
+			"they misjudged the distance and swung too early"
+		],
+		"WIN_COMBAT_EFFECTS": [
+			"As {player_mention} defeated {opponent_mention}, they fell to the ground, defeated",
+			"{opponent_mention} dropped their weapon and surrendered, and {player_mention} emerged, victorious",
+			"{opponent_mention} ran away in fear.  {player_mention} was left standing, victorious",
+			"{opponent_mention} was knocked unconscious.  {player_mention} won.",
+			"{opponent_mention} was left bleeding and defeated.  {player_mention} won the battle",
+			"{opponent_mention} was left with a broken arm and begged for mercy.  {player_mention} was victorious",
+			"{opponent_mention} was left with a broken leg and couldn't continue.  {player_mention} emerged victorious",
+			"{opponent_mention} was left with a deep wound and surrendered.  {player_mention} was victorious",
+			"{opponent_mention} was left with a gash on their side.  {player_mention} won.",
+			"{opponent_mention} was left with a bruise on their face as they surrendered, declaring {player_mention} the winner"
+		]
+
+	},
+	"ABILITIES": {
+		"SHIELD": {
+			"NAME": "Shield",
+			"DESCRIPTION": "Raise your shield to block incoming attacks",
+			"COOLDOWN": 3,
+			"OFFSET": 0.86,
+			"SUCCESS_EFFECTS": [
+				"blocked the attack with their shield",
+				"raised their shield just in time to deflect the blow",
+				"deflected the attack with their shield",
+				"raised their shield to block the incoming attack",
+				"blocked the attack with their shield, leaving their opponent off balance",
+				"deflected the attack with their shield, causing their opponent to stumble",
+				"raised their shield to block the attack, leaving their opponent open for a counterattack",
+				"blocked the attack with their shield, leaving their opponent vulnerable",
+				"deflected the attack with their shield, leaving their opponent exposed",
+				"raised their shield to block the attack, leaving their opponent open to a follow-up strike"
+			],
+			"FAILURE_EFFECTS": [
+				"raised their shield too late, taking the full force of the blow",
+				"tried to block the attack with their shield, but missed",
+				"raised their shield too high, leaving their legs exposed",
+				"raised their shield too low, leaving their head vulnerable",
+				"tried to block the attack with their shield, but the blow was too powerful",
+				"raised their shield too late, taking a glancing blow",
+				"raised their shield too high, leaving their chest exposed",
+				"raised their shield too low, leaving their arms vulnerable",
+				"tried to block the attack with their shield, but the force of the blow knocked it aside",
+				"raised their shield too late, taking a hit to the shoulder"
+			]
+		}
+	}
+}
