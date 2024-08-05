@@ -49,7 +49,6 @@ import agb.system.guild.available
 import agb.system.message.message
 import agb.system.message.dms
 import agb.system.rotatingStatus
-import agb.system.databaseUpdate
 
 # RequestHandler
 import agb.requestHandler
@@ -178,16 +177,23 @@ async def rotate_status():
     logging.getLogger("listener").debug("Dispatching RotateStatus task to agb.system.rotatingStatus.rotatingStatus")
     await agb.system.rotatingStatus.rotatingStatus(bot, cnx, CAN_USE_DATABASE)
 
-@tasks.loop(seconds=15)
-async def database_update():
-    logging.getLogger("listener").debug("Dispatching DatabaseUpdate task to agb.system.databaseUpdate.handleDatabaseUpdate")
-    agb.system.databaseUpdate.handleDatabaseUpdate(cnx, CAN_USE_DATABASE)
-
+@tasks.loop(seconds=1)
+async def database_reconnect():
+    # source: https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-ping.html
+    l = logging.getLogger("listener")
+    if not CAN_USE_DATABASE: return
+    
+    try:
+        cnx.ping()
+    except mysql.connector.errors.InterfaceError:
+        l.info("MySQL server connection was lost.  Attempting to reconnect...")
+        cnx.ping(reconnect=True, attempts=5, delay=1)
+    
 ##### BOT EVENTS #####
 @bot.listen('on_ready', once=True)
 async def on_ready():
     bot.auto_sync_commands = True # Sync new commands with Discord.
-    BOT_TASKS = [database_update, rotate_status]
+    BOT_TASKS = [database_reconnect, rotate_status]
     logging.debug("Starting tasks...")
     for task in BOT_TASKS:
         if not task.is_running():

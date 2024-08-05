@@ -181,6 +181,14 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             return
         elif isinstance(error, OperationalError):
             await interaction.response.send_message(":x: Internal Database Error.  Please try again later!")
+            print("op err")
+            # ping the bot owner
+            owner_id = agb.cogwheel.getBotInformation()["OWNER_ID"]
+            agb.requestHandler.handler.post(os.getenv("WEBHOOK"), 
+          {
+                    "content": f"<@{owner_id}>\n"
+                },
+                "Database OperationalError")
             return
     else:
         # commands.xxx error
