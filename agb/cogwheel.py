@@ -20,6 +20,7 @@ from discord.embeds import *
 import os
 import json
 import logging
+import random
 import mysql.connector
 global isDebugEnv
 
@@ -105,6 +106,11 @@ def embed(**kwargs) -> discord.Embed:
                       icon_url="https://static.alphagame.dev/alphagamebot/img/icon.png")
     return _embed
 
+def percent_of_happening(percent: float) -> bool:
+    """Gets a percentage and compares it to a random call.  This gives a percentage of a certain event happening.
+    
+    Returns a boolean."""
+    return random.random() < percent
 
 class CogwheelLoggerHelper:
     """In hindsight, this was kind of a dumb idea.  This will """
@@ -174,3 +180,25 @@ class MySQLEnabledCogwheel(Cogwheel):
             self.logger.debug("")
         else:
             self.cursor = None
+
+class DefaultView(discord.ui.View):
+    """Extended version of `discord.ui.view` that includes default settings for the view, such as behavior for timeout."""
+
+    force_no_timeout: bool = False
+    async def on_timeout(self):
+        """This function is called when the view times out.  By default, it closes all buttons."""
+        if self.force_no_timeout: return
+        # This code is stolen from the pycord default on_timeout source.
+    
+        self.disable_all_items()
+
+        if not self._message or self._message.flags.ephemeral:
+            message: discord.Message = self.parent
+        else:
+            message: discord.Message = self.message
+
+        if message:
+            m = await message.edit(content="%s\nButtons were disabled due to a timeout." % message.content, view=self)
+            if m:
+                self._message = m
+
