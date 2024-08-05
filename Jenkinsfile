@@ -28,10 +28,13 @@ pipeline {
                 // sh 'printenv'
 
                 echo "Building"
+                // 8/1/2024 -> No Cache was added because of the fact that Pycord will never update :/
+                // ----------> If you know a better way, please make a pull request!
                 sh 'docker build -t alphagamedev/alphagamebot:$AGB_VERSION \
                                 --build-arg COMMIT_MESSAGE="$COMMIT_MESSAGE" \
-                                --build-arg BUILD_NUMBER=$BUILD_NUMBER \
-                                --build-arg BRANCH_NAME=$BRANCH_NAME .'
+                                --build-arg BUILD_NUMBER="$BUILD_NUMBER" \
+                                --build-arg BRANCH_NAME="$BRANCH_NAME" \
+                                --no-cache .'
 
             }
         }
