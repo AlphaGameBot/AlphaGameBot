@@ -155,12 +155,23 @@ class Combat:
         
     async def openingScreen(self):
         """Opening screen for the combat.  Ask the user if they're ready to fight."""
-        await self.thread.send(embed=agb.cogwheel.embed(
+        embed = agb.cogwheel.embed(
             title = "Combat",
             description = "%s, %s just challenged you to a duel.  Are you ready to "
                           "prove your worth in a duel to the death?  If you are, "
                           "press the *Ready!* button." % (self.challenger.name, self.competitor.name)
-        ), view=ReadyView(self))
+        )
+        # add fields for all game settings
+        embed.add_field(name="Max HP", value=str(self.max_hp))
+        embed.add_field(name="Healing Potions", value=str(self.healing_potions))
+        embed.add_field(name="Healing Potion HP Range", value="%s-%s" % (self.healing_potion_hp_min, self.healing_potion_hp_max))
+        embed.add_field(name="Small Attack Damage Range", value="%s-%s" % (self.small_attack_min, self.small_attack_max))
+        embed.add_field(name="Small Attack Hit Chance", value="%s%%" % (round(self.small_attack_chance * 100)))
+        embed.add_field(name="Large Attack Damage Range", value="%s-%s" % (self.large_attack_min, self.large_attack_max))
+        embed.add_field(name="Large Attack Hit Chance", value="%s%%" % (round(self.large_attack_chance * 100)))
+        
+
+        await self.thread.send(embed=embed, view=ReadyView(self))
 
     async def startFight(self):
         """Entry point for the combat.  This is where the combat actually starts."""
