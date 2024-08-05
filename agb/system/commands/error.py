@@ -186,7 +186,7 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             owner_id = agb.cogwheel.getBotInformation()["OWNER_ID"]
             agb.requestHandler.handler.post(os.getenv("WEBHOOK"), 
           {
-                    "content": f"<@{owner_id}>\n"
+                    "content": f"<@{owner_id}>\nDatabase Operational Error: {repr(error)}.  Check the DB stuff to make sure it's working!",
                 },
                 "Database OperationalError")
             return
@@ -209,12 +209,16 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
     v = DebugErrorOptionView #(ErrorOptionView if not agb.cogwheel.isDebugEnv else DebugErrorOptionView)
 
     try:
-        await interaction.response.send_message(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=v(error, interaction, interaction.user))
+        try:
+            await interaction.response.send_message(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=v(error, interaction, interaction.user))
 
-    except discord.errors.InteractionResponded:
-        logging.debug("Using a followup message to send the error message because the interaction was already responded to.")
-        await interaction.followup.send(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
+        except discord.errors.InteractionResponded:
+            logging.debug("Using a followup message to send the error message because the interaction was already responded to.")
+            await interaction.followup.send(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
 
-    if agb.cogwheel.isDebugEnv:
-        # Pass the error along to the Python Error Handler (console)
-        raise error 
+        if agb.cogwheel.isDebugEnv:
+            # Pass the error along to the Python Error Handler (console)
+            raise error 
+    except discord.errors.NotFound:
+        logger.warning("All else failed.  Using standard message to send error without the interaction because NotFound.")
+        await interaction.channel.send(tb if agb.cogwheel.isDebugEnv else "", embed=embed)
