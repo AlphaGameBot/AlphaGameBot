@@ -21,6 +21,8 @@ from enum import Enum
 import agb.cogwheel
 import json
 from asyncio import sleep
+import logging
+
 class CombatTurn(Enum):
     HOME = 0
     VISITOR = 1
@@ -50,6 +52,7 @@ class Combat:
     large_attack_min: int
     large_attack_max: int
     large_attack_chance: int | float
+    shield_offset: int | float
 
     def __init__(self,
                  competitor: discord.User,
@@ -67,7 +70,10 @@ class Combat:
                  small_attack_chance: int | float = 0.50,
                  large_attack_min: int = 15,
                  large_attack_max: int = 20,
-                 large_attack_chance: int | float = 0.20):
+                 large_attack_chance: int | float = 0.20,
+                 shield_offset: int | float = .70,
+                 shield_turns: int = 2,
+                 shield_count: int = 2):
         self.challenger = challenger
         self.competitor = competitor
 
@@ -82,6 +88,9 @@ class Combat:
         self.large_attack_min = large_attack_min
         self.large_attack_max = large_attack_max
         self.large_attack_chance = large_attack_chance
+        self.shield_offset = shield_offset
+        self.shield_turns = shield_turns
+        self.shield_count = shield_count
 
         self.winReason = "UNKNOWN"
 
@@ -102,14 +111,22 @@ class Combat:
             CombatTurn.HOME: {
                 "user": self.competitor,
                 "hp": self.max_hp,
-                "healing_potions": self.healing_potions
+                "healing_potions": self.healing_potions,
+                "shield": False,
+                "shield_remaining_for": 0,
+                "shields_remaining": self.shield_count
             },
             CombatTurn.VISITOR: {
                 "user": self.challenger,
                 "hp": self.max_hp,
-                "healing_potions": self.healing_potions
+                "healing_potions": self.healing_potions,
+                "shield": False,
+                "shield_remaining_for": 0,
+                "shields_remaining": self.shield_count
             }
         }
+
+        self.logger = logging.getLogger("cogwheel")
 
     def identifyUser(self, 
                      user: discord.User):
@@ -145,7 +162,21 @@ class Combat:
 
         else:
             raise ValueError("Invalid role for verifyOkUser!")
-             
+    
+    def calculate_hit_chance(self,
+                             base: float,
+                             player: CombatTurn) -> float:
+        """Get the total chance of hitting a player, all things considered."""
+        player = self.players[player]
+        chance = base
+        offsets = []
+        if player["shield"]:
+            chance = chance * self.shield_offset
+            offsets.append("shield")
+        
+        self.logger.debug("combat: calculate_hit_chance: %s (Modifiers: %s)" % (chance, ",".join(offsets)))
+        return chance
+
     async def begin(self,
               interaction: discord.context.ApplicationContext):
         await interaction.response.send_message("Please continue in the following thread!")
@@ -169,7 +200,9 @@ class Combat:
         embed.add_field(name="Small Attack Hit Chance", value="%s%%" % (round(self.small_attack_chance * 100)))
         embed.add_field(name="Large Attack Damage Range", value="%s-%s" % (self.large_attack_min, self.large_attack_max))
         embed.add_field(name="Large Attack Hit Chance", value="%s%%" % (round(self.large_attack_chance * 100)))
-        
+        embed.add_field(name="Shield Offset", value="%s%%" % round(self.shield_offset*100))
+        embed.add_field(name="Shield Turns", value=str(self.shield_turns))
+        embed.add_field(name="Shields Count", value=str(self.shield_count))
 
         await self.thread.send(embed=embed, view=ReadyView(self))
 
@@ -181,7 +214,12 @@ class Combat:
     async def handleUserTurn(self, rotate=True):
         if rotate:
             self.currentTurn = self.otherTurn()
-            
+        
+        if self.players[self.currentTurn]["shield_remaining_for"] > 0:
+            self.players[self.currentTurn]["shield_remaining_for"] -= 1
+            if self.players[self.currentTurn]["shield_remaining_for"] == 0:
+                self.players[self.currentTurn]["shield"] = False
+                await self.thread.send(":shield: %s's shield has expired." % self.players[self.currentTurn]["user"].mention)
         player = self.players[self.currentTurn]
         opponent = self.players[self.otherTurn()]
 
@@ -298,6 +336,11 @@ class CombatOptionView(agb.cogwheel.DefaultView):
             self._healing_potion.disabled = True
         self._healing_potion.label = "Healing Potion (%s remaining)" % str(player["healing_potions"])
 
+        self.select_callback.options[0].label = "Shield (%s remaining)" % str(player["shields_remaining"])
+        if player["shields_remaining"] == 0:
+            self.select_callback.options[0].disabled = True
+
+
     async def validate_user(self, user, interaction) -> bool:
         if self.instance.verifyOkUser(user):
             if self.instance.identifyUser(user) == self.instance.currentTurn:
@@ -315,7 +358,9 @@ class CombatOptionView(agb.cogwheel.DefaultView):
         button.label = "Small Attack Chosen!"
         await interaction.response.edit_message(view=self)
         
-        roll = agb.cogwheel.percent_of_happening(self.instance.small_attack_chance)
+        roll_chance = self.instance.calculate_hit_chance(self.instance.small_attack_chance, self.instance.otherTurn())
+        roll = agb.cogwheel.percent_of_happening(roll_chance)
+
         player = self.instance.players[self.instance.currentTurn]
         opponent = self.instance.players[self.instance.otherTurn()]
         if roll:
@@ -344,7 +389,9 @@ class CombatOptionView(agb.cogwheel.DefaultView):
         button.label = "Large Attack Chosen!"
         await interaction.response.edit_message(view=self)
         
-        roll = agb.cogwheel.percent_of_happening(self.instance.large_attack_chance)
+        roll_chance = self.instance.calculate_hit_chance(self.instance.small_attack_chance, self.instance.otherTurn())
+        roll = agb.cogwheel.percent_of_happening(roll_chance)
+
         player = self.instance.players[self.instance.currentTurn]
         opponent = self.instance.players[self.instance.otherTurn()]
         if roll:
@@ -391,13 +438,39 @@ class CombatOptionView(agb.cogwheel.DefaultView):
 
         await self.instance.handleUserTurn()
 
+    @discord.ui.select(placeholder="Use a special ability...", options=[
+        discord.SelectOption(label="Shield", value="ability_shield", emoji="🛡️")
+    ])
+    async def select_callback(self, select, interaction):
+        if not await self.validate_user(interaction.user, interaction): return
+        self.disable_all_items()
+
+        if select.values[0] == "ability_shield":
+            player = self.instance.players[self.instance.currentTurn]
+            if player["shield"]:
+                await interaction.response.send_message(":shield: You already have a shield up!", ephemeral=True)
+                return
+            if player["shields_remaining"] == 0:
+                await interaction.response.send_message(":shield: You're out of shields!", ephemeral=True)
+                return
+            player["shields_remaining"] -= 1
+            player["shield"] = True
+            player["shield_remaining_for"] = self.instance.shield_turns
+            await self.instance.thread.send(":shield: %s activated a shield, protecting them from attacks for the next %s." % (
+                player["user"].mention,
+                "turn" if self.instance.shield_turns == 1 else "%s turns" % self.instance.shield_turns))
+
+            await self.instance.handleUserTurn()
+        await interaction.response.edit_message(view=self)
+
+            
     # surrender button
     @discord.ui.button(label="Surrender", style=discord.ButtonStyle.gray, emoji="🏳️")
     async def _surrender(self, button, interaction):
         if not await self.validate_user(interaction.user, interaction): return
         self.disable_all_items()
         await interaction.response.edit_message(view=self)
-        await self.instance.thread.send("%s has surrendered.  %s wins!" % (
+        await self.instance.thread.send(":flag_white: %s has surrendered.  %s wins!" % (
             interaction.user.mention,
             self.instance.players[self.instance.otherTurn()]["user"].mention
         ))
@@ -420,8 +493,11 @@ class CombatCog(agb.cogwheel.Cogwheel):
         small_attack_chance: discord.Option(float, description="The chance of a small attack hitting. (Percentage)", default=0.50), # type: ignore
         large_attack_min: discord.Option(int, description="The minimum damage for a large attack.", default=15), # type: ignore
         large_attack_max: discord.Option(int, description="The maximum damage for a large attack.", default=20), # type: ignore
-        large_attack_chance: discord.Option(float, description="The chance of a large attack hitting. (Percentage)", default=0.20)): # type: ignore
-
+        large_attack_chance: discord.Option(float, description="The chance of a large attack hitting. (Percentage)", default=0.20), # type: ignore
+        shield_offset: discord.Option(float, description="The offset for the shield to change the chance of hitting by", default=0.70), # type: ignore
+        shield_turns: discord.Option(int, description="The amount of turns that a shield lasts for", default=2), # type: ignore
+        shield_count: discord.Option(int, description="The amount of times that you can use the shield.", default=2) # type: ignore
+    ):
         
         # LOTS OF SAFEGUARDS to prevent a bad situation.
         if interaction.channel.type in [discord.ChannelType.public_thread, discord.ChannelType.private_thread]:
@@ -472,6 +548,9 @@ class CombatCog(agb.cogwheel.Cogwheel):
                           small_attack_chance,
                           large_attack_min,
                           large_attack_max,
-                          large_attack_chance)
+                          large_attack_chance,
+                          shield_offset,
+                          shield_turns,
+                          shield_count)
 
         await instance.begin(interaction)  
