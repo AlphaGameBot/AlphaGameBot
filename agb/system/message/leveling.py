@@ -64,7 +64,8 @@ async def handleMessageLevelUp( ctx: discord.Message,
     # Check if the leveling feature should be enabled in the first place
     cursor.execute("SELECT leveling_enabled FROM guild_settings WHERE guildid = %s", [ctx.guild.id])
 
-    enabled = bool(cursor.fetchone()) # 1 or 0
+    enabled = cursor.fetchone()
+    logging.debug("Got response for guild %s being enabled: %s" % (guild.id, enabled))
     # 3.8.1: bug (fixed):
     #           The fact that ctx.guild.id was mistakenly set to
     #           ctx.id, the message ID, exposed a problem where
@@ -73,11 +74,16 @@ async def handleMessageLevelUp( ctx: discord.Message,
     #           not happen because agb.system.message.onboarding
     #           runs before this, and initializes everything in the
     #           database.
-    if not enabled:
+    if enabled == False or not enabled:
         logger.debug("handleMessageLevelUp: This guild has disabled leveling. (Got %s from database)", enabled)
         return
     # Get message count
+    query = "SELECT messages_sent,user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s"
     cursor.execute("SELECT messages_sent,user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s", [ctx.author.id, ctx.guild.id])
+    data = cursor.fetchone()
+    if data is None:
+        logger.warn("Query for getting data for user %s (%s) yielded no results (%s).  The query was \"%s\".", ctx.author.id, ctx.author.name, data, query % (ctx.author.id, ctx.guild.id))
+        return
     messages, level = cursor.fetchone() # _ is commands_ran... Don't need it.  
 
     # check if there is any change to the level
