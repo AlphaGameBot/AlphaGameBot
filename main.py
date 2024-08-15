@@ -77,6 +77,7 @@ import agb.enneagram
 import agb.trivia
 import agb.guild
 import agb.combat
+
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
     agb.utility.UtilityCog,
@@ -120,15 +121,36 @@ if __name__ == "__main__":
     parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
     parser.add_argument("--discord-debug", help="Show debug discord gateway/client information, this will be noisy!", action="store_true")
     parser.add_argument("-s", "--enable-say", help="Enable the say functionality regardless of environment or debuug mode.", action="store_true")
+    parser.add_argument("-l", "--log-level", help="Set the log level to a specified level.  Valid levels are FATAL, ERROR, WARN, INFO, and DEBUG.")
+    parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
     args = parser.parse_args()
 # Initalize logging services
+logging.config.fileConfig("logging/main.ini") # load the config
 LOG_LEVEL = logging.INFO
 if args.debug: # args.debug:
     LOG_LEVEL = logging.DEBUG
 
+# after above to override it
+if args.log_level is not None:
+    if args.log_level.upper() == "FATAL":
+        LOG_LEVEL = logging.FATAL
+    elif args.log_level.upper() == "ERROR":
+        LOG_LEVEL = logging.ERROR
+    elif args.log_level.upper() == "WARN" or args.log_level.upper() == "WARNING":
+        LOG_LEVEL = logging.WARNING
+    elif args.log_level.upper() == "INFO":
+        LOG_LEVEL = logging.INFO
+    elif args.log_level.upper() == "DEBUG":
+        # you know, you could use -d to enable debug mode...
+        LOG_LEVEL = logging.DEBUG
+    else:
+        logging.fatal("Invalid logging type \'%s\'!  --log-level should be FATAL, ERROR, WARN, INFO, or DEBUG", args.log_level)
+        sys.exit(1)
+
+if args.silent:
+    LOG_LEVEL = logging.FATAL
 # Load the logging file (logging/main.ini)
 logging.lastResort.setLevel(logging.INFO)
-logging.config.fileConfig("logging/main.ini") # load the config
 
 if args.discord_debug:
     logging.getLogger("discord.client").setLevel(logging.DEBUG)
@@ -151,6 +173,7 @@ if args.version:
 
 # ----- Initialize RequestHandler -----
 agb.requestHandler.handler.initialize()
+logging.info("Using %s version %s", discord.__name__, discord.__version__)
 # ----- -----
 if args.environment != None:
     if not os.path.isfile(args.environment):
@@ -290,20 +313,27 @@ for cog in BOT_LOADED_COGS:
     if issubclass(cog, agb.cogwheel.MySQLEnabledCogwheel):
         mysql_cogs += 1
 
-        bot.add_cog(cog(bot, cnx, CAN_USE_DATABASE))
+        addcog = lambda: bot.add_cog(cog(bot, cnx, CAN_USE_DATABASE))
         t = "MySQLEnabledCogwheel"
     elif issubclass(cog, agb.cogwheel.Cogwheel):
         normal_cogs += 1
-        bot.add_cog(cog(bot))
+        addcog = lambda: bot.add_cog(cog(bot))
         t = "Cogwheel"
     elif issubclass(cog, commands.Cog):
         base_cogs += 1
-        bot.add_cog(cog(bot))
+        addcog = lambda: bot.add_cog(cog(bot))
         t = "DiscordBaseCog"
     else:
         invalid_cogs += 1
         t = "Unknown"
         logging.warning(f"Cog \"{cog.__name__}\" is of invalid type {cog}!  Skipping it...")
+    try:
+        addcog() 
+    except Exception as e:
+        if agb.cogwheel.isDebugEnv:
+            raise e
+            sys.exit(1)
+        logging.error("An error occured whilst initializing cog \"%s\": %s", cog.__name__, repr(e))
     logging.debug("The type of this cog is %s" % t)
 logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, Commands.Cog: {3}, with {4} invalid cogs.".format(
     mysql_cogs + normal_cogs + invalid_cogs,

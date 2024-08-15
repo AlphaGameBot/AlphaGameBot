@@ -57,7 +57,6 @@ async def handleMessageLevelUp( ctx: discord.Message,
         # [{"level": int, "messages_required": int}, etc, etc, etc]
         
     logger = logging.getLogger('system')
-    guild = ctx.guild    
     cursor = cnx.cursor()
 
 
@@ -77,9 +76,26 @@ async def handleMessageLevelUp( ctx: discord.Message,
         logger.debug("handleMessageLevelUp: This guild has disabled leveling. (Got %s from database)", enabled)
         return
     # Get message count
-    cursor.execute("SELECT messages_sent,user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s", [ctx.author.id, ctx.guild.id])
-    messages, level = cursor.fetchone() # _ is commands_ran... Don't need it.  
+    query = "SELECT messages_sent, user_level FROM guild_user_stats WHERE userid = %s AND guildid = %s;" % (ctx.author.id, ctx.guild.id)
+    cursor.execute(query)
 
+    data = cursor.fetchone()
+
+    # Big fat bug, but I cannot seem to recreate it...  I am doing this
+    # so I can do a proper fix later on!
+    try:
+        # This line has been causing some problems...
+        messages, level = data  
+    except Exception as e:
+        logger.warning("Getting user leveling information failed.  Data: '%s', User: '%s', Guild: '%s', and the complete query was '%s'.  The error was `%s`.",
+                       data,
+                       ctx.author.id,
+                       ctx.guild.id,
+                       query,
+                       repr(e))
+        return
+
+            
     # check if there is any change to the level
     c_level = get_level_from_message_count(messages)
 
