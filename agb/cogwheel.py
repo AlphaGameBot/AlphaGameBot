@@ -55,6 +55,10 @@ def isDebug(argp=None) -> bool:
     return r
 
 def initalizeNewUser(cnx, user_id):
+    """This is depricated and no longer needed, in favor of the newer `agb.system.message.onboarding` routine!"""
+
+    raise DepricationWarning("initializeNewUser is depricated.  Move to the onboarding routine!")
+    
     l = logging.getLogger("cogwheel")
     c = cnx.cursor()
     c.execute("SELECT * FROM user_settings WHERE userid = %s" % str(user_id))
@@ -113,7 +117,10 @@ def percent_of_happening(percent: float) -> bool:
     return random.random() < percent
 
 class CogwheelLoggerHelper:
-    """In hindsight, this was kind of a dumb idea.  This will """
+    """In hindsight, this was kind of a dumb idea.  This would do the logging but just prepend
+    the cog name.
+
+    Depricated."""
     def __init__(self, logger, cogname):
         self.logger = logger
         self.cogname = cogname
@@ -177,7 +184,6 @@ class MySQLEnabledCogwheel(Cogwheel):
         self.canUseDatabase = canUseDatabase
         if canUseDatabase:
             self.cursor = cnx.cursor()
-            self.logger.debug("")
         else:
             self.cursor = None
 
@@ -198,7 +204,7 @@ class DefaultView(discord.ui.View):
             message: discord.Message = self.message
 
         if message:
-            m = await message.edit(content="%s\nButtons were disabled due to a timeout." % message.content, view=self)
+            m = await message.edit(view=self)
             if m:
                 self._message = m
 

@@ -13,3 +13,7 @@ small: clean
 
 test:
 	docker run --rm -it --name alphagamebot_test alphagamedev/alphagamebot:dev python3 /docker/run_tests.py
+
+version:
+	cat alphagamebot.json | jq .VERSION -Mr
+	
