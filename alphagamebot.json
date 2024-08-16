@@ -120,7 +120,9 @@
     "github": {
     	"OCTOCAT": "https://api.github.com/octocat",
     	"REPO_SEARCH": "https://api.github.com/search/repositories",
-    	"GET_REPO_BY_ID": "https://api.github.com/repositories/{}"
+    	"USER_SEARCH": "https://api.github.com/search/users",
+    	"GET_REPO_BY_ID": "https://api.github.com/repositories/{}",
+    	"GET_USER_BY_ID": "https://api.github.com/user/{}"
     }
   },
   "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot/spamming +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
