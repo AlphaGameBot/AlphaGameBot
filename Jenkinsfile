@@ -7,11 +7,12 @@ pipeline {
     }
     environment {
         TOKEN = credentials('alphagamebot-token')
-	    WEBHOOK = credentials('alphagamebot-webhook')
-	    DOCKER_TOKEN = credentials('alphagamedev-docker-token')
-	    AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -cMr").trim()
-	    COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
+        WEBHOOK = credentials('alphagamebot-webhook')
+        DOCKER_TOKEN = credentials('alphagamedev-docker-token')
+        AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -cMr").trim()
+        COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
 
+        GITHUB_TOKEN = credentials('alphagamebot-github-token')
         // MySQL stuff
         MYSQL_HOST = "hubby.internal"
         MYSQL_DATABASE = "alphagamebot"
@@ -61,8 +62,8 @@ pipeline {
                                 -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite \
                                 --name alphagamebot \
                                 -e TOKEN -e WEBHOOK -e BUILD_NUMBER \
-                                -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
-                                -e REDDIT_API_SECRET -e REDDIT_API_ID --restart=always --net=host \
+                                -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD -e GITHUB_TOKEN \
+                                -e GIT_COMMIT -e REDDIT_API_SECRET -e REDDIT_API_ID --restart=always --net=host \
                                 alphagamedev/alphagamebot:$AGB_VERSION -rs" // add alphagamebot flags
             }
         }
