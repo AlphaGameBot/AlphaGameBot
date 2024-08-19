@@ -18,8 +18,18 @@ import agb.cogwheel
 import discord
 import os
 import json
+import time
 from validators import url as is_valid_url
+from requests import Response
 from agb.requestHandler import handler, formatQueryString
+
+class NoGitHubCredentialsError(Exception):
+    """Error for when GitHub credentials are not defined"""
+    pass
+
+class GitHubAPIError(Exception):
+    """Error for when the GitHub API returns an error"""
+    pass
 
 class GithubCog(agb.cogwheel.Cogwheel):
 
@@ -29,7 +39,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
         token = os.getenv("GITHUB_TOKEN")
 
         if not token:
-            raise NotImplimentedError("No valid GitHub Token!")
+            raise NoGitHubCredentialsError("No valid GitHub Token!")
             
         self.GITHUB_HEADERS = {
             "Authorization": "Bearer %s" % token
@@ -49,7 +59,9 @@ class GithubCog(agb.cogwheel.Cogwheel):
                     "q": interaction.value
                 }), headers=self.GITHUB_HEADERS, attemptCache=False
             )            
-
+            if not await self.cushionGitHubAPIResponse(r, interaction, autoResponse=False):
+                raise GitHubAPIError("GitHub API Request failed!")
+            
             j = json.loads(r.text)
 
             for result in j["items"]:
@@ -74,7 +86,8 @@ class GithubCog(agb.cogwheel.Cogwheel):
                     "q": interaction.value
                 }), headers=self.GITHUB_HEADERS, attemptCache=False
             )            
-
+            if not await self.cushionGitHubAPIResponse(r, interaction, autoResponse=False):
+                raise GitHubAPIError("GitHub API Request failed!")
             j = json.loads(r.text)
 
             for result in j["items"]:
@@ -86,19 +99,49 @@ class GithubCog(agb.cogwheel.Cogwheel):
                 )
             return results
 
+    async def cushionGitHubAPIResponse(self,
+                                       request: Response,
+                                       interaction: discord.context.ApplicationContext,
+                                       autoResponse: bool = True) -> bool:
+        """Checks if the GitHub API response is valid and can continue.
+        
+        Returns an boolean, `True` if it is OK, and `False` if not.  Automatic Responses can be configured
+        with the `autoResponse` argument (defaults to `True`)."""
+        requestOK = True
+        reason = "No Reason!"
+        
+        # log ratelimiting information
+        self.logger.debug("Ratelimit Remaining: %s, Resets: %s (in %s seconds).", 
+                          request.headers["x-ratelimit-remaining"], 
+                          request.headers["x-ratelimit-reset"], 
+                          int(request.headers["x-ratelimit-reset"]) - time.time())
+
+        if request.status_code not in [200, 204]:
+            # uhhh... this is not ok... lemme check.
+            if request.headers["x-ratelimit-remaining"] == 0:
+                reason = "Ratelimited"
+                requestOK = False
             
+            if not requestOK and autoResponse:
+                await interaction.response.send_message(":x: Can't do that right now...", ephemeral=True)
+                self.logger.warning("GitHub API Request failed: %s" % reason)
+            
+        return requestOK
+
+        
     @group.command(name="octocat", description="Get an octocat!")
     async def _octocat(self, interaction: discord.context.ApplicationContext):
         r = handler.get(
-            agb.cogwheel.getAPIEndpoint("github", "OCTOCAT", headers=self.GITHUB_HEADERS, attemptCache=False),
+            agb.cogwheel.getAPIEndpoint("github", "OCTOCAT"), headers=self.GITHUB_HEADERS, attemptCache=False,
         )
-
+        if not await self.cushionGitHubAPIResponse(r, interaction):
+            return
         await interaction.response.send_message("```\n%s\n```" % r.text)
         
 
     @group.command(name="repository", description="Get GitHub repository information!")
     async def _repository(self, interaction: discord.context.ApplicationContext,
-                          repository: discord.Option(int, description="Repository to use", autocomplete=_github_repo_search_autocomplete)):
+                          repository: discord.Option(int, description="Repository to use", autocomplete=_github_repo_search_autocomplete)): # type: ignore
 
         await interaction.response.defer()
         
@@ -108,10 +151,20 @@ class GithubCog(agb.cogwheel.Cogwheel):
             attemptCache=False
         )
 
-        if r.status_code == 403:
-            await interaction.response.send(":x: Can't do that right now...")
+        if not await self.cushionGitHubAPIResponse(r, interaction):
             return
+        
         data = json.loads(r.text)
+        
+        # get contributor information
+        r2 = handler.get( #r2d2 lol
+            data["contributors_url"],
+            headers=self.GITHUB_HEADERS,
+            attemptCache=False
+        )
+        canDoContributors = True
+        if not await self.cushionGitHubAPIResponse(r2, interaction, autoResponse=False):
+            canDoContributors = False    
 
         author = discord.EmbedAuthor(
             name     = data["full_name"],
@@ -141,20 +194,28 @@ class GithubCog(agb.cogwheel.Cogwheel):
             embed.add_field(name="Topics", 
                             value=topicstr)
         
+        if canDoContributors:
+            contributors = json.loads(r2.text)
+            contributorstr = "%s: " % str(len(contributors)) + contributors.join([c["login"] for c in contributors])
+            embed.add_field(name="Contributors", value=contributorstr)
+
         if is_valid_url(data["homepage"]):
+            self.logger.debug("Yep, the URL \"%s\" from the homepage seems to be valid.  Passing it along to the button!", data["homepage"])
             vi.add_item(
                 discord.ui.Button(
                     label = "Project Homepage",
                     url   = data["homepage"]
                 )
             )
+        else:
+            self.logger.debug("Well, that sucks.  The URL \"%s\" is not valid, so I can't use the button.", data["homepage"])
         
         # Fire off that embed!!
         await interaction.followup.send(embed = embed, view = vi)
 
     @group.command(name="user", description="Get a GitHub user's information!")
     async def _user(self, interaction: discord.context.ApplicationContext,
-                    user: discord.Option(int, description="User to search for!", autocomplete=_github_user_search_autocomplete)):
+                    user: discord.Option(int, description="User to search for!", autocomplete=_github_user_search_autocomplete)): # type: ignore
         await interaction.response.defer()
         endpoint = agb.cogwheel.getAPIEndpoint("github", "GET_USER_BY_ID")
 
@@ -163,6 +224,8 @@ class GithubCog(agb.cogwheel.Cogwheel):
             headers=self.GITHUB_HEADERS,
             attemptCache=False
         )
+        if not await self.cushionGitHubAPIResponse(r, interaction):
+            return
         data = json.loads(r.text)
 
         author = discord.EmbedAuthor(
