@@ -27,10 +27,9 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
         if agb.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
 
             # Increase the value of commands_ran by 1 for the given user id
-            query = "UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s"
-            values = [interaction.author.id]
             cursor = cnx.cursor()
-            cursor.execute(query, values)
+            cursor.execute("UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s", [interaction.author.id])
+            cursor.execute("UPDATE guild_user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s AND guildid = %s", [interaction.author.id, interaction.guild.id])
             cnx.commit()
             cursor.close()
         else:

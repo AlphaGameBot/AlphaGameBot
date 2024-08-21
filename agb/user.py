@@ -48,9 +48,9 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
             
         c = self.cnx.cursor()
 
-        c.execute("SELECT messages_sent, commands_ran from user_stats WHERE userid = %s", [user.id])
+        c.execute("SELECT messages_sent, commands_ran from guild_user_stats WHERE userid = %s AND guildid = %s", [user.id, interaction.guild.id])
 
-
+        self.logger.debug(c.statement)
         username = user.name
         nick = user.nick
 
@@ -59,7 +59,7 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
         else:
             presented_username = "{0}".format(username)
         
-        (messages_sent, commands_ran) = c.fetchall()[0]
+        messages_sent, commands_ran = c.fetchone()
         embed = agb.cogwheel.embed(
             title=presented_username
         )
