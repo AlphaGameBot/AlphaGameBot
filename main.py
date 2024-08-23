@@ -50,6 +50,7 @@ import agb.system.guild.available
 import agb.system.message.message
 import agb.system.message.dms
 import agb.system.rotatingStatus
+import agb.system.commands.completion
 
 # RequestHandler
 import agb.requestHandler
@@ -257,14 +258,15 @@ async def on_application_command(ctx: discord.context.ApplicationContext):
 
 @bot.listen()
 async def on_application_command_completion(interaction):
-    if CAN_USE_DATABASE:
-        cnx.commit()
+    listener.debug("Dispatching slash command /{0} to agb.system.commands.completion.handleApplicationCommandCompletion".format(interaction.command))
+    return await agb.system.commands.completion.handleApplicationCommandCompletion(interaction, cnx, CAN_USE_DATABASE)
 
 @bot.listen('on_guild_available')
 async def guild_available(ctx):
     listener.debug("Dispatching guild_availiable to agb.system.guild.availiable.handleGuildAvailiable (GuildID: %s)", ctx.id)
     # Essentially a proxy function
     return await agb.system.guild.available.handleGuildAvailiable(ctx, cnx, CAN_USE_DATABASE)
+
 
 MYSQL_SERVER = os.getenv("MYSQL_HOST", False)
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", False)

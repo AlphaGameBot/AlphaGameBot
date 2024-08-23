@@ -68,4 +68,3 @@ class jokesCog(agb.cogwheel.Cogwheel):
             await interaction.response.send_message(":x: Too long! ({0} > 2000)".format(len(t)))
             return
         await interaction.response.send_message("```\n{0}\n```".format(t))
-

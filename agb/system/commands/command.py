@@ -16,13 +16,15 @@
 
 import discord
 import agb.cogwheel
+import agb.system.onboarding
 import logging
+
 async def handleApplicationCommand(interaction: discord.context.ApplicationContext, CAN_USE_DATABASE, cnx, tracking):
     l = logging.getLogger("system")
     l.debug("handleApplicationCommand: Handling command /{0} from {1}".format(interaction.command.name, interaction.author.id))
     if CAN_USE_DATABASE and tracking:
         # attempt to make a new user if not already in the database
-        agb.cogwheel.initalizeNewUser(cnx, interaction.author.id)
+        agb.system.onboarding.initalizeNewUser(cnx, CAN_USE_DATABASE, interaction.author.id, interaction.guild.id)
 
         if agb.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
 
