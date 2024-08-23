@@ -1,4 +1,4 @@
 -- Announcement settings --
 .optin -> Opt-in for announcement DMs
 .outout -> Opt-out of announcement DMs
-.optstatus -> Check opt-in staus for announcement DMs.
+.optstatus -> Check opt-in status for announcement DMs.
