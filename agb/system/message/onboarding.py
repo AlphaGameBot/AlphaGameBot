@@ -6,6 +6,8 @@ async def initalizeNewUser(cnx: connection.MySQLConnection,
                            user_id: int, 
                            guild_id: int = None):
     if not CAN_USE_DATABASE: return
+    if cnx is None: return
+    
     l = logging.getLogger("cogwheel")
 
     try:

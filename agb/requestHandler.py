@@ -48,13 +48,15 @@ class RequestHandler:
         self.logger.debug("Using User-Agent '%s'", self.REQUEST_HEADERS["User-Agent"])
         self.logger.info("RequestHandler has been initalized!")
 
-    def get(self, url: str, attemptCache=True):
+    def get(self, url: str, headers: bool = {}, attemptCache=True):
         self.logger.debug("Web request was called with URL \"{0}\".  {1}".format(url,
                                                                                  "(CACHING WAS DISABLED)" if attemptCache == False else ""))
+        req_headers = self.REQUEST_HEADERS.copy()
+        req_headers.update(headers)
         if attemptCache:
-            r = self.session.get(url, headers=self.REQUEST_HEADERS)
+            r = self.session.get(url, headers=req_headers)
         else:
-            r = requests.get(url, headers=self.REQUEST_HEADERS)  # some sites / APIs don't work well with caching,
+            r = requests.get(url, headers=req_headers)  # some sites / APIs don't work well with caching,
             # especially /meme.  It always returns same because of the cache.
         self.logger.info("Web request finished.  StatusCode={0} ({1}), time={2}ms, from_cache:{3}".format(r.status_code,
                                                                                           self.RESPONSES[str(r.status_code)],

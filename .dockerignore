@@ -18,11 +18,11 @@
 *.md
 LICENSE
 .vscode
+.idea
 
 # Development stuff
 request-handler.sqlite
 .venv
-.idea
 
 # We don't *need* .git (required git stuff is environment variables)
 .git
@@ -32,7 +32,8 @@ request-handler.sqlite
 
 # Blueprints that are not needed in the container
 Dockerfile
-Jenkinsfile
+Jenkinsfile*
+Makefile
 docker-compose.yml
 
 build/

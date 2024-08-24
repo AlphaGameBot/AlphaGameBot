@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #    AlphaGameBot - A Discord bot that's free and (hopefully) doesn't suck
 #    Copyright (C) 2024  Damien Boisvert (AlphaGameDeveloper)
 
@@ -77,6 +78,7 @@ import agb.enneagram
 import agb.trivia
 import agb.guild
 import agb.combat
+import agb.github
 
 ##### LIST OF COGS #####
 BOT_LOADED_COGS = [
@@ -102,7 +104,8 @@ BOT_LOADED_COGS = [
     agb.enneagram.EnneagramCog,
     agb.trivia.TriviaCog,
     agb.guild.GuildCog,
-    agb.combat.CombatCog
+    agb.combat.CombatCog,
+    agb.github.GithubCog
 ]
 # parsing command line arguments
 if __name__ == "__main__":
@@ -120,11 +123,13 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", help="Print the version of the bot and exit.", action="store_true")
     parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
     parser.add_argument("--discord-debug", help="Show debug discord gateway/client information, this will be noisy!", action="store_true")
-    parser.add_argument("-s", "--enable-say", help="Enable the say functionality regardless of environment or debuug mode.", action="store_true")
+    parser.add_argument("-s", "--enable-say", help="Enable the say functionality regardless of environment or debug mode.", action="store_true")
     parser.add_argument("-l", "--log-level", help="Set the log level to a specified level.  Valid levels are FATAL, ERROR, WARN, INFO, and DEBUG.")
     parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
+    parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
     args = parser.parse_args()
 # Initalize logging services
+
 logging.config.fileConfig("logging/main.ini") # load the config
 LOG_LEVEL = logging.INFO
 if args.debug: # args.debug:
@@ -303,10 +308,15 @@ else:
     )
     cnx.autocommit = True
 # set command cogs
+if not CAN_USE_DATABASE:
+    logging.info("Database functionality is disabled!")
+    
 mysql_cogs = 0
 normal_cogs = 0
 base_cogs = 0
 invalid_cogs = 0
+failed_cogs = 0
+
 for cog in BOT_LOADED_COGS:
     # this is first b/c MySQLEnabledCogwheel inherits Cogwheel.
     logging.debug(f"Loading cog \"{cog.__name__}\"...")
@@ -330,9 +340,9 @@ for cog in BOT_LOADED_COGS:
     try:
         addcog() 
     except Exception as e:
-        if agb.cogwheel.isDebugEnv:
+        if args.strict:
             raise e
-            sys.exit(1)
+        failed_cogs += 1
         logging.error("An error occured whilst initializing cog \"%s\": %s", cog.__name__, repr(e))
     logging.debug("The type of this cog is %s" % t)
 logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, Commands.Cog: {3}, with {4} invalid cogs.".format(
@@ -345,6 +355,9 @@ logging.info("Loaded {0} cogs: MySQLEnabledCogwheel: {1}, Cogwheel: {2}, Command
 if invalid_cogs > 0:
     logging.warning(f"{invalid_cogs} failed to initalize: They're not decendants of Cogwheel!")
 
+if failed_cogs > 0:
+    logging.error(f"{failed_cogs} failed to initialize!")
+    
 if __name__ == "__main__":
     logging.info("Starting the bot...")
     token = os.getenv("TOKEN")

@@ -21,6 +21,7 @@ requests~=2.32.2
 requests-cache
 nltk~=3.8.1
 pynacl
+validators
 
 # (P)ython (R)eddit (A)pi (W)rapper
 praw
