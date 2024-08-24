@@ -111,10 +111,12 @@ class GithubCog(agb.cogwheel.Cogwheel):
         reason = "No Reason!"
         
         # log ratelimiting information
-        self.logger.debug("Ratelimit Remaining: %s, Resets: %s (in %s seconds).", 
+        self.logger.debug("GitHub ratelimit remaining for resource '%s': Used: %s (%s remaining), Resets: %s (in %s seconds).", 
+                          request.headers["x-ratelimit-resource"],
+                          request.headers["x-ratelimit-used"],
                           request.headers["x-ratelimit-remaining"], 
                           request.headers["x-ratelimit-reset"], 
-                          int(request.headers["x-ratelimit-reset"]) - time.time())
+                          round(int(request.headers["x-ratelimit-reset"]) - time.time()))
 
         if request.status_code not in [200, 204]:
             # uhhh... this is not ok... lemme check.
@@ -196,7 +198,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
         
         if canDoContributors:
             contributors = json.loads(r2.text)
-            contributorstr = "%s: " % str(len(contributors)) + contributors.join([c["login"] for c in contributors])
+            contributorstr = "%s: " % str(len(contributors)) + ", ".join([c["login"] for c in contributors])
             embed.add_field(name="Contributors", value=contributorstr)
 
         if is_valid_url(data["homepage"]):
