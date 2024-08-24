@@ -81,8 +81,6 @@ async def handleMessageLevelUp( ctx: discord.Message,
 
     data = cursor.fetchone()
 
-    # Big fat bug, but I cannot seem to recreate it...  I am doing this
-    # so I can do a proper fix later on!
     try:
         # This line has been causing some problems...
         messages, level = data  
@@ -93,7 +91,18 @@ async def handleMessageLevelUp( ctx: discord.Message,
                        ctx.guild.id,
                        query,
                        repr(e))
-        return
+        
+        # Let's try to add the user to the database... 
+        logger.warning("Attempting to add user %s to database as a last-ditch effort.", ctx.author.id)
+        add_query = "INSERT INTO guild_user_stats (userid, guildid) VALUES (%s, %s);" % (ctx.author.id, ctx.guild.id)
+        cursor.execute(add_query)
+        logger.warning("Completed adding user %s to database.  Trying again...", ctx.author.id)
+        cursor.close()
+        cnx.commit()
+
+        # Try again
+        return await handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, CAN_DO_TRACKING)
+        
 
             
     # check if there is any change to the level
