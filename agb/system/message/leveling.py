@@ -96,7 +96,7 @@ async def handleMessageLevelUp( ctx: discord.Message,
         logger.warning("Attempting to add user %s to database as a last-ditch effort.", ctx.author.id)
         add_query = "INSERT INTO guild_user_stats (userid, guildid) VALUES (%s, %s);" % (ctx.author.id, ctx.guild.id)
         cursor.execute(add_query)
-        logger.warning("Completed adding user %s to database.  Trying again...", ctx.user.id)
+        logger.warning("Completed adding user %s to database.  Trying again...", ctx.author.id)
         cursor.close()
         cnx.commit()
 
