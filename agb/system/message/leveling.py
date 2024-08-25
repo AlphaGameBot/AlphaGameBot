@@ -85,7 +85,7 @@ async def handleMessageLevelUp( ctx: discord.Message,
         # This line has been causing some problems...
         messages, level = data  
     except Exception as e:
-        logger.warning("Getting user leveling information failed.  Data: '%s', User: '%s', Guild: '%s', and the complete query was '%s'.  The error was `%s`.",
+        logger.warning("Getting user leveling information failed.  Data: `%s`, User: `%s`, Guild: `%s`.  The complete query was `%s`.  The error was `%s`.",
                        data,
                        ctx.author.id,
                        ctx.guild.id,
@@ -96,7 +96,7 @@ async def handleMessageLevelUp( ctx: discord.Message,
         logger.warning("Attempting to add user %s to database as a last-ditch effort.", ctx.author.id)
         add_query = "INSERT INTO guild_user_stats (userid, guildid) VALUES (%s, %s);" % (ctx.author.id, ctx.guild.id)
         cursor.execute(add_query)
-        logger.warning("Completed adding user %s to database.  Trying again...", ctx.author.id)
+        logger.warning("Completed adding user %s to database.  (%s rows affected). Trying again...", ctx.author.id, cursor.rowcount)
         cursor.close()
         cnx.commit()
 
