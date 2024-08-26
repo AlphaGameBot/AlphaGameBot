@@ -3,12 +3,11 @@
 <!-- badges go BRRRR -->
 <p align="center">
   <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/AlphaGameDeveloper/AlphaGameBot">
-  <img alt="Python Version" src="https://img.shields.io/badge/Python-3.11-yellow">
   <img alt="GitHub License" src="https://img.shields.io/github/license/AlphaGameDeveloper/AlphaGameBot?logo=github">
-  <img alt="GitHub Sponsors" src="https://img.shields.io/github/sponsors/AlphaGameDeveloper">
   <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/AlphaGameDeveloper/AlphaGameBot">
-  <img alt="GitHub repo file count (file type)" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file">
-  <img alt="GitHub repo Python files" src="https://img.shields.io/github/directory-file-count/AlphaGameDeveloper/AlphaGameBot?type=file&logo=python&label=Python%20files&extension=py">
+  <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/alphagamedev/alphagamebot?logo=docker">
+  <img alt="Docker Image Version" src="https://img.shields.io/docker/v/alphagamedev/alphagamebot">
+  
 </p>
 <p align="center"> <!-- line 2 for Jenkins! -->
   <img src='https://jenkins.alphagame.dev/buildStatus/icon?job=AlphaGameBot%2FAlphaGameBot+Production%2Fmaster&subject=Production%20Build'>
