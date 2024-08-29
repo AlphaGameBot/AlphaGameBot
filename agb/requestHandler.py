@@ -26,7 +26,8 @@ class RequestHandler:
         self.logger = logging.getLogger("requesthandler")
         with open("assets/http_codes.json", "r") as f:
             self.RESPONSES = json.load(f)
-            self.logger.debug("Loaded %s HTTP Responses!" % len(self.RESPONSES.keys()))
+            self.logger.debug("Loaded %s HTTP Responses!", len(self.RESPONSES.keys()))
+            self.logger.debug("Debug Environment: %s", "yes" if agb.cogwheel.isDebugEnv else "no")
         self.session = requests_cache.CachedSession("request-handler", cache_control=True, expire_after=43200) # 43200 seconds = 12 hours
         with open("alphagamebot.json", "r") as f:
             self.BOT_INFORMATION = json.load(f)
