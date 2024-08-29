@@ -161,7 +161,9 @@ logging.lastResort.setLevel(logging.INFO)
 if args.discord_debug:
     logging.getLogger("discord.client").setLevel(logging.DEBUG)
     logging.getLogger("discord.gateway").setLevel(logging.DEBUG)
-    
+
+if args.debug:
+    os.environ["DEBUG"] = "1"
 CONFIGURED_LOGGERS = [
 	"root",
 	"cogwheel",
@@ -394,6 +396,7 @@ if __name__ == "__main__":
     except client_exceptions.ClientConnectorError as e:
         logging.fatal("Cannot connect to Discord's gateway!")
         logging.fatal("Maybe check your internet connection?")
+        logging.fatal("Complete Error: %s" % repr(e))
         sys.exit(1)
     except discord.errors.LoginFailure as e:
         logging.fatal("LoginFailure: Invalid token given.  Please check the token and try again.")

@@ -57,7 +57,7 @@ def isDebug(argp=None) -> bool:
 def initalizeNewUser(cnx, user_id):
     """This is depricated and no longer needed, in favor of the newer `agb.system.message.onboarding` routine!"""
 
-    raise DepricationWarning("initializeNewUser is depricated.  Move to the onboarding routine!")
+    logging.warning("initializeNewUser is depricated.  Move to the onboarding routine!")
     
     l = logging.getLogger("cogwheel")
     c = cnx.cursor()
