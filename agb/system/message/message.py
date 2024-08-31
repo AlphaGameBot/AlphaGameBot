@@ -65,7 +65,8 @@ async def handleOnMessage(bot: commands.Bot,
         await agb.system.message.counting.countMessage(ctx, cnx, CAN_USE_DATABASE, tracking)
         await agb.system.message.leveling.handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, tracking)
     else:
-        logging.debug("handleOnMessage: Not dispatching tracking functions because %s", "tracking is disabled" if not tracking else "the database is disabled")
+        logging.debug("handleOnMessage: Not dispatching tracking functions because %s", 
+                      "tracking is disabled" if not tracking else "the database is disabled")
 
     if ctx.content.startswith(say_trigger) == False and not say_prompted:
         return
@@ -76,6 +77,9 @@ async def handleOnMessage(bot: commands.Bot,
         return
     
     # When I run 2 instances of AlphaGameBot at the same time, both will reply to my message.
+    # ----> Ammendment: This was really only a problem when using the old, prefixed say command
+    # ----> such as "..(text)" or "?say (text)".  Now that I use the mention, it's not a problem.
+    # ----> I will keep this, with the addition of the "--say-trigger" flag.
     # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
     # I will just remove the `DEBUG=1` environment variable.
     if agb.cogwheel.isDebugEnv and not forcesay:
