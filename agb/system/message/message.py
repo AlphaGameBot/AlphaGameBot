@@ -29,37 +29,46 @@ async def handleOnMessage(bot: commands.Bot,
                           cnx: mysql.connector.connection.MySQLConnection, 
                           CAN_USE_DATABASE: bool,
                           tracking: bool, 
-                          forcesay: bool):
-    orc = ctx.content
-    bot_information = agb.cogwheel.getBotInformation()
+                          forcesay: bool,
+                          global_say_enabled: bool,
+                          say_trigger: str | None = None) -> None:
+    """This function handles messages sent by users.  It is called every time a message is sent,
+    and it will handle dispatching the message to the appropriate functions.
+    
+    Args:
+        bot (commands.Bot): The bot object.
+        ctx (discord.Message): The message object.
+        cnx (mysql.connector.connection.MySQLConnection): The database connection.
+        CAN_USE_DATABASE (bool): Whether or not the database is enabled.
+        tracking (bool): Whether or not to track messages.
+        forcesay (bool): Whether or not to force the bot have say functionality regardless of the environment.
+        global_say_enabled (bool): Whether or not the bot can say messages in all guilds.
+        say_trigger (str): The trigger to make the bot say something."""
     logger = logging.getLogger("system")
-    bot_mention_string = bot.user.mention
-    isSay = False
-    isSay = ctx.content.startswith(bot_mention_string)
-    ctx.content = ctx.content.strip(bot_mention_string).strip()
-    if tracking:
-        if isSay:
-            logger.debug("Recieved 'say' message: (original: %s, valuetosay: %s, isSay: %s)" % (orc, ctx.content, isSay))
-        if ctx.author.bot:
-            logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
-            return
-        
-        # Fire the messageLevelUp -> In another file to be more organized (ME? ORGANIZED? INSANE!!)
+    bot_information = agb.cogwheel.getBotInformation()
+    
+    if say_trigger is None:
+        say_trigger = bot.user.mention # <@BOT_ID>
+    
+    say_prompted = ctx.content.startswith(say_trigger)
+    
+    ctx.content = ctx.content.strip(say_trigger).strip()
+    if say_prompted:
+        logger.debug("Recieved say message: (original: %s, valuetosay: %s, isSay: %s)", ctx.content, ctx.content, say_prompted)
+
+    if ctx.author.bot:
+        logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
+        return
+    
+    if tracking and CAN_USE_DATABASE:
         await agb.system.onboarding.initalizeNewUser(cnx, ctx.author.id, ctx.guild.id)
         await agb.system.message.counting.countMessage(ctx, cnx, CAN_USE_DATABASE, tracking)
         await agb.system.message.leveling.handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, tracking)
-        
     else:
-        logging.debug("handleOnMessage: Not tracking message count because CAN_USE_DATABASE is False or tracking is False.")
+        logging.debug("handleOnMessage: Not dispatching tracking functions because %s", "tracking is disabled" if not tracking else "the database is disabled")
 
-    if ctx.content.startswith("..") == False and not isSay:
+    if ctx.content.startswith(say_trigger) == False and not say_prompted:
         return
-    if ctx.content.startswith("...") == True: 
-        # Sometimes, I make sarcastic comments, starting with ...
-        # Example: "... blah blah blah", and the bot responds to it as
-        # ". blah blah blah".  This prevents the bot from responding.
-        return
-
 
     # Disable the say command for all servers except for the ones in which they are explicitly
     # enabled in alphagamebot.json, key "SAY_EXCEPTIONS"
@@ -73,18 +82,13 @@ async def handleOnMessage(bot: commands.Bot,
         logger.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
     
-    if ctx.author.id != os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690):
-        logger.warning("{0} tried to make me say \"{1}\", but I successfully ignored it.".format(ctx.author.name,
+    if ctx.author.id != os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690) and not global_say_enabled:
+        logger.warning("%s tried to make me say \"%s\", but I successfully ignored it.".format(ctx.author.name,
                                                                                                ctx.content))
-#        await ctx.reply("> \"You can go fuck yourself with that!\", Brewstew, *Devil Chip*")
         return
 
-    text = ctx.content
-    if not isSay:
-        text = text[2:]
-    if text == None:
-        # No text given, so give up...
-        return
+    text = ctx.content[len(say_trigger):].strip()
+    logger.debug("handleOnMessage: say: Final text cut is \"%s\"", text)
     
     # Put in the console that it was told to say something!
     logger.info("I was told to say: \"%s\"." % text)

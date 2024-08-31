@@ -25,6 +25,10 @@ with open("assets/levels.json", "r") as f:
     levels = json.load(f)["levels"]
     
 def get_level_from_message_count(messages: int) -> int:
+    """This function will return the level of a user based on the number of messages they have sent.
+    
+    Args:
+        messages (int): The number of messages the user has sent."""
     levelNumber = 0 # to show errors in the code, we set a value that will 100% be overwritten
     for level in reversed(levels):
         if level["messages_required"] > messages:

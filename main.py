@@ -128,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--log-level", help="Set the log level to a specified level.  Valid levels are FATAL, ERROR, WARN, INFO, and DEBUG.")
     parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
     parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
+    parser.add_argument("--say-trigger", help="Set the trigger for the say command.  Default is the bot's mention.")
     args = parser.parse_args()
 # Initalize logging services
 
@@ -251,7 +252,7 @@ async def on_message(ctx: discord.Message):
         return await agb.system.message.dms.handleDMMessage(bot, ctx, cnx, CAN_USE_DATABASE)
     
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
-    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say)
+    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say, args.say_trigger)
 
 @bot.listen()
 async def on_application_command(ctx: discord.context.ApplicationContext):
