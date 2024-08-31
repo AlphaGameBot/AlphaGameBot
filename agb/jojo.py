@@ -18,7 +18,7 @@ import discord
 from discord.ext import commands
 
 import agb.cogwheel
-from . import requestHandler
+from .system import requestHandler
 import json
 import random
 import logging

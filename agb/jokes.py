@@ -18,7 +18,7 @@ import logging
 
 import discord
 from discord.ext import commands
-import agb.requestHandler
+import agb.system.requestHandler
 import json
 from nltk.corpus import words
 import random
@@ -28,7 +28,7 @@ import agb.cogwheel
 class jokesCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="joke", description="I'm so funny, right?")
     async def _joke(self, interaction):
-        r = agb.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)
+        r = agb.system.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)
         joke = json.loads(r.text)
 
         embed = discord.Embed(title="Joke #{}".format(joke["id"]), description="{0}\n{1}".format(joke["setup"], joke["punchline"]))
@@ -46,7 +46,7 @@ class jokesCog(agb.cogwheel.Cogwheel):
             text[len(text) - 1] = ""
         text = text.lower()
         # following spaces so cache is possible lol
-        r = agb.requestHandler.handler.get(endpoint + "?text=" + text)
+        r = agb.system.requestHandler.handler.get(endpoint + "?text=" + text)
         j = json.loads(r.text)
         await interaction.response.send_message(j['contents']["translated"])
 

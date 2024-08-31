@@ -20,7 +20,7 @@ import traceback
 import discord
 from discord.ext import commands
 import agb.cogwheel
-import agb.requestHandler
+import agb.system.requestHandler
 import time
 from json import load
 from mysql.connector.errors import OperationalError
@@ -72,7 +72,7 @@ class ErrorOptionView(discord.ui.View):
                 arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
         except KeyError:
             arguments = "*No Arguments.*"
-        response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
+        response = agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -184,7 +184,7 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             print("op err")
             # ping the bot owner
             owner_id = agb.cogwheel.getBotInformation()["OWNER_ID"]
-            agb.requestHandler.handler.post(os.getenv("WEBHOOK"), 
+            agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), 
           {
                     "content": f"<@{owner_id}>\nDatabase Operational Error: {repr(error)}.  Check the DB stuff to make sure it's working!",
                 },

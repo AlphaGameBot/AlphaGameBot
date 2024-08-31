@@ -17,7 +17,7 @@ import discord
 import requests.exceptions
 
 import agb.cogwheel
-import agb.requestHandler
+import agb.system.requestHandler
 import feedparser
 import re
 from discord.ext import commands
@@ -40,7 +40,7 @@ class RSSFeedCog(agb.cogwheel.Cogwheel):
         # We need to have exception handling for the request because
         # it uses a user-supplied url, which can have errors!
         try:
-            request = agb.requestHandler.handler.get(feed)
+            request = agb.system.requestHandler.handler.get(feed)
         except requests.exceptions.MissingSchema as e:
             await interaction.followup.send(":x: No schema set!  You must set the url to have either `http://` or `https://`")
             return e

@@ -19,7 +19,7 @@ from discord.ext import commands
 import logging
 import agb.cogwheel
 import time
-from agb.requestHandler import handler
+from agb.system.requestHandler import handler
 from mysql.connector import connection
 
 with open("assets/dms_announcemment_template.txt", "r") as f:

@@ -17,7 +17,7 @@
 import json
 import discord
 from discord.ext import commands
-import agb.requestHandler
+import agb.system.requestHandler
 import logging
 import agb.cogwheel
 
@@ -31,7 +31,7 @@ class MemesCog(agb.cogwheel.Cogwheel):
         else:
             endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME_BY_SUBREDDIT").format(subreddit)
             
-        r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
+        r = agb.system.requestHandler.handler.get(endpoint, attemptCache=False)
         d = json.loads(r.text)
         if r.status_code != 200:
             await interaction.response.send_message(":x: `%s`" % d["message"])

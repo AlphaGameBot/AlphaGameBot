@@ -14,12 +14,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-from agb.requestHandler import handler as requesthandler
+from agb.system.requestHandler import handler as requesthandler
 from json import loads
 import agb.cogwheel
 import discord
 import random
-import agb.requestHandler
+import agb.system.requestHandler
 
 
 class CompodiumEntrySchema:

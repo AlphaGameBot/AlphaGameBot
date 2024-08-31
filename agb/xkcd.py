@@ -19,7 +19,7 @@ import discord
 import json
 import random
 import requests
-import agb.requestHandler
+import agb.system.requestHandler
 import logging
 import agb.cogwheel
 
@@ -73,7 +73,7 @@ class xkcdCog(agb.cogwheel.Cogwheel):
         else:
             url = agb.cogwheel.getAPIEndpoint("xkcd", "GET_SPECIFIC").format(num)
 
-        response = agb.requestHandler.handler.get(url)
+        response = agb.system.requestHandler.handler.get(url)
         if response.status_code == 200:
             xkcd = json.loads(response.text)
         else:

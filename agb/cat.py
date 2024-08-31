@@ -15,7 +15,7 @@
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import agb.cogwheel
-from agb.requestHandler import handler
+from agb.system.requestHandler import handler
 import discord
 from json import loads
 

@@ -16,7 +16,7 @@
 
 import random
 import agb.cogwheel
-import agb.requestHandler
+import agb.system.requestHandler
 from discord.ext import commands
 import discord
 import json
@@ -91,7 +91,7 @@ class TriviaOptionDisplayView(discord.ui.View):
 class TriviaCog(agb.cogwheel.Cogwheel):
     def __init__(self, bot):
         super().__init__(bot)
-        with agb.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("trivia", "GET_CATEGORIES")) as r:
+        with agb.system.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("trivia", "GET_CATEGORIES")) as r:
             self.CATEGORIES = json.loads(r.text)["trivia_categories"]
             self.logger.debug("Retrieved %s categories" % len(self.CATEGORIES))
         
@@ -129,10 +129,10 @@ class TriviaCog(agb.cogwheel.Cogwheel):
             "type": type,
             "amount": 1
         }
-        u = agb.requestHandler.formatQueryString(agb.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
+        u = agb.system.requestHandler.formatQueryString(agb.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
                                                  api_args)
 
-        with agb.requestHandler.handler.get(u, attemptCache=False) as r:
+        with agb.system.requestHandler.handler.get(u, attemptCache=False) as r:
             data = json.loads(r.text)
             if data["response_code"] == 1:
                 await interaction.followup.send("No results found.")

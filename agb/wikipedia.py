@@ -19,7 +19,7 @@ import discord
 import urllib.parse
 from discord.ext import commands
 import json
-from agb.requestHandler import handler, formatQueryString
+from agb.system.requestHandler import handler, formatQueryString
 
 class WikipediaCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="wikipedia", description="Wikipedia commands!")

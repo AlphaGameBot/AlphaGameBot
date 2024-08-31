@@ -53,7 +53,7 @@ import agb.system.rotatingStatus
 import agb.system.commands.completion
 
 # RequestHandler
-import agb.requestHandler
+import agb.system.requestHandler
 # commands
 import agb.user
 import agb.utility
@@ -181,7 +181,7 @@ if args.version:
     sys.exit(0)
 
 # ----- Initialize RequestHandler -----
-agb.requestHandler.handler.initialize()
+agb.system.requestHandler.handler.initialize()
 logging.info("Using %s version %s", discord.__name__, discord.__version__)
 # ----- -----
 if args.environment != None:

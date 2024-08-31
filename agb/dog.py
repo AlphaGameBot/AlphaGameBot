@@ -15,7 +15,7 @@
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import agb.cogwheel
-import agb.requestHandler
+import agb.system.requestHandler
 import discord
 import random
 import json
@@ -26,7 +26,7 @@ class DogCog(agb.cogwheel.Cogwheel):
     @group.command(name="picture", description="Get a dog picture!")
     async def _dog(self, interaction):
         endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_PICTURE")
-        r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
+        r = agb.system.requestHandler.handler.get(endpoint, attemptCache=False)
         embed = discord.Embed(title="Dog")
         url = json.loads(r.text)["message"]
         embed.set_image(url=url)
@@ -35,7 +35,7 @@ class DogCog(agb.cogwheel.Cogwheel):
     @group.command(name="breed", description="Dog breeds :3")
     async def _dogbreeds(self, interaction):
         endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_BREEDS")
-        r = agb.requestHandler.handler.get(endpoint)
+        r = agb.system.requestHandler.handler.get(endpoint)
         j = json.loads(r.text)
         a = list(j["message"].keys())
         breed = random.choice(list(a))
@@ -45,10 +45,10 @@ class DogCog(agb.cogwheel.Cogwheel):
 
     @group.command(name="http", description="Get a dog for your HTTP response code!")
     async def _http(self, interaction: discord.context.ApplicationContext,
-                        code: discord.Option(int, description="HTTP code")):
+                        code: discord.Option(int, description="HTTP code")): # type: ignore
         endpoint = agb.cogwheel.getAPIEndpoint("dog", "GET_HTTP_DOG").format(code)
 
-        response = agb.requestHandler.handler.get(endpoint)
+        response = agb.system.requestHandler.handler.get(endpoint)
         
         if response.status_code != 200:
             await interaction.response.send_message(":x: HTTP code not found!")

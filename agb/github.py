@@ -21,7 +21,7 @@ import json
 import time
 from validators import url as is_valid_url
 from requests import Response
-from agb.requestHandler import handler, formatQueryString
+from agb.system.requestHandler import handler, formatQueryString
 
 class NoGitHubCredentialsError(Exception):
     """Error for when GitHub credentials are not defined"""
