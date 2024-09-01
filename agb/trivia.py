@@ -23,19 +23,47 @@ import json
 import logging
 import html
 
-class TrueFalseTriviaOptionDisplayView(discord.ui.View):
-    def __init__(self, options: list[str], correctAnswer: bool, intendedUser: discord.User):
-        self.correctAnswer = correctAnswer
+class BaseTriviaOptionDisplayView(discord.ui.View):
+    def __init__(self, correctAnswer: bool, intendedUser: discord.User):
         super().__init__()
+        self.correctAnswer = correctAnswer
+        self.intendedUser = intendedUser
+        self.logger = logging.getLogger("cogwheel")
+        self.logger.debug("Correct answer is %s" % self.correctAnswer)
+        self.logger.debug("Intended user is %s (ID: %s)" % self.intendedUser.name, self.intendedUser.id)
         
+    def isCorrectUser(self, interaction: discord.context.ApplicationContext, autoRespond: bool = True) -> bool:
+        """Check if the user is the intended user to answer the question
+        
+        Args:
+            interaction (discord.context.ApplicationContext): The interaction context
+            autoRespond (bool, optional): If true, will automatically respond with an error message using the given `ApplicationContext`.  Defaults to True."""
+        re = interaction.author.id == self.intendedUser.id
+        self.logger.debug("isCorrectUser: %s (Comparing Intended:%s to Actual:%s)" % re, self.intendedUser.id, interaction.author.id)
+        if not re and autoRespond:
+            self.logger.debug("isCorrectUser: Responding with error message")
+            interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for {self.intendedUser.mention}!", ephemeral=True)
+        return re
+    
     async def handleAnswer(self, interaction, answer):
-        if answer == correctAnswer:
+        """Handle the user's answer
+        
+        Args:
+            interaction (discord.context.ApplicationContext): The interaction context
+            answer (bool): The user's answer"""
+        logging.getLogger("system").debug("Answer: %s", answer)
+
+        if not self.isCorrectUser(interaction):
+            return
+        
+        if answer == self.correctAnswer:
             await interaction.response.send_message(":white_check_mark: Correct!")
         else:
             await interaction.response.send_message(":x: Incorrect!")
         self.disable_all_items()
         await interaction.message.edit(view=self)
         
+class BaseTriviaOptionDisplayView(BaseTriviaOptionDisplayView):
     @discord.ui.button(label="False", style=discord.ButtonStyle.red)
     async def _false(self, button, interaction):
         return await self.handleAnswer(interaction, False)
@@ -57,7 +85,7 @@ class TriviaOptionDisplayView(discord.ui.View):
 
     async def handle_response(self, interaction, button_option_index: int):
         if interaction.user.id != self.intendedUser.id:
-            await interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for `{self.intendedUser.name}`!", ephemeral=True)
+            await interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for {self.intendedUser.mention}!", ephemeral=True)
             return
         if button_option_index - 1 == self.correctValueIndex:
             await interaction.response.send_message(":white_check_mark: Correct!  The answer was **%s**." % self.options[self.correctValueIndex])
@@ -153,7 +181,8 @@ class TriviaCog(agb.cogwheel.Cogwheel):
         question = data["results"][0]["question"]
         answers = data["results"][0]["incorrect_answers"]
         answers.append(data["results"][0]["correct_answer"])
+        self.logger.debug("Answers: %s" % answers)
         random.shuffle(answers)
 
-        answerView = (TrueFalseTriviaOptionDisplayView if type == "boolean" else TriviaOptionDisplayView)(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
+        answerView = (f type == "boolean" else TriviaOptionDisplayView)(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
         await interaction.followup.send(html.unescape(question), view=answerView)

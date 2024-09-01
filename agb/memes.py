@@ -24,7 +24,8 @@ import agb.cogwheel
 class MemesCog(agb.cogwheel.Cogwheel):
 
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
-    async def meme(self, interaction, subreddit: discord.Option(str, description="The subreddit that you want to get a meme from", default=None, required=False)):
+    async def meme(self, interaction: discord.context.ApplicationContext, 
+                   subreddit: discord.Option(str, description="The subreddit that you want to get a meme from", default=None, required=False)): # type: ignore
         # get the meme from the memes api
         if subreddit == None:
             endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME")

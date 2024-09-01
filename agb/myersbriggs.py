@@ -43,11 +43,12 @@ class TestButtonView(discord.ui.View):
         await self.test.nextQuestion()
 
 class TestCompleteOptionView(discord.ui.View):
-    def __init__(self, message: discord.Message, channel: discord.Thread):
+    def __init__(self, message: discord.Message, channel: discord.Thread, intendedUser: discord.User):
         super().__init__()
         self.channel = channel
         self.message = message
-
+        self.intendedUser = intendedUser
+        
     @discord.ui.button(label="Close Test",
                        style=discord.ButtonStyle.blurple)
     async def _close(self, button, interaction):

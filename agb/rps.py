@@ -67,7 +67,7 @@ class rpsCog(agb.cogwheel.Cogwheel):
                        "rock",
                        "paper",
                        "scissors"
-                   ])):
+                   ])): # type: ignore
         if playerchoice.lower() not in self.gameData.keys():
             # well shit I guess you entered something wrong :/
             embed = agb.cogwheel.embed(title="Error!",
