@@ -20,8 +20,17 @@ import asyncio
 import agb.cogwheel
 import os
 import logging
+from mysql.connector import MySQLConnection
 
-async def rotatingStatus(bot: commands.Bot, cnx, CAN_USE_DATABASE: bool):
+async def rotatingStatus(bot: commands.Bot, 
+                         cnx: MySQLConnection, 
+                         CAN_USE_DATABASE: bool):
+    """Background task to change the bot's status every so often
+    
+    Args:
+        bot (commands.Bot): The bot instance
+        cnx (MySQLConnection): The MySQL connection
+        CAN_USE_DATABASE (bool): If the bot can use the database"""
     logger = logging.getLogger("system")
     botinfo = agb.cogwheel.getBotInformation()
     
