@@ -17,7 +17,7 @@
 import agb.cogwheel
 import agb.system.message.leveling
 import agb.system.onboarding
-import agb.system.message.counting
+import agb.system.counting
 import mysql.connector
 import discord
 from discord.ext import commands
@@ -62,7 +62,7 @@ async def handleOnMessage(bot: commands.Bot,
     
     if tracking and CAN_USE_DATABASE:
         await agb.system.onboarding.initalizeNewUser(cnx, ctx.author.id, ctx.guild.id)
-        await agb.system.message.counting.countMessage(ctx, cnx, CAN_USE_DATABASE, tracking)
+        await agb.system.counting.countMessage(ctx, cnx, CAN_USE_DATABASE, tracking)
         await agb.system.message.leveling.handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, tracking)
     else:
         logging.debug("handleOnMessage: Not dispatching tracking functions because %s", 

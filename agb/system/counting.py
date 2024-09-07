@@ -16,10 +16,18 @@
 
 from mysql.connector import connection
 import discord
+import enum
+
+class CountingEvent(enum.Enum):
+    """An enumeration of the different events that can be counted."""
+    MESSAGE = 0
+    COMMAND = 1
 
 async def countMessage(
                        ctx: discord.Message,
                        cnx: connection.MySQLConnection | None,
+
+                       event: CountingEvent,
 
                        CAN_USE_DATABASE: bool,
                        CAN_DO_TRACKING:  bool) -> int:
@@ -35,6 +43,13 @@ async def countMessage(
 
     This function also assumes that the user has been initialized into the database, so ensure that
     this condition is met, as it is difficult to check for it reliably in the function.
+
+    Args:
+        ctx (discord.Message): The message context
+        cnx (connection.MySQLConnection | None): The MySQL connection object
+        event (CountingEvent): The event type
+        CAN_USE_DATABASE (bool): If the database is enabled
+        CAN_DO_TRACKING (bool): If tracking is enabled
     """
     # Check if this function should even be called in the first place!
     if not CAN_USE_DATABASE: return 1
