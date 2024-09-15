@@ -6,6 +6,10 @@
   },
   "VERSION": "3.11.2",
   "ANNOUNCEMENT_URL": "https://static.alphagame.dev/alphagamebot/announcement.txt",
+  "POINTS": {
+    "MESSAGE": 1,
+    "COMMAND": 5
+  },
   "SAY_EXCEPTIONS": [
     1180023544042770533,
     1179187852601479230

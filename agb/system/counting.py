@@ -17,13 +17,19 @@
 from mysql.connector import connection
 import discord
 import enum
+import logging
+import agb.cogwheel
 
 class CountingEvent(enum.Enum):
     """An enumeration of the different events that can be counted."""
     MESSAGE = 0
     COMMAND = 1
 
-async def countMessage(
+bot_information = agb.cogwheel.getBotInformation()
+
+POINTS_MESSAGE = bot_information["POINTS"]["MESSAGE"]
+POINTS_COMMAND = bot_information["POINTS"]["COMMAND"]
+async def countPoints(
                        ctx: discord.Message,
                        cnx: connection.MySQLConnection | None,
 
@@ -56,16 +62,18 @@ async def countMessage(
     if not CAN_DO_TRACKING:  return 1
 
     cursor = cnx.cursor()
-
-    user_id = ctx.author.id
-    guild_id = ctx.guild.id
-    # Update the user_stats table
-    cursor.execute("UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s;", [user_id])
-
-    # Update the guild_user_stats (Guild-specific user stats) table
-    cursor.execute("UPDATE guild_user_stats SET messages_sent = messages_sent + 1 WHERE userid = %s AND guildid = %s;", (user_id, guild_id))
-
-    cursor.close()
-    cnx.commit()
+    logger = logging.getLogger("system")
+    # get points gained
+    points = 0
+    if event == CountingEvent.MESSAGE:
+        points = POINTS_MESSAGE
+    elif event == CountingEvent.COMMAND:
+        points = POINTS_COMMAND
+    
+    
+    
+    if points == 0:
+        logging.warning("Points are zero!  This is a bug!")
+        return 1
     
     return 0
