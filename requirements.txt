@@ -16,7 +16,7 @@
 
 #    Note: These libraries used are licensed under their own respective licenses.
 
-py-cord
+py-cord>=2.6.1
 requests~=2.32.2
 requests-cache
 nltk~=3.8.1
