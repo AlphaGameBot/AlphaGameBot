@@ -95,8 +95,8 @@ async def command_optstatus(
     cursor = cnx.cursor()
 
     cursor.execute("SELECT announcements FROM user_settings WHERE userid = %s", [ctx.author.id])
-    r = cursor.fetchone()[0]
-    logger.debug("optstatus: Current is %s", r)
+    currentSetting = cursor.fetchone()[0]
+    logger.debug("optstatus: Current is %s (Evaluates to %s)", currentSetting, bool(currentSetting))
 
     if currentSetting:
         await ctx.reply(":tada: You're currently opted in to receive DM announcements from me!\n"
