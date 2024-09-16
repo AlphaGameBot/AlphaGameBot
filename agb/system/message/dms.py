@@ -17,7 +17,7 @@
 import discord
 from discord.ext import commands
 import logging
-import agb.cogwheel
+import agb.system.cogwheel
 import agb.system.onboarding
 import agb.system.message.announcements
 import mysql.connector
@@ -108,23 +108,23 @@ async def command_optstatus(
         return
 
 async def command_blast(bot, ctx, cnx, CAN_USE_DATABASE):
-    if ctx.author.id != agb.cogwheel.getBotInformation()["OWNER_ID"]:
+    if ctx.author.id != agb.system.cogwheel.getBotInformation()["OWNER_ID"]:
         await ctx.reply(":x: Nice try, but you're not allowed to use this command. ;)")
         return
     t = await agb.system.message.announcements.blast_announcement(bot, cnx, CAN_USE_DATABASE)
     await ctx.reply(t)
 
 async def command_blastpreview(bot, ctx, cnx):
-    if ctx.author.id != agb.cogwheel.getBotInformation()["OWNER_ID"]:
+    if ctx.author.id != agb.system.cogwheel.getBotInformation()["OWNER_ID"]:
         await ctx.reply(":x: Nice try, but you're not allowed to use this command. ;)")
         return
     rendered_text = agb.system.message.announcements.render_announcement_template(handler.get(
-        agb.cogwheel.getBotInformation()["ANNOUNCEMENT_URL"],
+        agb.system.cogwheel.getBotInformation()["ANNOUNCEMENT_URL"],
         attemptCache=False).text)
     await ctx.reply(rendered_text)
 
 async def command_blastdryrun(bot, ctx, cnx, CAN_USE_DATABASE):
-    if ctx.author.id != agb.cogwheel.getBotInformation()["OWNER_ID"]:
+    if ctx.author.id != agb.system.cogwheel.getBotInformation()["OWNER_ID"]:
         await ctx.reply(":x: Nice try, but you're not allowed to use this command. ;)")
         return
     t = await agb.system.message.announcements.blast_announcement(bot, cnx, CAN_USE_DATABASE, dry_run=True)
@@ -180,7 +180,7 @@ async def handleDMMessage(bot: commands.Bot,
             await command()
             return
         except Exception as e:
-            if agb.cogwheel.isDebugEnv:
+            if agb.system.cogwheel.isDebugEnv:
                 await ctx.reply(f":x: Internal Error: `{repr(e)}`")
             else:
                 await ctx.reply(":x: An error occurred while processing your command.  Please try again later.")

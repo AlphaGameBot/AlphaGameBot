@@ -15,7 +15,7 @@
 #      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
-import agb.cogwheel
+import agb.system.cogwheel
 import agb.system.onboarding
 import logging
 
@@ -26,7 +26,7 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
         # attempt to make a new user if not already in the database
         agb.system.onboarding.initalizeNewUser(cnx, CAN_USE_DATABASE, interaction.author.id, interaction.guild.id)
 
-        if agb.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
+        if agb.system.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
 
             # Increase the value of commands_ran by 1 for the given user id
             cursor = cnx.cursor()

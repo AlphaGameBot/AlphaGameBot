@@ -18,14 +18,14 @@ from mysql.connector import connection
 import discord
 import enum
 import logging
-import agb.cogwheel
+import agb.system.cogwheel
 
 class CountingEvent(enum.Enum):
     """An enumeration of the different events that can be counted."""
     MESSAGE = 0
     COMMAND = 1
 
-bot_information = agb.cogwheel.getBotInformation()
+bot_information = agb.system.cogwheel.getBotInformation()
 
 POINTS_MESSAGE = bot_information["POINTS"]["MESSAGE"]
 POINTS_COMMAND = bot_information["POINTS"]["COMMAND"]

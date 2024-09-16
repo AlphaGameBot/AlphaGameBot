@@ -15,7 +15,7 @@
 #      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
-import agb.cogwheel
+import agb.system.cogwheel
 import json
 import logging
 from mysql.connector import (connection)

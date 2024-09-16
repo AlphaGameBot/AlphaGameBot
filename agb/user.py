@@ -14,14 +14,14 @@
 #      You should have received a copy of the GNU General Public License
 #      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
+import agb.system.cogwheel
 import discord
 import time
 import uuid
 from discord.ext import commands
 from mysql.connector import OperationalError
 
-class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
+class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
     group = discord.SlashCommandGroup(name="user", description="user-related commands")
     @group.command(name="stats", description="Get user stats")
     async def _userstats(self, interaction: discord.commands.context.ApplicationContext,
@@ -38,7 +38,7 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
         else:
             user = user
 
-        if not agb.cogwheel.getUserSetting(self.cnx, user.id, "message_tracking_consent"):
+        if not agb.system.cogwheel.getUserSetting(self.cnx, user.id, "message_tracking_consent"):
             await interaction.followup.send(":x: This user has not consented to message tracking.")
             return
 
@@ -60,7 +60,7 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
             presented_username = "{0}".format(username)
         
         messages_sent, commands_ran = c.fetchone()
-        embed = agb.cogwheel.embed(
+        embed = agb.system.cogwheel.embed(
             title=presented_username
         )
 
@@ -83,6 +83,6 @@ class UserStatsCog(agb.cogwheel.MySQLEnabledCogwheel):
         c.close()
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="User Settings", url=f"{agb.cogwheel.getAPIEndpoint('webui', 'USER_SETTINGS')}?token={token}"))
+        view.add_item(discord.ui.Button(label="User Settings", url=f"{agb.system.cogwheel.getAPIEndpoint('webui', 'USER_SETTINGS')}?token={token}"))
 
         await interaction.response.send_message("Here is your WebUI link.\n*(Do NOT share it with anyone, as it will let them change your user settings!)*", view=view, ephemeral=True)

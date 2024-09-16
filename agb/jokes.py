@@ -23,12 +23,12 @@ import json
 from nltk.corpus import words
 import random
 import cowsay
-import agb.cogwheel
+import agb.system.cogwheel
 
-class jokesCog(agb.cogwheel.Cogwheel):
+class jokesCog(agb.system.cogwheel.Cogwheel):
     @commands.slash_command(name="joke", description="I'm so funny, right?")
     async def _joke(self, interaction):
-        r = agb.system.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)
+        r = agb.system.requestHandler.handler.get(agb.system.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)
         joke = json.loads(r.text)
 
         embed = discord.Embed(title="Joke #{}".format(joke["id"]), description="{0}\n{1}".format(joke["setup"], joke["punchline"]))
@@ -41,7 +41,7 @@ class jokesCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="shakespeare", description="Shakespeare translator!")
     async def _shakespeare(self, interaction,
                            text: discord.Option(str, description="Text to translate!")): # type: ignore
-        endpoint = agb.cogwheel.getAPIEndpoint("shakespeare", "TRANSLATE")
+        endpoint = agb.system.cogwheel.getAPIEndpoint("shakespeare", "TRANSLATE")
         if text[len(text) - 1] == " ":
             text[len(text) - 1] = ""
         text = text.lower()

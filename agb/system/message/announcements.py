@@ -17,7 +17,7 @@
 import discord
 from discord.ext import commands
 import logging
-import agb.cogwheel
+import agb.system.cogwheel
 import time
 from agb.system.requestHandler import handler
 from mysql.connector import connection
@@ -40,7 +40,7 @@ async def blast_announcement(
     logger = logging.getLogger("system")
 
     text = handler.get(
-        agb.cogwheel.getBotInformation()["ANNOUNCEMENT_URL"],
+        agb.system.cogwheel.getBotInformation()["ANNOUNCEMENT_URL"],
         attemptCache=False).text
     
     cursor.execute("SELECT userid FROM user_settings WHERE announcements = 1")

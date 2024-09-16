@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
+import agb.system.cogwheel
 import agb.system.leveling
 import agb.system.onboarding
 import agb.system.counting
@@ -45,7 +45,7 @@ async def handleOnMessage(bot: commands.Bot,
         global_say_enabled (bool): Whether or not the bot can say messages in all guilds.
         say_trigger (str): The trigger to make the bot say something."""
     logger = logging.getLogger("system")
-    bot_information = agb.cogwheel.getBotInformation()
+    bot_information = agb.system.cogwheel.getBotInformation()
     
     if say_trigger is None:
         say_trigger = bot.user.mention # <@BOT_ID>
@@ -82,7 +82,7 @@ async def handleOnMessage(bot: commands.Bot,
     # ----> I will keep this, with the addition of the "--say-trigger" flag.
     # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
     # I will just remove the `DEBUG=1` environment variable.
-    if agb.cogwheel.isDebugEnv and not forcesay:
+    if agb.system.cogwheel.isDebugEnv and not forcesay:
         logger.info("Say was ignored as I think this is a development build.")
         return EnvironmentError("Bot is in development build")
     

@@ -19,10 +19,10 @@ from discord.ext import commands
 from discord import Permissions
 import logging
 import datetime
-import agb.cogwheel
+import agb.system.cogwheel
 
 
-class ModerationCog(agb.cogwheel.Cogwheel):
+class ModerationCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="moderation", description="Moderation-related commands")
 
     @group.command(name="kick", description="Kicks a user.")

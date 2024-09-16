@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
+import agb.system.cogwheel
 import discord
 import os
 import json
@@ -31,7 +31,7 @@ class GitHubAPIError(Exception):
     """Error for when the GitHub API returns an error"""
     pass
 
-class GithubCog(agb.cogwheel.Cogwheel):
+class GithubCog(agb.system.cogwheel.Cogwheel):
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -47,7 +47,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="github", description="Interact with GitHub!")
 
     async def _github_repo_search_autocomplete(self, interaction: discord.context.AutocompleteContext):
-            endpoint = agb.cogwheel.getAPIEndpoint("github", "REPO_SEARCH")
+            endpoint = agb.system.cogwheel.getAPIEndpoint("github", "REPO_SEARCH")
     
             if interaction.value.strip() == "":
                 return []
@@ -74,7 +74,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
             return results
 
     async def _github_user_search_autocomplete(self, interaction: discord.context.AutocompleteContext):
-            endpoint = agb.cogwheel.getAPIEndpoint("github", "USER_SEARCH")
+            endpoint = agb.system.cogwheel.getAPIEndpoint("github", "USER_SEARCH")
     
             if interaction.value.strip() == "":
                 return []
@@ -134,7 +134,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
     @group.command(name="octocat", description="Get an octocat!")
     async def _octocat(self, interaction: discord.context.ApplicationContext):
         r = handler.get(
-            agb.cogwheel.getAPIEndpoint("github", "OCTOCAT"), headers=self.GITHUB_HEADERS, attemptCache=False,
+            agb.system.cogwheel.getAPIEndpoint("github", "OCTOCAT"), headers=self.GITHUB_HEADERS, attemptCache=False,
         )
         if not await self.cushionGitHubAPIResponse(r, interaction):
             return
@@ -148,7 +148,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
         await interaction.response.defer()
         
         r = handler.get(
-            agb.cogwheel.getAPIEndpoint("github", "GET_REPO_BY_ID").format(repository),
+            agb.system.cogwheel.getAPIEndpoint("github", "GET_REPO_BY_ID").format(repository),
             headers=self.GITHUB_HEADERS,
             attemptCache=False
         )
@@ -173,7 +173,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
             url      = data["html_url"],
             icon_url = data["owner"]["avatar_url"]            
         )
-        embed = agb.cogwheel.embed(
+        embed = agb.system.cogwheel.embed(
             title       = data["name"],
             description = data["description"],
             author      = author
@@ -219,7 +219,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
     async def _user(self, interaction: discord.context.ApplicationContext,
                     user: discord.Option(int, description="User to search for!", autocomplete=_github_user_search_autocomplete)): # type: ignore
         await interaction.response.defer()
-        endpoint = agb.cogwheel.getAPIEndpoint("github", "GET_USER_BY_ID")
+        endpoint = agb.system.cogwheel.getAPIEndpoint("github", "GET_USER_BY_ID")
 
         r = handler.get(
             endpoint.format(user),
@@ -234,7 +234,7 @@ class GithubCog(agb.cogwheel.Cogwheel):
             name = "%s (%s)" % (data["name"], data["login"]),
             url  = data["html_url"]
         )
-        embed = agb.cogwheel.embed(
+        embed = agb.system.cogwheel.embed(
             description = data["bio"],
             author      = author
         )

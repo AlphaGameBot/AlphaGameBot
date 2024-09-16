@@ -15,7 +15,7 @@
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import random
-import agb.cogwheel
+import agb.system.cogwheel
 import agb.system.requestHandler
 from discord.ext import commands
 import discord
@@ -117,10 +117,10 @@ class TriviaOptionDisplayView(BaseTriviaOptionDisplayView):
         return await self.handleAnswer(interaction, button.label)
 
 
-class TriviaCog(agb.cogwheel.Cogwheel):
+class TriviaCog(agb.system.cogwheel.Cogwheel):
     def __init__(self, bot):
         super().__init__(bot)
-        with agb.system.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("trivia", "GET_CATEGORIES")) as r:
+        with agb.system.requestHandler.handler.get(agb.system.cogwheel.getAPIEndpoint("trivia", "GET_CATEGORIES")) as r:
             self.CATEGORIES = json.loads(r.text)["trivia_categories"]
             self.logger.debug("Retrieved %s categories" % len(self.CATEGORIES))
         
@@ -158,7 +158,7 @@ class TriviaCog(agb.cogwheel.Cogwheel):
             "type": type,
             "amount": 1
         }
-        u = agb.system.requestHandler.formatQueryString(agb.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
+        u = agb.system.requestHandler.formatQueryString(agb.system.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
                                                  api_args)
 
         with agb.system.requestHandler.handler.get(u, attemptCache=False) as r:
