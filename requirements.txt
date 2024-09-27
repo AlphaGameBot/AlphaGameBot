@@ -67,3 +67,7 @@ googlesearch-python
 urllib3>=2.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
 aiohttp>=3.10.2 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+certifi>=2024.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
+idna>=3.7 # not directly required, pinned by Snyk to avoid a vulnerability
+protobuf>=3.18.3 # not directly required, pinned by Snyk to avoid a vulnerability
+requests-cache>=0.6.0.dev1 # not directly required, pinned by Snyk to avoid a vulnerability
