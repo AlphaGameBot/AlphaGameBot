@@ -12,7 +12,7 @@ class CogwheelTests(unittest.TestCase):
         self.args.debug = False
     def test_embed(self):
         # Test case 1: Check if the returned object is an instance of discord.Embed
-        agb.cogwheel.args = self.args
+        agb.system.cogwheel.args = self.args
         result = agb.system.cogwheel.embed()
         self.assertIsInstance(result, Embed)
 

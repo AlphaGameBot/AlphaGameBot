@@ -20,8 +20,10 @@ from discord.embeds import *
 import os
 import json
 import logging
+from agb.system.requestHandler import handler
 import random
 import mysql.connector
+
 global isDebugEnv
 
 def getVersion() -> str:
@@ -36,6 +38,23 @@ def getAPIEndpoint(apiName, process):
     _p = _a[process]
     return _p
 
+def webhook(text="", dataOverride={}, urlOverride=None):
+    if not urlOverride:
+        url = os.getenv("WEBHOOK_URL", None)
+    else:
+        url = urlOverride
+    
+    if not url:
+        logging.error("Cannot send webhook because I cannot find a webhook URL!")
+        return
+    
+    data = {
+        "content": text
+    }
+    data.update(dataOverride)
+
+    handler.post(url, data)
+    
 def isDebug(argp=None) -> bool:
     global isDebugEnv
     useArgp = False

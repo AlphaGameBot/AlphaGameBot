@@ -33,10 +33,8 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
             await interaction.followup.send(":x: Database is not enabled.  This command cannot be used.")
             return
 
-        if user == None:
+        if not user:
             user = interaction.user
-        else:
-            user = user
 
         if not agb.system.cogwheel.getUserSetting(self.cnx, user.id, "message_tracking_consent"):
             await interaction.followup.send(":x: This user has not consented to message tracking.")
@@ -48,7 +46,8 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
             
         c = self.cnx.cursor()
 
-        c.execute("SELECT messages_sent, commands_ran from guild_user_stats WHERE userid = %s AND guildid = %s", [user.id, interaction.guild.id])
+        c.execute("SELECT user_level, points, messages_sent, commands_ran from guild_user_stats WHERE userid = %s AND guildid = %s", [user.id, interaction.guild.id])
+        level, points, messages_sent, commands_ran = c.fetchone()
 
         self.logger.debug(c.statement)
         username = user.name
@@ -59,13 +58,14 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
         else:
             presented_username = "{0}".format(username)
         
-        messages_sent, commands_ran = c.fetchone()
         embed = agb.system.cogwheel.embed(
             title=presented_username
         )
 
         embed.add_field(name="Messages Sent", value=messages_sent)
         embed.add_field(name="Commands Ran", value=commands_ran)
+        embed.add_field(name="Level", value=level)
+        embed.add_field(name="Points", value=points)
 
         await interaction.followup.send(embed=embed)
 
@@ -85,4 +85,4 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label="User Settings", url=f"{agb.system.cogwheel.getAPIEndpoint('webui', 'USER_SETTINGS')}?token={token}"))
 
-        await interaction.response.send_message("Here is your WebUI link.\n*(Do NOT share it with anyone, as it will let them change your user settings!)*", view=view, ephemeral=True)
+        await interaction.response.send_message("Here is your WebUI link.\n-# Do NOT share it with anyone, as it will let them change your user settings!", view=view, ephemeral=True)

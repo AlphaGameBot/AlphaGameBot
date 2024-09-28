@@ -18,13 +18,6 @@ import agb.system.cogwheel
 import discord
 import os
 from discord.ext import commands
-
-async def sendToOwner(bot, *args, **kwargs):
-    _d = agb.system.cogwheel.getBotInformation()
-    owner = bot.get_user(_d["OWNER_ID"])
-    owner_dm = await owner.create_dm()
-
-    await owner_dm.send(*args, **kwargs)
     
 class FeedbackModal(discord.ui.Modal):
     def __init__(self, bot, *args, **kwargs) -> None:
@@ -39,7 +32,7 @@ class FeedbackModal(discord.ui.Modal):
         owner_embed.add_field(name='Username', value=interaction.user.name)
         owner_embed.add_field(name='User ID', value=interaction.user.id)
 
-        await sendToOwner(self.bot, embed=owner_embed)
+        agb.system.cogwheel.webhook(dataOverride={"embeds": [owner_embed.to_dict()]})
         
         await interaction.response.send_message("Feedback sent!", ephemeral=True)
 
@@ -57,7 +50,7 @@ class CommandSuggestionModal(discord.ui.Modal):
         owner_embed.add_field(name="User Name", value=interaction.user.name)
         owner_embed.add_field(name="User ID", value=interaction.user.id)
 
-        await sendToOwner(self.bot, embed=owner_embed)
+        agb.system.cogwheel.webhook(dataOverride={"embeds": [owner_embed.to_dict()]})
         await interaction.response.send_message("Command Suggestion Sent.  Thank you!", ephemeral=True)
 class AboutView(discord.ui.View):
     def __init__(self, bot) -> None:

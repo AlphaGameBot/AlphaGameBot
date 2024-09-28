@@ -17,6 +17,7 @@
 import discord
 import agb.system.cogwheel
 import agb.system.onboarding
+import agb.system.leveling
 import logging
 
 async def handleApplicationCommand(interaction: discord.context.ApplicationContext, CAN_USE_DATABASE, cnx, tracking):
@@ -27,12 +28,6 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
         agb.system.onboarding.initalizeNewUser(cnx, CAN_USE_DATABASE, interaction.author.id, interaction.guild.id)
 
         if agb.system.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
-
-            # Increase the value of commands_ran by 1 for the given user id
-            cursor = cnx.cursor()
-            cursor.execute("UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s", [interaction.author.id])
-            cursor.execute("UPDATE guild_user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s AND guildid = %s", [interaction.author.id, interaction.guild.id])
-            cnx.commit()
-            cursor.close()
+            await agb.system.leveling.countPoints(interaction, cnx, agb.system.leveling.CountingEvent.COMMAND, CAN_USE_DATABASE, tracking)
         else:
             l.debug("Not tracking command usage for /{0} because user {1} has not consented to message tracking.".format(interaction.command.name, interaction.author.id))
