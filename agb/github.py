@@ -39,7 +39,7 @@ class GithubCog(agb.system.cogwheel.Cogwheel):
         token = os.getenv("GITHUB_TOKEN")
 
         if not token:
-            raise NoGitHubCredentialsError("No valid GitHub Token!")
+            self.logger.warning("No GitHub token defined!  Please define the GITHUB_TOKEN environment variable.")
             
         self.GITHUB_HEADERS = {
             "Authorization": "Bearer %s" % token
@@ -108,7 +108,7 @@ class GithubCog(agb.system.cogwheel.Cogwheel):
         Returns an boolean, `True` if it is OK, and `False` if not.  Automatic Responses can be configured
         with the `autoResponse` argument (defaults to `True`)."""
         requestOK = True
-        reason = "No Reason!"
+        reason = "Unknown"
         
         # log ratelimiting information
         self.logger.debug("GitHub ratelimit remaining for resource '%s': Used: %s (%s remaining), Resets: %s (in %s seconds).", 
