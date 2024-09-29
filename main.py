@@ -128,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
     parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
     parser.add_argument("--say-trigger", help="Set the trigger for the say command.  Default is the bot's mention.")
+    parser.add_argument("--dry-run", help="Run the bot in dry-run mode.  This will not connect to Discord.", action="store_true")
     args = parser.parse_args()
 # Initalize logging services
 
@@ -385,7 +386,10 @@ if __name__ == "__main__":
     if token == None or token == "":
         logging.error("No token was given via the environment variable 'TOKEN', nor was one given via the commandline using '-t' or '--token'!")
         logging.error("Use '-e' or '--environment' to automatically load your .env file.")
-        sys.exit(1)
+        if args.dry_run:
+            logging.info("Ignoring the above, as dry-run mode does not require a token.")
+        else:
+            sys.exit(1)
 
     if agb.system.cogwheel.isDebug(argp=args) == True:
         logging.warning("Debug mode is ENABLED.  This is a development build.  Do not use this in a production environment.")
@@ -399,6 +403,9 @@ if __name__ == "__main__":
             logging.error("The webhook URL is invalid!  Please check the URL and try again.")
             sys.exit(1)
     try:
+        if args.dry_run:
+            logging.info("Dry-run mode is enabled.  Stopping now, and not connecting to Discord.")
+            sys.exit(0)
         logging.info("Logging in using static token from %s" % tokenSource)
         bot.run(token)
     except client_exceptions.ClientConnectorError as e:
