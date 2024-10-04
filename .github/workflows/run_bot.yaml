@@ -6,7 +6,7 @@ on:
       - '**'
 
 jobs:
-  test:
+  dryrun:
     runs-on: ubuntu-latest
 
     steps:
