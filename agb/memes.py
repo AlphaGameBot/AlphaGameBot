@@ -17,21 +17,22 @@
 import json
 import discord
 from discord.ext import commands
-import agb.requestHandler
+import agb.system.requestHandler
 import logging
-import agb.cogwheel
+import agb.system.cogwheel
 
-class MemesCog(agb.cogwheel.Cogwheel):
+class MemesCog(agb.system.cogwheel.Cogwheel):
 
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
-    async def meme(self, interaction, subreddit: discord.Option(str, description="The subreddit that you want to get a meme from", default=None, required=False)):
+    async def meme(self, interaction: discord.context.ApplicationContext, 
+                   subreddit: discord.Option(str, description="The subreddit that you want to get a meme from", default=None, required=False)): # type: ignore
         # get the meme from the memes api
         if subreddit == None:
-            endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME")
+            endpoint = agb.system.cogwheel.getAPIEndpoint("meme", "GET_MEME")
         else:
-            endpoint = agb.cogwheel.getAPIEndpoint("meme", "GET_MEME_BY_SUBREDDIT").format(subreddit)
+            endpoint = agb.system.cogwheel.getAPIEndpoint("meme", "GET_MEME_BY_SUBREDDIT").format(subreddit)
             
-        r = agb.requestHandler.handler.get(endpoint, attemptCache=False)
+        r = agb.system.requestHandler.handler.get(endpoint, attemptCache=False)
         d = json.loads(r.text)
         if r.status_code != 200:
             await interaction.response.send_message(":x: `%s`" % d["message"])
@@ -40,7 +41,7 @@ class MemesCog(agb.cogwheel.Cogwheel):
             self.logger.debug("Rejecting this meme because it is a NSFW meme sent in a non-age-restricted channel.")
             await interaction.response.send_message(":x: NSFW memes can only be sent in NSFW channels.")
             return
-        embed = agb.cogwheel.embed(title=d["title"])
+        embed = agb.system.cogwheel.embed(title=d["title"])
         embed.set_footer(text="Sent in r/{0} by u/{1}".format(d["subreddit"], d["author"]))
         embed.set_image(url=d["preview"][len(d["preview"])-1])
         

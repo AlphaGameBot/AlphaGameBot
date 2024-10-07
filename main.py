@@ -32,17 +32,16 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 import os
-import time
 import logging
 import logging.config
-import agb.cogwheel
+import agb.system.cogwheel
 import sys
 from dotenv import load_dotenv
 from aiohttp import client_exceptions
 import datetime
 import argparse
 import mysql.connector
-import threading
+import json
 # system
 import agb.system.commands.error
 import agb.system.commands.command
@@ -53,7 +52,7 @@ import agb.system.rotatingStatus
 import agb.system.commands.completion
 
 # RequestHandler
-import agb.requestHandler
+import agb.system.requestHandler
 # commands
 import agb.user
 import agb.utility
@@ -128,6 +127,8 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--log-level", help="Set the log level to a specified level.  Valid levels are FATAL, ERROR, WARN, INFO, and DEBUG.")
     parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
     parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
+    parser.add_argument("--say-trigger", help="Set the trigger for the say command.  Default is the bot's mention.")
+    parser.add_argument("--dry-run", help="Run the bot in dry-run mode.  This will not connect to Discord.", action="store_true")
     args = parser.parse_args()
 # Initalize logging services
 
@@ -175,12 +176,12 @@ CONFIGURED_LOGGERS = [
 for l in CONFIGURED_LOGGERS:
 	logging.getLogger(l).setLevel(LOG_LEVEL)
 if args.version:
-    print(f"AlphaGameBot Discord Bot Version {agb.cogwheel.getBotInformation()['VERSION']}")
+    print(f"AlphaGameBot Discord Bot Version {agb.system.cogwheel.getBotInformation()['VERSION']}")
     print(f"Copyright (C) {d.year}  Damien Boisvert (AlphaGameDeveloper); See LICENSE for licensing information.")
     sys.exit(0)
 
 # ----- Initialize RequestHandler -----
-agb.requestHandler.handler.initialize()
+agb.system.requestHandler.handler.initialize()
 logging.info("Using %s version %s", discord.__name__, discord.__version__)
 # ----- -----
 if args.environment != None:
@@ -251,7 +252,7 @@ async def on_message(ctx: discord.Message):
         return await agb.system.message.dms.handleDMMessage(bot, ctx, cnx, CAN_USE_DATABASE)
     
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
-    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say)
+    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say, args.say_trigger)
 
 @bot.listen()
 async def on_application_command(ctx: discord.context.ApplicationContext):
@@ -324,12 +325,12 @@ failed_cogs = 0
 for cog in BOT_LOADED_COGS:
     # this is first b/c MySQLEnabledCogwheel inherits Cogwheel.
     logging.debug(f"Loading cog \"{cog.__name__}\"...")
-    if issubclass(cog, agb.cogwheel.MySQLEnabledCogwheel):
+    if issubclass(cog, agb.system.cogwheel.MySQLEnabledCogwheel):
         mysql_cogs += 1
 
         addcog = lambda: bot.add_cog(cog(bot, cnx, CAN_USE_DATABASE))
         t = "MySQLEnabledCogwheel"
-    elif issubclass(cog, agb.cogwheel.Cogwheel):
+    elif issubclass(cog, agb.system.cogwheel.Cogwheel):
         normal_cogs += 1
         addcog = lambda: bot.add_cog(cog(bot))
         t = "Cogwheel"
@@ -367,7 +368,7 @@ if __name__ == "__main__":
     token = os.getenv("TOKEN")
     tokenSource = "environment"
 
-    if args.environment != None:
+    if args.environment is not None:
         logging.info("Loading the %s environment file because it was explicitly requested with '-e' or '--environment'." % args.environment)
         if not os.path.isfile(args.environment):
             logging.fatal("The environment file %s does not exist!  Please check the path and try again." % args.environment)
@@ -385,12 +386,26 @@ if __name__ == "__main__":
     if token == None or token == "":
         logging.error("No token was given via the environment variable 'TOKEN', nor was one given via the commandline using '-t' or '--token'!")
         logging.error("Use '-e' or '--environment' to automatically load your .env file.")
-        sys.exit(1)
+        if args.dry_run:
+            logging.info("Ignoring the above, as dry-run mode does not require a token.")
+        else:
+            sys.exit(1)
 
-    if agb.cogwheel.isDebug(argp=args) == True:
+    if agb.system.cogwheel.isDebug(argp=args) == True:
         logging.warning("Debug mode is ENABLED.  This is a development build.  Do not use this in a production environment.")
-        
+    
+    webhook_url = os.getenv("WEBHOOK")
+    if webhook_url:
+        try:
+            webhook_data = json.loads(agb.system.requestHandler.handler.get(webhook_url).text)
+            logging.info("Webhook URL is set.  Webhook name is %s; Channel ID: %s.", webhook_data["name"], webhook_data["channel_id"])
+        except json.JSONDecodeError:
+            logging.error("The webhook URL is invalid!  Please check the URL and try again.")
+            sys.exit(1)
     try:
+        if args.dry_run:
+            logging.info("Dry-run mode is enabled.  Stopping now, and not connecting to Discord.")
+            sys.exit(0)
         logging.info("Logging in using static token from %s" % tokenSource)
         bot.run(token)
     except client_exceptions.ClientConnectorError as e:

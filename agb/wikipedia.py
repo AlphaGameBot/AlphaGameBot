@@ -14,18 +14,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
+import agb.system.cogwheel
 import discord
 import urllib.parse
 from discord.ext import commands
 import json
-from agb.requestHandler import handler, formatQueryString
+from agb.system.requestHandler import handler, formatQueryString
 
-class WikipediaCog(agb.cogwheel.Cogwheel):
+class WikipediaCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="wikipedia", description="Wikipedia commands!")
 
     async def _wikipedia_search_autocomplete(self, interaction: discord.context.AutocompleteContext):
-        endpoint = agb.cogwheel.getAPIEndpoint("wikipedia", "API_ENDPOINT")
+        endpoint = agb.system.cogwheel.getAPIEndpoint("wikipedia", "API_ENDPOINT")
 
         if interaction.value.strip() == "":
             return []
@@ -50,7 +50,7 @@ class WikipediaCog(agb.cogwheel.Cogwheel):
     @group.command(name="summary", description="Get a summmary of a Wikipedia article!")
     async def _summary(self, interaction: discord.context.ApplicationContext,
                        page: discord.Option(str, description="The page to summarize!", autocomplete=_wikipedia_search_autocomplete)): # type: ignore
-        endpoint = agb.cogwheel.getAPIEndpoint("wikipedia", "API_ENDPOINT") # this is api.php
+        endpoint = agb.system.cogwheel.getAPIEndpoint("wikipedia", "API_ENDPOINT") # this is api.php
 
         
         # get the page id
@@ -87,7 +87,7 @@ class WikipediaCog(agb.cogwheel.Cogwheel):
         # this is stupid code lol, make a pr if you know how to fix this
         page = summary["pages"][list(summary["pages"].keys())[0]]
 
-        embed = agb.cogwheel.embed(
+        embed = agb.system.cogwheel.embed(
             title=page["title"],
             description=page["extract"] if page["extract"] != None else "No Extract Given"
         )

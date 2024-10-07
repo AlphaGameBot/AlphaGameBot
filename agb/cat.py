@@ -14,17 +14,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
-from agb.requestHandler import handler
+import agb.system.cogwheel
+from agb.system.requestHandler import handler
 import discord
 from json import loads
 
-class CatCog(agb.cogwheel.Cogwheel):
+class CatCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="cat", description="For all your kitty needs!")
 
     @group.command(name="image", description="Get a cat image!")
     async def _image(self, interaction: discord.context.ApplicationContext):
-        endpoint = agb.cogwheel.getAPIEndpoint("cat", "RANDOM_IMAGE")
+        endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "RANDOM_IMAGE")
 
         response = loads(handler.get(endpoint, attemptCache=False).text)[0]
 
@@ -33,7 +33,7 @@ class CatCog(agb.cogwheel.Cogwheel):
     @group.command(name="http", description="Get a cat for your HTTP response code!")
     async def _http(self, interaction: discord.context.ApplicationContext,
                         code: discord.Option(int, description="HTTP code")): # type: ignore
-        endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_HTTP_CAT").format(code)
+        endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "GET_HTTP_CAT").format(code)
 
         response = agb.requestHandler.handler.get(endpoint)
         
@@ -44,7 +44,7 @@ class CatCog(agb.cogwheel.Cogwheel):
 
     @group.command(name="fact", description="Get a random cat fact!")
     async def _fact(self, interaction: discord.context.ApplicationContext):
-        endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_RANDOM_CAT_FACT")
+        endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "GET_RANDOM_CAT_FACT")
 
         response = loads(handler.get(endpoint, attemptCache=False).text)
 
@@ -52,7 +52,7 @@ class CatCog(agb.cogwheel.Cogwheel):
 
     @group.command(name="random", description="Get a random cat image!")
     async def _random(self, interaction: discord.context.ApplicationContext):
-        endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_RANDOM_CAT_JSON")
+        endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "GET_RANDOM_CAT_JSON")
         api_json = loads(
             handler.get(endpoint, attemptCache=False).text
         )
@@ -64,12 +64,12 @@ class CatCog(agb.cogwheel.Cogwheel):
         # _id: string, append to 'https://cataas.com/cat/(_id)' to get the actual image URL
 
         await interaction.response.send_message(
-            agb.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE").format(api_json["_id"])
+            agb.system.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE").format(api_json["_id"])
         )
 
     @group.command(name="says", description="Get a cat image with a custom message!")
     async def _says(self, interaction: discord.context.ApplicationContext,
                         message: discord.Option(str, description="The message to display on the cat image")): # type: ignore
-        endpoint = agb.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE_WITH_MESSAGE").format(message)
+        endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE_WITH_MESSAGE").format(message)
 
         await interaction.response.send_message(endpoint)

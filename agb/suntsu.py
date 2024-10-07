@@ -15,12 +15,12 @@
 #      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
-import agb.cogwheel
+import agb.system.cogwheel
 import random
 from discord.ext import commands
 
 
-class SunTsuCog(agb.cogwheel.Cogwheel):
+class SunTsuCog(agb.system.cogwheel.Cogwheel):
     def init(self):
         self.SUNTSU_QUOTES = [
             "It is the rule in war, if our forces are ten to the enemy's one, to surround him; if five to one, to attack him; if twice as numerous, to divide our army into two.",

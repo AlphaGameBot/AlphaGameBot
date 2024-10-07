@@ -14,10 +14,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
+import agb.system.cogwheel
 import discord
 
-class MathematicsCog(agb.cogwheel.Cogwheel):
+class MathematicsCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="math", description="For all your calculating needs!")
 
     def formatNumber(self, number):

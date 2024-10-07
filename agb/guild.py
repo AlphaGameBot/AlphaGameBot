@@ -14,13 +14,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.cogwheel
+import agb.system.cogwheel
 import time
 import uuid
 import discord
 from discord.ext import commands
 
-class GuildCog(agb.cogwheel.MySQLEnabledCogwheel):
+class GuildCog(agb.system.cogwheel.MySQLEnabledCogwheel):
     group = discord.SlashCommandGroup(name="guild", description="Current Discord Server commands")
 
     @group.command(name="settings", description="Open your server settings in the WebUI")
@@ -38,6 +38,6 @@ class GuildCog(agb.cogwheel.MySQLEnabledCogwheel):
         c.close()
 
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="Guild Settings", url=f"{agb.cogwheel.getAPIEndpoint('webui', 'GUILD_SETTINGS')}?token={token}"))
+        view.add_item(discord.ui.Button(label="Guild Settings", url=f"{agb.system.cogwheel.getAPIEndpoint('webui', 'GUILD_SETTINGS')}?token={token}"))
 
         await interaction.response.send_message("Here is your WebUI link.\n*(Do NOT share it with anyone, as it will let them change your server settings!)*", view=view, ephemeral=True)
