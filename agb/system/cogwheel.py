@@ -32,13 +32,10 @@ def getVersion() -> str:
 def getBotInformation() -> dict:
     return json.load(open("alphagamebot.json", "r"))
 
-def getAPIEndpoint(apiName, process):
-    _d = getBotInformation()
-    _a = _d["API_ENDPOINTS"][apiName]
-    _p = _a[process]
-    return _p
+def getAPIEndpoint(apiName, process) -> str:
+    return getBotInformation()["API_ENDPOINTS"][apiName][process] 
 
-def webhook(text="", dataOverride={}, urlOverride=None):
+def webhook(text="", dataOverride={}, urlOverride=None) -> bool:
     if not urlOverride:
         url = os.getenv("WEBHOOK_URL", None)
     else:
@@ -46,7 +43,7 @@ def webhook(text="", dataOverride={}, urlOverride=None):
     
     if not url:
         logging.error("Cannot send webhook because I cannot find a webhook URL!")
-        return
+        return False
     
     data = {
         "content": text
@@ -54,7 +51,8 @@ def webhook(text="", dataOverride={}, urlOverride=None):
     data.update(dataOverride)
 
     handler.post(url, data)
-    
+    return True
+
 def isDebug(argp=None) -> bool:
     global isDebugEnv
     useArgp = False
@@ -74,7 +72,7 @@ def isDebug(argp=None) -> bool:
     return r
 
 def initalizeNewUser(cnx, user_id):
-    """This is depricated and no longer needed, in favor of the newer `agb.system.message.onboarding` routine!"""
+    """This is depricated and no longer needed, in favor of the newer `agb.system.onboarding` routine!"""
 
     logging.warning("initializeNewUser is depricated.  Move to the onboarding routine!")
     
@@ -206,6 +204,18 @@ class MySQLEnabledCogwheel(Cogwheel):
         else:
             self.cursor = None
 
+    async def verifyDatabaseUtility(self, interaction: discord.context.ApplicationContext, wasResponded: bool, send_message: bool = True) -> bool:
+        """This function is used to verify that the database is enabled and that the cog can use it.
+        If the database is not enabled, it will send a message to the user (if `send_message` is True)"""
+        if not self.canUseDatabase:
+            if send_message:
+                if wasResponded:
+                    await interaction.followup.send(":x: Database is not enabled.  This command cannot be used.")
+                else:
+                    await interaction.response.send_message(":x: Database is not enabled.  This command cannot be used.")
+            return False
+        return True
+    
 class DefaultView(discord.ui.View):
     """Extended version of `discord.ui.view` that includes default settings for the view, such as behavior for timeout."""
 

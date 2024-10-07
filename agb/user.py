@@ -29,8 +29,7 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
         await interaction.response.defer()
         
         # note, if using agb.cogwheel.MySQLEnabledCogwheel, BE SURE TO INCLUDE THIS CHECK
-        if not self.canUseDatabase:
-            await interaction.followup.send(":x: Database is not enabled.  This command cannot be used.")
+        if not await self.verifyDatabaseUtility(interaction, True):
             return
 
         if not user:
@@ -54,7 +53,7 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
         nick = user.nick
 
         if nick != None:
-            presented_username = "{0} ({1})".format(nick, username)
+            presented_username = "%s (%s)".format(nick, username)
         else:
             presented_username = "{0}".format(username)
         
@@ -71,8 +70,7 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
 
     @group.command(name="settings", description="User Settings Web Interface")
     async def _settings(self, interaction: discord.context.ApplicationContext):
-        if not self.canUseDatabase:
-            await interaction.response.send_message(":x: Database is not enabled.  This command cannot be used.")
+        if not await self.verifyDatabaseUtility(interaction, False):
             return
         
         c = self.cnx.cursor()
@@ -86,3 +84,31 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
         view.add_item(discord.ui.Button(label="User Settings", url=f"{agb.system.cogwheel.getAPIEndpoint('webui', 'USER_SETTINGS')}?token={token}"))
 
         await interaction.response.send_message("Here is your WebUI link.\n-# Do NOT share it with anyone, as it will let them change your user settings!", view=view, ephemeral=True)
+
+    @group.command(name="level", description="Get user level")
+    async def _userlevel(self, interaction: discord.commands.context.ApplicationContext,
+                         user: discord.Option(discord.User, "User to get level for", required=False)): # type: ignore
+        await interaction.response.defer()
+
+        if not await self.verifyDatabaseUtility(interaction, True):
+            return
+        
+        if not user:
+            user = interaction.user
+
+        if not agb.system.cogwheel.getUserSetting(self.cnx, user.id, "message_tracking_consent"):
+            await interaction.followup.send(":x: This user has not consented to message tracking.")
+            return
+
+        if user.bot:
+            await interaction.followup.send(":x: This user is a bot.  Support for bot tracking *may* be added in the future.")
+            return
+
+        c = self.cnx.cursor()
+        c.execute("SELECT user_level from guild_user_stats WHERE userid = %s AND guildid = %s", [user.id, interaction.guild.id])
+        level = c.fetchone()[0]
+
+        self.logger.debug(c.statement)
+
+
+        await interaction.followup.send(f"{user.mention}'s level is **{level}**!")
