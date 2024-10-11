@@ -49,7 +49,7 @@ class ModerationCog(agb.system.cogwheel.Cogwheel):
     async def _purge(self, interaction: discord.ApplicationContext,
                      number: discord.Option(int, description="Maximum number of messages to purge.")): # type: ignore
         await interaction.channel.purge(limit=number)
-        await interaction.response.send_message(":white_check_mark:  Purged **{}** messages.".format(number))
+        await interaction.response.send_message(":white_check_mark:  Purged **{}** messages.".format(number), ephemeral=True)
         
     @group.command(name="timeout", description="Timeout a user.")
     @commands.has_permissions(moderate_members=True)
