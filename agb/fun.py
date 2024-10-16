@@ -14,12 +14,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.system.cogwheel
+import agb.cogwheel
 import discord
 import random
 from discord.ext import commands
 
-class FunCog(agb.system.cogwheel.Cogwheel):
+class FunCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="magic8ball", description="It's a magic 8 ball!")
     async def _magic8ball(self, interaction: discord.commands.context.ApplicationContext,
                           prompt: discord.Option(str, description="What do you want to know?", required=True)): #type: ignore
@@ -46,6 +46,6 @@ class FunCog(agb.system.cogwheel.Cogwheel):
             "Very doubtful"
         ]
 
-        embed = agb.system.cogwheel.embed(title=prompt, description=random.choice(answers))
+        embed = agb.cogwheel.embed(title=prompt, description=random.choice(answers))
         embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/8ball.png")
         await interaction.response.send_message(embed=embed)

@@ -18,7 +18,7 @@ import random
 import discord
 from discord.ext import commands
 from enum import Enum
-import agb.system.cogwheel
+import agb.cogwheel
 import json
 from asyncio import sleep
 import logging
@@ -186,7 +186,7 @@ class Combat:
         
     async def openingScreen(self):
         """Opening screen for the combat.  Ask the user if they're ready to fight."""
-        embed = agb.system.cogwheel.embed(
+        embed = agb.cogwheel.embed(
             title = "Combat",
             description = "%s, %s just challenged you to a duel.  Are you ready to "
                           "prove your worth in a duel to the death?  If you are, "
@@ -232,7 +232,7 @@ class Combat:
         
     
 
-        await self.thread.send(embed=agb.system.cogwheel.embed(
+        await self.thread.send(embed=agb.cogwheel.embed(
             title = "%s, you're up!" % player["user"].name,
             description="""**What do you want to do?**\n
 You can either:
@@ -276,7 +276,7 @@ You can either:
         await self.thread.send(":crossed_swords: The combat has ended.  Thanks for playing!")
         await sleep(5)
         
-        embed = agb.system.cogwheel.embed(
+        embed = agb.cogwheel.embed(
             title = "Combat Results",
             description = """**Combat Results**
 * %s: %s HP (%s healing potions left)
@@ -297,7 +297,7 @@ Winner: %s (by %s)""" % (
         await self.thread.starting_message.edit(content="Here are the results of the battle between %s and %s." % (self.competitor.mention, self.challenger.mention), embed=embed)
         await self.thread.delete()
 
-class ReadyView(agb.system.cogwheel.DefaultView):
+class ReadyView(agb.cogwheel.DefaultView):
     def __init__(self, combatInstance):
         super().__init__()
         self.instance = combatInstance
@@ -326,7 +326,7 @@ class ReadyView(agb.system.cogwheel.DefaultView):
         else:
             await interaction.response.edit_message()
 
-class CombatOptionView(agb.system.cogwheel.DefaultView):
+class CombatOptionView(agb.cogwheel.DefaultView):
     def __init__(self, instance: Combat):
         super().__init__()
         self.instance = instance
@@ -359,7 +359,7 @@ class CombatOptionView(agb.system.cogwheel.DefaultView):
         await interaction.response.edit_message(view=self)
         
         roll_chance = self.instance.calculate_hit_chance(self.instance.small_attack_chance, self.instance.otherTurn())
-        roll = agb.system.cogwheel.percent_of_happening(roll_chance)
+        roll = agb.cogwheel.percent_of_happening(roll_chance)
 
         player = self.instance.players[self.instance.currentTurn]
         opponent = self.instance.players[self.instance.otherTurn()]
@@ -390,7 +390,7 @@ class CombatOptionView(agb.system.cogwheel.DefaultView):
         await interaction.response.edit_message(view=self)
         
         roll_chance = self.instance.calculate_hit_chance(self.instance.small_attack_chance, self.instance.otherTurn())
-        roll = agb.system.cogwheel.percent_of_happening(roll_chance)
+        roll = agb.cogwheel.percent_of_happening(roll_chance)
 
         player = self.instance.players[self.instance.currentTurn]
         opponent = self.instance.players[self.instance.otherTurn()]
@@ -477,7 +477,7 @@ class CombatOptionView(agb.system.cogwheel.DefaultView):
         self.instance.winReason = "Surrender"
         await self.instance.closeCombat()
     
-class CombatCog(agb.system.cogwheel.Cogwheel):
+class CombatCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="combat", description="Challenge another user to a combat!")
     async def _combat_begin(
         self,

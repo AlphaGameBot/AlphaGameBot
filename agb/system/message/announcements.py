@@ -17,22 +17,17 @@
 import discord
 from discord.ext import commands
 import logging
-import agb.system.cogwheel
+import agb.cogwheel
 import time
-from agb.system.requestHandler import handler
+from agb.requestHandler import handler
 from mysql.connector import connection
 
 with open("assets/dms_announcemment_template.txt", "r") as f:
     announcement_template = f.read()
-
-def render_announcement_template(text: str) -> str:
-    return announcement_template.format(content=text, time=int(time.time()))
-
 async def blast_announcement(
         bot: commands.Bot,
         cnx: connection.MySQLConnection,
-        CAN_USE_DATABASE: bool,
-        dry_run: bool = False) -> str | None:
+        CAN_USE_DATABASE: bool) -> str | None:
     """Blasts an announcement to DM to all users *who have opted in*"""    
     if not CAN_USE_DATABASE: return
 
@@ -40,17 +35,15 @@ async def blast_announcement(
     logger = logging.getLogger("system")
 
     text = handler.get(
-        agb.system.cogwheel.getBotInformation()["ANNOUNCEMENT_URL"],
+        agb.cogwheel.getBotInformation()["ANNOUNCEMENT_URL"],
         attemptCache=False).text
     
     cursor.execute("SELECT userid FROM user_settings WHERE announcements = 1")
     db_users = cursor.fetchall()
+    print(db_users)
 
     errNotFound = 0
     errForbidden = 0
-
-    rendered_text = render_announcement_template(text)
-
     for user_id in db_users:
         _id = user_id[0]
         logger.debug(_id)
@@ -60,17 +53,14 @@ async def blast_announcement(
             logger.warning("blast_announcement: User %s is none (What o_0)", _id)
             continue
         try:
-            if dry_run:
-                logger.info("blast_announcement: Dry run, not sending message to user %s", _id)
-                continue
             dm = await user.create_dm()
-            await dm.send(rendered_text)
+            await dm.send(announcement_template.format(content=text, ctime=time.ctime()))
         except discord.Forbidden:
             logger.warning("blast_announcement: Can't send message to user %s (Forbidden)", user_id)
     
     return """## Announcement Blast Results
-Results of the announcement blast: **{status}**
+Results of the announcement blast: **SUCCESS**
 Users Sent To (Total): {total}
 Users Not Found: {notfound}
 Users Forbidden: {forbidden}
-""".format(total=len(db_users), notfound=errNotFound, forbidden=errForbidden, status="Dry Run" if dry_run else "Complete")
+""".format(total=len(db_users), notfound=errNotFound, forbidden=errForbidden)

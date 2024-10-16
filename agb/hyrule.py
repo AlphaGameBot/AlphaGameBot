@@ -14,12 +14,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-from agb.system.requestHandler import handler as requesthandler
+from agb.requestHandler import handler as requesthandler
 from json import loads
-import agb.system.cogwheel
+import agb.cogwheel
 import discord
 import random
-import agb.system.requestHandler
+import agb.requestHandler
 
 
 class CompodiumEntrySchema:
@@ -141,7 +141,7 @@ class CompodiumTreasure(CompodiumEntrySchema):
         return embed
 
 # make the discord cog
-class HyruleCog(agb.system.cogwheel.Cogwheel):
+class HyruleCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="hyrule", description="Hyrule Compendium-related commands")
     
     def __init__(self, bot):
@@ -151,7 +151,7 @@ class HyruleCog(agb.system.cogwheel.Cogwheel):
         self.compodiumEntries = []
         self.compodium = loads(
             requesthandler.get(
-                agb.system.cogwheel.getAPIEndpoint("hyrule", "GET_ALL")
+                agb.cogwheel.getAPIEndpoint("hyrule", "GET_ALL")
             ).text
         )["data"]
         for entry in self.compodium:
@@ -183,7 +183,7 @@ class HyruleCog(agb.system.cogwheel.Cogwheel):
                                          required=True, 
                                          autocomplete=compodium_autocomplete)): # type: ignore
         r = requesthandler.get(
-                agb.system.cogwheel.getAPIEndpoint("hyrule", "GET_ONE").format(entry))
+                agb.cogwheel.getAPIEndpoint("hyrule", "GET_ONE").format(entry))
         apiresponse = loads(
             r.text
         )

@@ -15,73 +15,27 @@
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import random
-import agb.system.cogwheel
-import agb.system.requestHandler
+import agb.cogwheel
+import agb.requestHandler
 from discord.ext import commands
 import discord
 import json
 import logging
 import html
 
-class BaseTriviaOptionDisplayView(discord.ui.View):
-    def __init__(self, answers: list[str|bool], correctAnswer: str | bool, intendedUser: discord.User):
-        super().__init__()
+class TrueFalseTriviaOptionDisplayView(discord.ui.View):
+    def __init__(self, options: list[str], correctAnswer: bool, intendedUser: discord.User):
         self.correctAnswer = correctAnswer
-        self.intendedUser = intendedUser
-        self.answers = answers
-        self.logger = logging.getLogger("cogwheel")
-        self.logger.debug("Correct answer is %s" % self.correctAnswer)
-        self.logger.debug("Intended user is %s (ID: %s)", self.intendedUser.name, self.intendedUser.id)
+        super().__init__()
         
-    async def isCorrectUser(self, interaction: discord.context.ApplicationContext, autoRespond: bool = True) -> bool:
-        """Check if the user is the intended user to answer the question
-        
-        Args:
-            interaction (discord.context.ApplicationContext): The interaction context
-            autoRespond (bool, optional): If true, will automatically respond with an error message using the given `ApplicationContext`.  Defaults to True."""
-        re = interaction.user.id == self.intendedUser.id
-        self.logger.debug("isCorrectUser: %s (Comparing Intended:%s to Actual:%s)", re, self.intendedUser.id, interaction.user.id)
-        if not re and autoRespond:
-            self.logger.debug("isCorrectUser: Responding with error message")
-            await interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for {self.intendedUser.mention}!", ephemeral=True)
-        return re
-    
     async def handleAnswer(self, interaction, answer):
-        """Handle the user's answer
-        
-        Args:
-            interaction (discord.context.ApplicationContext): The interaction context
-            answer (bool): The user's answer"""
-        logging.getLogger("system").debug("Answer: %s", answer)
-
-        if not await self.isCorrectUser(interaction):
-            return
-        
-        self.logger.debug("Comparing user answer \"%s\" (Type: %s) to correct answer \"%s\" (Type: %s)", answer, type(answer).__name__, self.correctAnswer, type(self.correctAnswer).__name__)
-        previous_type = type(answer)
-        # Here's my extremely hacky way of comparing the answer to the correct answer even if the types are different
-        # A problem with it is that it will error out if the types are not compatible, or it'll return a bad result if
-        # the value evaluates to True, such as (if "string") will evaluate to True, unless if the string is empty.
-        answer = type(self.correctAnswer)(answer)
-        current_type = type(answer)
-
-        if previous_type != current_type:
-            self.logger.debug("Converted answer from %s to %s" % (previous_type.__name__, current_type.__name__))
-            
-        if answer == self.correctAnswer:
+        if answer == correctAnswer:
             await interaction.response.send_message(":white_check_mark: Correct!")
         else:
-            await interaction.response.send_message(":x: Incorrect!  The correct answer was `%s`" % self.correctAnswer)
+            await interaction.response.send_message(":x: Incorrect!")
         self.disable_all_items()
         await interaction.message.edit(view=self)
-    
-    async def on_timeout(self):
-        for child in self.children:
-            child.disabled = True
-        self.stop()    
-
-
-class TrueFalseDisplayView(BaseTriviaOptionDisplayView):
+        
     @discord.ui.button(label="False", style=discord.ButtonStyle.red)
     async def _false(self, button, interaction):
         return await self.handleAnswer(interaction, False)
@@ -90,37 +44,54 @@ class TrueFalseDisplayView(BaseTriviaOptionDisplayView):
     async def _true(self, button, interaction):
         return await self.handleAnswer(interaction, True)
         
-class TriviaOptionDisplayView(BaseTriviaOptionDisplayView):
-    def __init__(self, answers: list[str], correct_answer: str, intendedUser: discord.User):
-        super().__init__(answers, correct_answer, intendedUser)
-        self._option_button_1.label = answers[0]
-        self._option_button_2.label = answers[1]
-        self._option_button_3.label = answers[2]
-        self._option_button_4.label = answers[3]
+class TriviaOptionDisplayView(discord.ui.View):
+    def __init__(self, options: list[str], correctValueIndex: int, intendedUser: discord.User):
+        super().__init__()
+        self.options = options
+        self.correctValueIndex = correctValueIndex
+        self._option_button_1.label = options[0]
+        self._option_button_2.label = options[1]
+        self._option_button_3.label = options[2]
+        self._option_button_4.label = options[3]
         self.intendedUser = intendedUser
 
+    async def handle_response(self, interaction, button_option_index: int):
+        if interaction.user.id != self.intendedUser.id:
+            await interaction.response.send_message(f":x: You are not the intended user to answer this question.  This one's for `{self.intendedUser.name}`!", ephemeral=True)
+            return
+        if button_option_index - 1 == self.correctValueIndex:
+            await interaction.response.send_message(":white_check_mark: Correct!  The answer was **%s**." % self.options[self.correctValueIndex])
+        else:
+            await interaction.response.send_message(f":x: Incorrect!  The correct answer was `{self.options[self.correctValueIndex]}`")
+        self.disable_all_items()
+        await interaction.message.edit(view=self)
 
     @discord.ui.button(label="Placeholder Value 1", style=discord.ButtonStyle.primary)
     async def _option_button_1(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
-        return await self.handleAnswer(interaction, button.label)
+        return await self.handle_response(interaction, 1)
 
     @discord.ui.button(label="Placeholder Value 2", style=discord.ButtonStyle.primary)
     async def _option_button_2(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
-        return await self.handleAnswer(interaction, button.label)
+        return await self.handle_response(interaction, 2)
 
     @discord.ui.button(label="Placeholder Value 3", style=discord.ButtonStyle.primary)
     async def _option_button_3(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
-        return await self.handleAnswer(interaction, button.label)
+        return await self.handle_response(interaction, 3)
 
     @discord.ui.button(label="Placeholder Value 4", style=discord.ButtonStyle.primary)
     async def _option_button_4(self, button: discord.ui.Button, interaction: discord.ApplicationContext):
-        return await self.handleAnswer(interaction, button.label)
+        return await self.handle_response(interaction, 4)
+
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+        self.stop()    
 
 
-class TriviaCog(agb.system.cogwheel.Cogwheel):
+class TriviaCog(agb.cogwheel.Cogwheel):
     def __init__(self, bot):
         super().__init__(bot)
-        with agb.system.requestHandler.handler.get(agb.system.cogwheel.getAPIEndpoint("trivia", "GET_CATEGORIES")) as r:
+        with agb.requestHandler.handler.get(agb.cogwheel.getAPIEndpoint("trivia", "GET_CATEGORIES")) as r:
             self.CATEGORIES = json.loads(r.text)["trivia_categories"]
             self.logger.debug("Retrieved %s categories" % len(self.CATEGORIES))
         
@@ -158,10 +129,10 @@ class TriviaCog(agb.system.cogwheel.Cogwheel):
             "type": type,
             "amount": 1
         }
-        u = agb.system.requestHandler.formatQueryString(agb.system.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
+        u = agb.requestHandler.formatQueryString(agb.cogwheel.getAPIEndpoint("trivia", "API_ENDPOINT"),
                                                  api_args)
 
-        with agb.system.requestHandler.handler.get(u, attemptCache=False) as r:
+        with agb.requestHandler.handler.get(u, attemptCache=False) as r:
             data = json.loads(r.text)
             if data["response_code"] == 1:
                 await interaction.followup.send("No results found.")
@@ -181,10 +152,8 @@ class TriviaCog(agb.system.cogwheel.Cogwheel):
             
         question = data["results"][0]["question"]
         answers = data["results"][0]["incorrect_answers"]
-        correct_answer = data["results"][0]["correct_answer"]
-        answers.append(correct_answer)
-        self.logger.debug("Answers: %s" % answers)
+        answers.append(data["results"][0]["correct_answer"])
         random.shuffle(answers)
 
-        answerView = (TrueFalseDisplayView if type == "boolean" else TriviaOptionDisplayView)(answers, correct_answer, interaction.author)
+        answerView = (TrueFalseTriviaOptionDisplayView if type == "boolean" else TriviaOptionDisplayView)(answers, answers.index(data["results"][0]["correct_answer"]), interaction.author)
         await interaction.followup.send(html.unescape(question), view=answerView)

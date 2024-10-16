@@ -17,9 +17,9 @@
 from googlesearch import search
 import discord
 import logging
-import agb.system.cogwheel
+import agb.cogwheel
 
-class GoogleCog(agb.system.cogwheel.Cogwheel):
+class GoogleCog(agb.cogwheel.Cogwheel):
     @discord.command(name="google", description="Search on Google (for those of you who don't wanna open Chrome :/)")
     async def _google(self, interaction,
                       query: discord.Option(str, description="The search term that you want"), # type: ignore

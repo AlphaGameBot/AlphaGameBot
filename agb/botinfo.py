@@ -14,10 +14,17 @@
 #      You should have received a copy of the GNU General Public License
 #      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.system.cogwheel
+import agb.cogwheel
 import discord
 import os
 from discord.ext import commands
+
+async def sendToOwner(bot, *args, **kwargs):
+    _d = agb.cogwheel.getBotInformation()
+    owner = bot.get_user(_d["OWNER_ID"])
+    owner_dm = await owner.create_dm()
+
+    await owner_dm.send(*args, **kwargs)
     
 class FeedbackModal(discord.ui.Modal):
     def __init__(self, bot, *args, **kwargs) -> None:
@@ -26,13 +33,13 @@ class FeedbackModal(discord.ui.Modal):
         self.add_item(discord.ui.InputText(label="Feedback", style=discord.InputTextStyle.long))
 
     async def callback(self, interaction: discord.Interaction):
-        _d = agb.system.cogwheel.getBotInformation()
-        owner_embed = agb.system.cogwheel.embed(title="AlphaGameBot Feedback", description="A user has submitted feedback!", colour=discord.Colour.dark_blue())
+        _d = agb.cogwheel.getBotInformation()
+        owner_embed = agb.cogwheel.embed(title="AlphaGameBot Feedback", description="A user has submitted feedback!", colour=discord.Colour.dark_blue())
         owner_embed.add_field(name="Feedback", value=self.children[0].value)
         owner_embed.add_field(name='Username', value=interaction.user.name)
         owner_embed.add_field(name='User ID', value=interaction.user.id)
 
-        agb.system.cogwheel.webhook(dataOverride={"embeds": [owner_embed.to_dict()]})
+        await sendToOwner(self.bot, embed=owner_embed)
         
         await interaction.response.send_message("Feedback sent!", ephemeral=True)
 
@@ -46,17 +53,17 @@ class CommandSuggestionModal(discord.ui.Modal):
 
     async def callback(self, interaction: discord.ApplicationContext):
         description = "**Command Name**: %s\n\n**Command Description**: %s" % (self.children[0].value, self.children[1].value)
-        owner_embed = agb.system.cogwheel.embed(title="AlphaGameBot Command Suggestion", description=description)
+        owner_embed = agb.cogwheel.embed(title="AlphaGameBot Command Suggestion", description=description)
         owner_embed.add_field(name="User Name", value=interaction.user.name)
         owner_embed.add_field(name="User ID", value=interaction.user.id)
 
-        agb.system.cogwheel.webhook(dataOverride={"embeds": [owner_embed.to_dict()]})
+        await sendToOwner(self.bot, embed=owner_embed)
         await interaction.response.send_message("Command Suggestion Sent.  Thank you!", ephemeral=True)
 class AboutView(discord.ui.View):
     def __init__(self, bot) -> None:
         super().__init__()
         self.bot = bot
-        _d = agb.system.cogwheel.getBotInformation()
+        _d = agb.cogwheel.getBotInformation()
         addTheBot = discord.ui.Button(
             label="Add the Bot!",                          
             url=_d["BOT_INFORMATION"]["INVITE_URL"], row=1)
@@ -79,7 +86,7 @@ class AboutView(discord.ui.View):
         button.label = "Thanks for the suggestion!"
         await interaction.response.send_modal(CommandSuggestionModal(self.bot, title="AlphaGameBot Command Suggestion"))
 
-class BotInformationCog(agb.system.cogwheel.MySQLEnabledCogwheel):
+class BotInformationCog(agb.cogwheel.MySQLEnabledCogwheel):
 
     def getCommitMessage(self):
         """Get the most recent commit message
@@ -95,7 +102,7 @@ class BotInformationCog(agb.system.cogwheel.MySQLEnabledCogwheel):
 
     @commands.slash_command(name="about", description="About AlphaGameBot!")
     async def _about(self, interaction):
-        _d = agb.system.cogwheel.getBotInformation()
+        _d = agb.cogwheel.getBotInformation()
         view = AboutView(self.bot)        
 
         # get users
@@ -118,11 +125,11 @@ class BotInformationCog(agb.system.cogwheel.MySQLEnabledCogwheel):
             build_text = "(Build #{0})".format(build)
         else:
             build_text = ""
-        embed = discord.Embed(title=f"AlphaGameBot {agb.system.cogwheel.getVersion()}  {build_text}",
+        embed = discord.Embed(title=f"AlphaGameBot {agb.cogwheel.getVersion()}  {build_text}",
                               description=_d["BOT_INFORMATION"]["DESCRIPTION"],
                               colour=discord.Colour.dark_blue())
         embed.add_field(name="Bot Ping", value="{0} milliseconds".format(round(self.bot.latency * 100, 2)))
-        embed.add_field(name="Bot version", value=agb.system.cogwheel.getVersion())
+        embed.add_field(name="Bot version", value=agb.cogwheel.getVersion())
         embed.add_field(name="User Count", value=usercount)
         embed.add_field(name="Server Count", value=len(self.bot.guilds))
         embed.add_field(name="Latest Commit Message", value=self.getCommitMessage())

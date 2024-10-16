@@ -19,8 +19,8 @@ import random
 import traceback
 import discord
 from discord.ext import commands
-import agb.system.cogwheel
-import agb.system.requestHandler
+import agb.cogwheel
+import agb.requestHandler
 import time
 from json import load
 from mysql.connector.errors import OperationalError
@@ -51,7 +51,7 @@ class ErrorOptionView(discord.ui.View):
         else:
             error = self._error
         
-        if agb.system.cogwheel.isDebugEnv:
+        if agb.cogwheel.isDebugEnv:
             # well this is kind of useless
             self.logger.info("Bug reporting was disabled, as this is a debug build.  If you need to test bug reporting, disable debug mode.  Also, be sure to set the 'WEBHOOK' so you can actually send the report!")
             await interaction.response.send_message(":x: Naturally, you shouldn't be able to send a bug report in a debug build, as there is no real benefit of doing so.  If you are the developer, please check the Python console.  Otherwise, please inform the developer of this bug!.", ephemeral=True)
@@ -72,7 +72,7 @@ class ErrorOptionView(discord.ui.View):
                 arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
         except KeyError:
             arguments = "*No Arguments.*"
-        response = agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
+        response = agb.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -125,7 +125,7 @@ An error was reported.  Here is some information!
         
         # Send a DM thanking the user for reporting the bug (I will eventually add a way to not get a DM)
         dm = await self.user.create_dm()
-        sent_embed = agb.system.cogwheel.embed(
+        sent_embed = agb.cogwheel.embed(
             title="✅ Bug Report Recieved!",
             description=f"""
 Hey, {self.user.name}!
@@ -183,8 +183,8 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             await interaction.response.send_message(":x: Internal Database Error.  Please try again later!")
             print("op err")
             # ping the bot owner
-            owner_id = agb.system.cogwheel.getBotInformation()["OWNER_ID"]
-            agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), 
+            owner_id = agb.cogwheel.getBotInformation()["OWNER_ID"]
+            agb.requestHandler.handler.post(os.getenv("WEBHOOK"), 
           {
                     "content": f"<@{owner_id}>\nDatabase Operational Error: {repr(error)}.  Check the DB stuff to make sure it's working!",
                 },
@@ -196,9 +196,9 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             await interaction.response.send_message(":x: Sorry, but you don't have sufficient permissions to do that!")
             return
         
-    embed = agb.system.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able to make it work by trying again.\nSorry about that! (awkward face emoji)",
+    embed = agb.cogwheel.embed(title="An error occured...", description="An internal server error has occured, and the bot cannot fulfill your request.  You may be able to make it work by trying again.\nSorry about that! (awkward face emoji)",
                                color=discord.Color.red())
-    if not agb.system.cogwheel.isDebugEnv:
+    if not agb.cogwheel.isDebugEnv:
         embed.add_field(name="Joke", value=random.choice(ERROR_JOKES))
     else:
         embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
@@ -210,15 +210,15 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
 
     try:
         try:
-            await interaction.response.send_message(tb if agb.system.cogwheel.isDebugEnv else "", embed=embed, view=v(error, interaction, interaction.user))
+            await interaction.response.send_message(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=v(error, interaction, interaction.user))
 
         except discord.errors.InteractionResponded:
             logging.debug("Using a followup message to send the error message because the interaction was already responded to.")
-            await interaction.followup.send(tb if agb.system.cogwheel.isDebugEnv else "", embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
+            await interaction.followup.send(tb if agb.cogwheel.isDebugEnv else "", embed=embed, view=ErrorOptionView(error, interaction, interaction.user))
 
-        if agb.system.cogwheel.isDebugEnv:
+        if agb.cogwheel.isDebugEnv:
             # Pass the error along to the Python Error Handler (console)
             raise error 
     except discord.errors.NotFound:
         logger.warning("All else failed.  Using standard message to send error without the interaction because NotFound.")
-        await interaction.channel.send(tb if agb.system.cogwheel.isDebugEnv else "", embed=embed)
+        await interaction.channel.send(tb if agb.cogwheel.isDebugEnv else "", embed=embed)

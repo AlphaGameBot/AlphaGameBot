@@ -15,7 +15,7 @@
 #      along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
-import agb.system.cogwheel
+import agb.cogwheel
 import discord
 from discord.ext import commands
 
@@ -73,8 +73,8 @@ class TestCompleteOptionView(discord.ui.View):
     
 
 class EnneagramTest:
-    logger: agb.system.cogwheel.CogwheelLoggerHelper
-    cog: agb.system.cogwheel.Cogwheel
+    logger: agb.cogwheel.CogwheelLoggerHelper
+    cog: agb.cogwheel.Cogwheel
     key: dict
     user: discord.User
     id: int
@@ -87,7 +87,7 @@ class EnneagramTest:
     mbti: str
     mbti_list: list
 
-    def __init__(self, cog: agb.system.cogwheel.Cogwheel, user: discord.User):
+    def __init__(self, cog: agb.cogwheel.Cogwheel, user: discord.User):
         self.user = user # discord.User
         self.id = self.user.id
         self.cog = cog
@@ -207,7 +207,7 @@ class EnneagramTest:
         description = "**Here is some more information.**\n"
         description = description + "Your highest score was for the type %s, with a score of %s.\n" % (self.key[enneagram], self.stats[enneagram])
         description = description + "Other possible enneagrams include {}\n".format(", ".join(["*" + self.key[x] + "*" for x in possibleEnneagrams if x != enneagram])) if len(possibleEnneagrams) > 1 else "No other possible enneagrams found, but you might be able to find something by looking at the scores.\n"
-        embed = agb.system.cogwheel.embed(title="Enneagram Test Results ({0}w{1}) [{2}]".format(enneagram, 
+        embed = agb.cogwheel.embed(title="Enneagram Test Results ({0}w{1}) [{2}]".format(enneagram, 
                                                                                          wing, 
                                                                                          "".join([str(x) for x in tritype])), 
                                    description=description)
@@ -233,7 +233,7 @@ class EnneagramTest:
         self.thread = await self.message.create_thread(name="*%s's Enneagram Test*" % self.user.name, auto_archive_duration=60)
         await self.nextQuestion(advance=False)  # advance=False tells the function not to increase the question counter, as we are just starting.
 
-class EnneagramCog(agb.system.cogwheel.Cogwheel):
+class EnneagramCog(agb.cogwheel.Cogwheel):
     @commands.slash_command(name="enneagram", description="Take the Enneagram test!")
     async def enneagram(self, interaction: discord.context.ApplicationContext):
         await EnneagramTest(self, interaction.author).startTest(interaction)

@@ -19,10 +19,10 @@ from discord.ext import commands
 from discord import Permissions
 import logging
 import datetime
-import agb.system.cogwheel
+import agb.cogwheel
 
 
-class ModerationCog(agb.system.cogwheel.Cogwheel):
+class ModerationCog(agb.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="moderation", description="Moderation-related commands")
 
     @group.command(name="kick", description="Kicks a user.")
@@ -49,7 +49,7 @@ class ModerationCog(agb.system.cogwheel.Cogwheel):
     async def _purge(self, interaction: discord.ApplicationContext,
                      number: discord.Option(int, description="Maximum number of messages to purge.")): # type: ignore
         await interaction.channel.purge(limit=number)
-        await interaction.response.send_message(":white_check_mark:  Purged **{}** messages.".format(number), ephemeral=True)
+        await interaction.response.send_message(":white_check_mark:  Purged **{}** messages.".format(number))
         
     @group.command(name="timeout", description="Timeout a user.")
     @commands.has_permissions(moderate_members=True)

@@ -18,7 +18,7 @@ import requests_cache
 import logging
 import requests
 import json
-import agb.system.cogwheel
+import agb.cogwheel
 import urllib.parse
 
 class RequestHandler:
@@ -27,7 +27,7 @@ class RequestHandler:
         with open("assets/http_codes.json", "r") as f:
             self.RESPONSES = json.load(f)
             self.logger.debug("Loaded %s HTTP Responses!", len(self.RESPONSES.keys()))
-            self.logger.debug("Debug Environment: %s", "yes" if agb.system.cogwheel.isDebug() else "no")
+            self.logger.debug("Debug Environment: %s", "yes" if agb.cogwheel.isDebugEnv else "no")
         self.session = requests_cache.CachedSession("request-handler", cache_control=True, expire_after=43200) # 43200 seconds = 12 hours
         with open("alphagamebot.json", "r") as f:
             self.BOT_INFORMATION = json.load(f)
@@ -37,7 +37,7 @@ class RequestHandler:
                 version=self.BOT_INFORMATION["VERSION"],
                 requests=requests.__version__,
                 devstatus=(
-                    " (DEVELOPMENT EDITION)" if agb.system.cogwheel.isDebug() else ""
+                    " (DEVELOPMENT EDITION)" if agb.cogwheel.isDebugEnv else ""
                 )),  # this can be changed in the config (alphagamebot.json)
             "Accept": "application/json,text/plain,application/xml",
             "x-alphagamebot-version": self.BOT_INFORMATION["VERSION"],

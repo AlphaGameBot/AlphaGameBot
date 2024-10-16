@@ -1,5 +1,5 @@
 `------------AlphaGameBot Announcement-------------`
 {content}
 `--------------------------------------------------`
-*Sent: <t:{time}:f>*
+*Sent: `{ctime}`*
 -# You can opt-out of these messages using `.optout`.

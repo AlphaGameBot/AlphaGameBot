@@ -16,12 +16,12 @@
 
 import discord
 from discord.ext import commands
-import agb.system.cogwheel
+import agb.cogwheel
 import logging
 import random
 
 
-class rpsCog(agb.system.cogwheel.Cogwheel):
+class rpsCog(agb.cogwheel.Cogwheel):
     def init(self):
         self.gameData = {
             "rock": {
@@ -67,10 +67,10 @@ class rpsCog(agb.system.cogwheel.Cogwheel):
                        "rock",
                        "paper",
                        "scissors"
-                   ])): # type: ignore
+                   ])):
         if playerchoice.lower() not in self.gameData.keys():
             # well shit I guess you entered something wrong :/
-            embed = agb.system.cogwheel.embed(title="Error!",
+            embed = agb.cogwheel.embed(title="Error!",
                                        description="Well this is awkward... '{}' doesn't seem to be a valid option.  Please use:\nrock,paper,scissors".format(
                                            playerchoice))
             await interaction.response.send_message(embed=embed)
@@ -82,7 +82,7 @@ class rpsCog(agb.system.cogwheel.Cogwheel):
         # 2 --> AI wins
         # 0 --> Draw
 
-        embed = agb.system.cogwheel.embed(title="Rock Paper Scissors",
+        embed = agb.cogwheel.embed(title="Rock Paper Scissors",
                                    description=(
                                            "You %s" % state["human-win-status"]))
         embed.add_field(name="Your choice", value=state["players"]["player"])
