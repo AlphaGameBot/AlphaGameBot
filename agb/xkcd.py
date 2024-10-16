@@ -19,11 +19,11 @@ import discord
 import json
 import random
 import requests
-import agb.requestHandler
+import agb.system.requestHandler
 import logging
-import agb.cogwheel
+import agb.system.cogwheel
 
-class xkcdCog(agb.cogwheel.Cogwheel):
+class xkcdCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name = "xkcd",
                                       description = "XKCD Integrations in Discord!")
     
@@ -69,11 +69,11 @@ class xkcdCog(agb.cogwheel.Cogwheel):
                  num: int | None = None) -> list[dict, requests.models.Response]:
         self.logger.debug("Getting XKCD #{}".format(num if num != None else "CURRENT"))
         if num == None:
-            url = agb.cogwheel.getAPIEndpoint("xkcd", "GET_CURRENT")
+            url = agb.system.cogwheel.getAPIEndpoint("xkcd", "GET_CURRENT")
         else:
-            url = agb.cogwheel.getAPIEndpoint("xkcd", "GET_SPECIFIC").format(num)
+            url = agb.system.cogwheel.getAPIEndpoint("xkcd", "GET_SPECIFIC").format(num)
 
-        response = agb.requestHandler.handler.get(url)
+        response = agb.system.requestHandler.handler.get(url)
         if response.status_code == 200:
             xkcd = json.loads(response.text)
         else:
@@ -82,7 +82,7 @@ class xkcdCog(agb.cogwheel.Cogwheel):
         return [xkcd, response]
     
     def makeEmbedFromXKCD(self, comic: dict) -> dict:
-        embed = agb.cogwheel.Embed(title="#{0}: {1}".format(comic["num"], comic["safe_title"]),
+        embed = agb.system.cogwheel.Embed(title="#{0}: {1}".format(comic["num"], comic["safe_title"]),
                                    description="{1}".format(comic["num"], comic['alt']))
         embed.set_footer(text="XKCD #{0} - {1}/{2}/{3} - \"{4}\"".format(comic["num"],
                                                                          comic["month"],

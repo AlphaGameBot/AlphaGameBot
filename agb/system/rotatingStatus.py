@@ -17,13 +17,22 @@
 from discord.ext import commands
 import discord
 import asyncio
-import agb.cogwheel
+import agb.system.cogwheel
 import os
 import logging
+from mysql.connector import MySQLConnection
 
-async def rotatingStatus(bot: commands.Bot, cnx, CAN_USE_DATABASE: bool):
+async def rotatingStatus(bot: commands.Bot, 
+                         cnx: MySQLConnection, 
+                         CAN_USE_DATABASE: bool):
+    """Background task to change the bot's status every so often
+    
+    Args:
+        bot (commands.Bot): The bot instance
+        cnx (MySQLConnection): The MySQL connection
+        CAN_USE_DATABASE (bool): If the bot can use the database"""
     logger = logging.getLogger("system")
-    botinfo = agb.cogwheel.getBotInformation()
+    botinfo = agb.system.cogwheel.getBotInformation()
     
     # We will have a format for all of the statuses, in JSON form being:
     #{
@@ -75,7 +84,7 @@ async def rotatingStatus(bot: commands.Bot, cnx, CAN_USE_DATABASE: bool):
             logger.error(f"Unknown online status type: {botinfo['STATUS']}.  Defaulting to online.")
             online_status = discord.Status.online
         statusText = status["status"].format( # to allow for placeholders in the status
-            version=agb.cogwheel.getVersion(), 
+            version=agb.system.cogwheel.getVersion(), 
             build=os.getenv("BUILD_NUMBER"), 
             guilds=len(bot.guilds),
             users=usercount,

@@ -16,7 +16,7 @@
 
 import json
 import discord
-import agb.cogwheel
+import agb.system.cogwheel
 from discord.ext import commands
 
 class TestButtonView(discord.ui.View):
@@ -43,11 +43,12 @@ class TestButtonView(discord.ui.View):
         await self.test.nextQuestion()
 
 class TestCompleteOptionView(discord.ui.View):
-    def __init__(self, message: discord.Message, channel: discord.Thread):
+    def __init__(self, message: discord.Message, channel: discord.Thread, intendedUser: discord.User):
         super().__init__()
         self.channel = channel
         self.message = message
-
+        self.intendedUser = intendedUser
+        
     @discord.ui.button(label="Close Test",
                        style=discord.ButtonStyle.blurple)
     async def _close(self, button, interaction):
@@ -140,7 +141,7 @@ class MyersBriggsTypeIndicatorTest:
         mbti_string = "".join(mbti)
         self.mbti = mbti_string
         self.mbti_list = mbti
-        embed = agb.cogwheel.Embed(title="Results", description="Your MBTI is: {0} *({1}, {2}, {3}, and {4})*".format(
+        embed = agb.system.cogwheel.Embed(title="Results", description="Your MBTI is: {0} *({1}, {2}, {3}, and {4})*".format(
             mbti_string,
             self.key[mbti_string[0]],
             self.key[mbti_string[1]],
@@ -162,7 +163,7 @@ class MyersBriggsTypeIndicatorTest:
 
 
 # initalized into the bot by pycord - such a long class name lol
-class MyersBriggsTypeIndicatorCog(agb.cogwheel.Cogwheel):
+class MyersBriggsTypeIndicatorCog(agb.system.cogwheel.Cogwheel):
     @commands.slash_command(name="mbtitest", description="Take a Myers-Briggs type indicator test!")
     async def _mbtitest(self, interaction: discord.context.ApplicationContext):
         test = MyersBriggsTypeIndicatorTest(interaction.user)

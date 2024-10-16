@@ -14,17 +14,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with AlphaGameBot.  If not, see <https://www.gnu.org/licenses/>.
 
-import agb.requestHandler
+import agb.system.requestHandler
 import discord
 from discord.ext import commands
 import logging
 import uuid
 import random
-import agb.cogwheel
+import agb.system.cogwheel
 import json
 from nltk.corpus import words
 
-class UtilityCog(agb.cogwheel.Cogwheel):
+class UtilityCog(agb.system.cogwheel.Cogwheel):
 
 
     @commands.slash_command(name="whoami", description="For whose who need a discord bot to help with an identity crisis.")
@@ -124,9 +124,9 @@ class UtilityCog(agb.cogwheel.Cogwheel):
     async def _dictionary(self, interaction: discord.context.ApplicationContext,
                           word: discord.Option(str, description="The word to define!", required=True)): # type: ignore
         # define word
-        endpoint = agb.cogwheel.getAPIEndpoint('dictionary', "GET_WORD_DEFINITION").format(word.lower())
+        endpoint = agb.system.cogwheel.getAPIEndpoint('dictionary', "GET_WORD_DEFINITION").format(word.lower())
 
-        request = agb.requestHandler.handler.get(endpoint)
+        request = agb.system.requestHandler.handler.get(endpoint)
         response = json.loads(request.text)
 
         if request.status_code == 404: # word not found
@@ -145,7 +145,7 @@ class UtilityCog(agb.cogwheel.Cogwheel):
                 definition["partOfSpeech"],
                 definition["definitions"][0]["definition"]
             )
-        embed = agb.cogwheel.embed(
+        embed = agb.system.cogwheel.embed(
             title=titleWord,
             description=description
         )

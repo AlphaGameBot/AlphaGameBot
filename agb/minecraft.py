@@ -22,10 +22,10 @@ from socket import gaierror
 
 from mcstatus.querier import QueryResponse
 
-import agb.cogwheel
+import agb.system.cogwheel
 
 
-class MinecraftCog(agb.cogwheel.Cogwheel):
+class MinecraftCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="minecraft", description="Minecraft-related commands")
 
     @group.command(name="java", description="Ping a Minecraft: Java Edition server amd get data!")
@@ -57,7 +57,7 @@ class MinecraftCog(agb.cogwheel.Cogwheel):
         except TimeoutError:
             pass
 
-        embed = agb.cogwheel.embed(title="Server info for {}".format(addr),
+        embed = agb.system.cogwheel.embed(title="Server info for {}".format(addr),
                        description="Server information is limited as server disabled advanced query." if enableQuery == False else "")
 
         embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft.png")
@@ -84,20 +84,20 @@ class MinecraftCog(agb.cogwheel.Cogwheel):
         try:
             status = server.status()
         except gaierror as e:  # socket.gaierror: [Errno -2] Name or service not known
-            embed = agb.cogwheel.embed(title="Error!",
+            embed = agb.system.cogwheel.embed(title="Error!",
                                        description="The server data cannot be found!  Check the domain name and/or the port.\n\nThe reason for this is:\n`{0}`".format(
                                            repr(e)))
             embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft-error.png")
             await interaction.followup.send(embed=embed)
             return 1
         except TimeoutError as e:
-            embed = agb.cogwheel.embed(title="Error!",
+            embed = agb.system.cogwheel.embed(title="Error!",
                                        description="The server timed out!\n`{0}`".format(repr(e)))
             embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft-error.png")
             await interaction.followup.send(embed=embed)
             return e
 
-        embed = agb.cogwheel.embed(title="Server info for {0}".format(addr),
+        embed = agb.system.cogwheel.embed(title="Server info for {0}".format(addr),
                                    description=status.description)
         embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/minecraft.png")
 
