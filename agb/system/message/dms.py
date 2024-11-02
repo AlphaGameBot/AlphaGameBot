@@ -163,7 +163,7 @@ async def handleDMMessage(bot: commands.Bot,
     logger.debug(f"DM message received from {ctx.author} with content: {content}.  IsCommand: {isCommand}")
     if isCommand:
         # add the user to the database if they're not already in it
-        await agb.system.onboarding.initalizeNewUser(cnx, CAN_USE_DATABASE, ctx.author.id)
+        await agb.system.onboarding.initializeNewUser(cnx, CAN_USE_DATABASE, ctx.author.id)
 
         command = ctx.content.split(" ")[0][1:].lower()
         logger.debug(f"Command: {command}")

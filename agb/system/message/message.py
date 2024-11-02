@@ -60,7 +60,7 @@ async def handleOnMessage(bot: commands.Bot,
         return
     
     if tracking and CAN_USE_DATABASE:
-        await agb.system.onboarding.initalizeNewUser(cnx, ctx.author.id, ctx.guild.id)
+        await agb.system.onboarding.initializeNewUser(cnx, ctx.author.id, ctx.guild.id)
         await agb.system.leveling.countPoints(ctx, cnx, agb.system.leveling.CountingEvent.MESSAGE, CAN_USE_DATABASE, tracking)
         await agb.system.leveling.handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, tracking)
     else:
