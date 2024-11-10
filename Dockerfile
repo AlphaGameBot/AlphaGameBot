@@ -21,7 +21,7 @@ ARG BUILD_NUMBER=INFINITY
 ARG BRANCH_NAME=unknown
 
 # Use Python 3.11 for pycord compatibility
-FROM python:3.12.5
+FROM python:3.13.0rc2
 
 # Re-define the arguments after the FROM instruction
 ARG COMMIT_MESSAGE
