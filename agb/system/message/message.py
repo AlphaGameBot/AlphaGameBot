@@ -57,7 +57,8 @@ async def handleOnMessage(bot: commands.Bot,
     else:
         logging.debug("handleOnMessage: Not dispatching tracking functions because %s", 
                       "tracking is disabled" if not tracking else "the database is disabled")
-
-    logger.debug("handleOnMessage: Received message: '%s'", ctx.content)
-    logger.debug("handleOnMessage: Received bot-readable message: '%s'", ctx.content)
+    
+    if ctx.content:
+        logger.debug("handleOnMessage: Received bot-readable message: '%s'", ctx.content)
+    
     await agb.system.message.say.handleSay(ctx, forcesay, global_say_enabled, say_trigger)
