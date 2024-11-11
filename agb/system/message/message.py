@@ -16,6 +16,7 @@
 
 import agb.system.cogwheel
 import agb.system.leveling
+import agb.system.message.say
 import agb.system.onboarding
 import mysql.connector
 import discord
@@ -44,58 +45,20 @@ async def handleOnMessage(bot: commands.Bot,
         global_say_enabled (bool): Whether or not the bot can say messages in all guilds.
         say_trigger (str): The trigger to make the bot say something."""
     logger = logging.getLogger("system")
-    bot_information = agb.system.cogwheel.getBotInformation()
     
-    if say_trigger is None:
-        say_trigger = bot.user.mention # <@BOT_ID>
-    
-    say_prompted = ctx.content.startswith(say_trigger)
-    
-    ctx.content = ctx.content.strip(say_trigger).strip()
-    if say_prompted:
-        logger.debug("Recieved say message: (original: %s, valuetosay: %s, isSay: %s)", ctx.content, ctx.content, say_prompted)
-
     if ctx.author.bot:
         logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
         return
     
     if tracking and CAN_USE_DATABASE:
-        await agb.system.onboarding.initalizeNewUser(cnx, ctx.author.id, ctx.guild.id)
+        await agb.system.onboarding.initializeNewUser(cnx, ctx.author.id, ctx.guild.id)
         await agb.system.leveling.countPoints(ctx, cnx, agb.system.leveling.CountingEvent.MESSAGE, CAN_USE_DATABASE, tracking)
         await agb.system.leveling.handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, tracking)
     else:
         logging.debug("handleOnMessage: Not dispatching tracking functions because %s", 
                       "tracking is disabled" if not tracking else "the database is disabled")
-
-    if ctx.content.startswith(say_trigger) == False and not say_prompted:
-        return
-
-    # Disable the say command for all servers except for the ones in which they are explicitly
-    # enabled in alphagamebot.json, key "SAY_EXCEPTIONS"
-    if ctx.guild.id not in bot_information["SAY_EXCEPTIONS"]:
-        return
     
-    # When I run 2 instances of AlphaGameBot at the same time, both will reply to my message.
-    # ----> Ammendment: This was really only a problem when using the old, prefixed say command
-    # ----> such as "..(text)" or "?say (text)".  Now that I use the mention, it's not a problem.
-    # ----> I will keep this, with the addition of the "--say-trigger" flag.
-    # What it does is that if it is in a debug environment, it will ignore the command.  When testing,
-    # I will just remove the `DEBUG=1` environment variable.
-    if agb.system.cogwheel.isDebugEnv and not forcesay:
-        logger.info("Say was ignored as I think this is a development build.")
-        return EnvironmentError("Bot is in development build")
+    if ctx.content:
+        logger.debug("handleOnMessage: Received bot-readable message: '%s'", ctx.content)
     
-    if ctx.author.id != os.getenv("ALPHAGAMEBOT_OWNER_ID", 420052952686919690) and not global_say_enabled:
-        logger.warning("%s tried to make me say \"%s\", but I successfully ignored it.".format(ctx.author.name,
-                                                                                               ctx.content))
-        return
-
-    text = ctx.content[len(say_trigger):].strip()
-    logger.debug("handleOnMessage: say: Final text cut is \"%s\"", text)
-    
-    # Put in the console that it was told to say something!
-    logger.info("I was told to say: \"%s\"." % text)
-    await ctx.channel.send(text)
-
-    # Delete the original message, so it looks better in the application!
-    await ctx.delete()
+    await agb.system.message.say.handleSay(ctx, forcesay, global_say_enabled, say_trigger)
