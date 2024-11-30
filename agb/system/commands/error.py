@@ -203,7 +203,7 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
     else:
         embed.add_field(name="Error message", value="`{0}`".format(repr(error)))
 
-    embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/error.png")
+    embed.set_thumbnail(url="https://static-alphagamebot.alphagame.dev/img/error.png")
     tb = "```\n%s\n```" % ''.join(traceback.format_tb(error.__traceback__))
 
     v = DebugErrorOptionView #(ErrorOptionView if not agb.cogwheel.isDebugEnv else DebugErrorOptionView)

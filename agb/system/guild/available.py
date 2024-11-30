@@ -17,7 +17,7 @@ import discord
 import logging
 from mysql.connector import (connection)
 
-async def handleGuildAvailiable(ctx: discord.guild.Guild,
+async def handleGuildAvailiable(ctx: discord.Guild,
                                 cnx: connection.MySQLConnection | None,
                                 CAN_USE_DATABASE: bool):
     """Contains code that is executed when a new guild is seen by the bot.  This defaults some settings and other routines.
@@ -29,7 +29,13 @@ async def handleGuildAvailiable(ctx: discord.guild.Guild,
     cursor = cnx.cursor()
     rc = 0
     
-    cursor.execute("INSERT INTO guild_settings (guildid) SELECT %s AS guildid FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM guild_settings WHERE guildid = %s);", (ctx.id, ctx.id))    
+    cursor.execute("""
+        INSERT INTO guild_settings (guildid, ownerid)
+        SELECT %s AS guildid, %s AS ownerid
+        FROM DUAL
+        WHERE NOT EXISTS (SELECT 1 FROM guild_settings WHERE guildid = %s)
+        ON DUPLICATE KEY UPDATE ownerid = IF(VALUES(ownerid) = 0, guild_settings.ownerid, VALUES(ownerid));
+    """, (ctx.id, ctx.owner_id, ctx.id))
     rc += cursor.rowcount
 
     cursor.close()

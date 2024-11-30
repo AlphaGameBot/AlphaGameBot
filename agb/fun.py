@@ -47,5 +47,5 @@ class FunCog(agb.system.cogwheel.Cogwheel):
         ]
 
         embed = agb.system.cogwheel.embed(title=prompt, description=random.choice(answers))
-        embed.set_thumbnail(url="https://static.alphagame.dev/alphagamebot/img/8ball.png")
+        embed.set_thumbnail(url="https://static-alphagamebot.alphagame.dev/img/8ball.png")
         await interaction.response.send_message(embed=embed)

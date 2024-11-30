@@ -124,7 +124,7 @@ def embed(**kwargs) -> discord.Embed:
         getVersion(),
         " (development build)" if isDebugEnv else ""
     ),
-                      icon_url="https://static.alphagame.dev/alphagamebot/img/icon.png")
+                      icon_url="https://static-alphagamebot.alphagame.dev/img/icon.png")
     return _embed
 
 def percent_of_happening(percent: float) -> bool:
