@@ -21,6 +21,7 @@ import agb.system.cogwheel
 import agb.system.onboarding
 import agb.system.message.announcements
 import mysql.connector
+from agb.system.leveling import get_level_from_message_count
 from agb.system.requestHandler import handler
 from mysql.connector import (connection)
 
@@ -130,6 +131,31 @@ async def command_blastdryrun(bot, ctx, cnx, CAN_USE_DATABASE):
     t = await agb.system.message.announcements.blast_announcement(bot, cnx, CAN_USE_DATABASE, dry_run=True)
     await ctx.reply(t)
 
+async def command_fixallmyshit(ctx: discord.Message, cnx: connection.MySQLConnection, CAN_USE_DATABASE: bool):
+    logger = logging.getLogger('system')
+    if ctx.author.id != agb.system.cogwheel.getBotInformation()["OWNER_ID"]:
+        await ctx.reply(":x: Nice try, but you're not allowed to use this command. ;)")
+        return
+    if not CAN_USE_DATABASE:
+        await ctx.reply(":x: Sorry, but I can't process your request because the database is not enabled.")
+        return
+    cursor = cnx.cursor()
+    
+    cursor.execute("SELECT userid,guildid FROM guild_user_stats")
+    rows = cursor.fetchall()
+    usersfixed = 0
+    for row in rows:
+        userid, guildid = row
+
+        # get point count
+        cursor.execute("SELECT points FROM guild_user_stats WHERE userid = %s AND guildid = %s", (userid, guildid))
+        points = cursor.fetchone()[0]
+
+        cursor.execute("UPDATE guild_user_stats SET user_level = %s WHERE userid = %s AND guildid = %s", (get_level_from_message_count(points), userid, guildid))
+        logger.debug("fixallmyshit: Fixed user %s in guild %s", userid, guildid)
+        usersfixed += 1
+    cnx.commit()
+    await ctx.reply(f":white_check_mark: Fixed {usersfixed} users. (You're welcome!)")
 async def handleDMMessage(bot: commands.Bot,
                           ctx: discord.Message,
                           cnx: connection.MySQLConnection,
@@ -151,7 +177,8 @@ async def handleDMMessage(bot: commands.Bot,
         "optstatus": lambda: command_optstatus(ctx, cnx, CAN_USE_DATABASE),
         "blast": lambda: command_blast(bot, ctx, cnx, CAN_USE_DATABASE),
         "blastpreview": lambda: command_blastpreview(bot, ctx, cnx),
-        "blastdryrun": lambda: command_blastdryrun(bot, ctx, cnx, CAN_USE_DATABASE)
+        "blastdryrun": lambda: command_blastdryrun(bot, ctx, cnx, CAN_USE_DATABASE),
+        "fixallmyshit": lambda: command_fixallmyshit(ctx, cnx, CAN_USE_DATABASE)
     }
 
     logger = logging.getLogger('system')

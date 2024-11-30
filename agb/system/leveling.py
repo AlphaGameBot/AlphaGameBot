@@ -75,8 +75,12 @@ async def countPoints(
     points = 0
     if event == CountingEvent.MESSAGE:
         points = POINTS_MESSAGE
+        cursor.execute("UPDATE user_stats SET messages_sent = messages_sent + 1 WHERE userid = %s", [ctx.author.id])
+        cursor.execute("UPDATE guild_user_stats SET messages_sent = messages_sent + 1 WHERE userid = %s AND guildid = %s", (ctx.author.id, ctx.guild.id))
     elif event == CountingEvent.COMMAND:
         points = POINTS_COMMAND
+        cursor.execute("UPDATE user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s", [ctx.author.id])
+        cursor.execute("UPDATE guild_user_stats SET commands_ran = commands_ran + 1 WHERE userid = %s AND guildid = %s", (ctx.author.id, ctx.guild.id))
     
     
     cursor.execute("UPDATE guild_user_stats SET points = points + %s WHERE userid = %s AND guildid = %s", (points, ctx.author.id, ctx.guild.id))
@@ -85,6 +89,7 @@ async def countPoints(
         logger.warning("Points are zero!  This is a bug!")
         return 1
     
+    cnx.commit()
     return 0
 
 def get_level_from_message_count(messages: int) -> int:

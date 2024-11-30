@@ -23,7 +23,7 @@ class CogwheelTests(unittest.TestCase):
 
         # Test case 3: Check if the footer icon URL is set correctly
         result = agb.system.cogwheel.embed()
-        self.assertEqual(result.footer.icon_url, "https://static.alphagame.dev/alphagamebot/img/icon.png")
+        self.assertEqual(result.footer.icon_url, "https://static-alphagamebot.alphagame.dev/img/icon.png")
 
         # Test case 4: Check if the kwargs are passed correctly
         result = agb.system.cogwheel.embed(title="Test Embed", description="This is a test embed")
