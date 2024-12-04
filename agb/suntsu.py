@@ -29,5 +29,5 @@ class SunTsuCog(agb.system.cogwheel.Cogwheel):
 
     @commands.slash_command(name="suntsu", description="Get a quote from Sun Tsu: The Art of War")
     async def _SunTsuCog(self, interaction: discord.context.ApplicationContext):
-        await interaction.response.send_message("> *\"%s\"*\n> \- Sun Tzu, *The Art of War*" % random.choice(
+        await interaction.response.send_message("> *\"%s\"*\n> \\- Sun Tzu, *The Art of War*" % random.choice(
                                                                                             self.SUNTSU_QUOTES))
