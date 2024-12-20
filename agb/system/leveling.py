@@ -191,4 +191,9 @@ async def handleMessageLevelUp( ctx: discord.Message,
     logger.debug("Current data is: (Calculated Level = %s, Database Level = %s, Rows Affected = %s)", c_level, level, cursor.rowcount)
         
     cnx.commit()    
-    await ctx.reply(":tada: Congrats, %s, you just advanced to level **%s**!  Nice!" % (ctx.author.mention, c_level))
+    
+    try:
+        await ctx.reply(":tada: Congrats, %s, you just advanced to level **%s**!  Nice!" % (ctx.author.mention, c_level))
+    except discord.errors.Forbidden:
+        logger.warning("Cannot send level-up message as the bot is missing the required permissions. (Guild: %s (%s))", ctx.guild.name, ctx.guild.id)
+        return

@@ -101,13 +101,19 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
             return
 
         if user.bot:
-            await interaction.followup.send(":x: This user is a bot.  Support for bot tracking *may* be added in the future.")
+            await interaction.followup.send(":x: This user is a bot.")
             return
 
         c = self.cnx.cursor()
         c.execute("SELECT user_level from guild_user_stats WHERE userid = %s AND guildid = %s", [user.id, interaction.guild.id])
-        level = c.fetchone()[0]
 
+        try:
+            level = c.fetchone()[0]
+        except TypeError:
+            await interaction.followup.send(":x: I cannot find that user... they might have not sent any messages yet."
+                                            "\n-# If you're sure they have, then make a [bug report](https://github.com/AlphaGameDeveloper/AlphaGameBot/issues/new/choose)!")
+            return
+        
         self.logger.debug(c.statement)
 
 
