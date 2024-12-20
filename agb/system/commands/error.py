@@ -72,30 +72,26 @@ class ErrorOptionView(discord.ui.View):
                 arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
         except KeyError:
             arguments = "*No Arguments.*"
-        response = agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": """
+        response = agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": f"""
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
-**User**: `{0}` (Nick: *{1}*)
-**Error Message**: `{2}`
-**Command Affected**: `/{3}`
+**User**: `{self.user.name}`
+    * UserID: `{self.user.id}`
+    * Nick: *{(interaction.user.nick if isinstance(interaction.user, discord.Member) else "No Nick Available")}*)
+**Error Message**: `{repr(error)}`
+**Command Affected**: `/{self.realinteraction.command}`
 
 **Command Arguments**
-{4}
+{arguments if arguments else "*No Arguments.*"}
 
 **Python Traceback**
 ```
-{5}
+{''.join(traceback.format_tb(error.__traceback__))}
 ```
 
-**Reported At** {6}
-        """.format(interaction.user.name,
-                   (interaction.user.nick if isinstance(interaction.user, discord.Member) else "No Nick Available"),
-                   repr(error),
-                   self.realinteraction.command,
-                   arguments,
-                   ''.join(traceback.format_tb(error.__traceback__)),
-                   time.ctime())}, "Error report by %s" % self.user.name)
+**Reported** <t:{int(time.time())}:R>
+        """}, "Error Report")
         
         
         # Stop the button from being used again.  Thank you for sending the bug report, but I don't need spam.
@@ -150,18 +146,6 @@ Cheers,
 
         await dm.send(embed=sent_embed, view=view)
 
-
-class DebugErrorOptionView(ErrorOptionView):
-    @discord.ui.button(label="Error Traceback", style=discord.ButtonStyle.red)
-    async def _traceback(self, button, interaction):
-        error = None
-        if isinstance(self._error, discord.ApplicationCommandInvokeError):
-            error = self._error.original
-        else:
-            error = self._error
-
-        await interaction.response.send_message("```\n%s\n```" % ''.join(traceback.format_tb(error.traceback)))
-        
 async def handleApplicationCommandError(interaction: discord.ApplicationContext, error):
     # get original error if possible
     o_error = error
@@ -181,12 +165,12 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             return
         elif isinstance(error, OperationalError):
             await interaction.response.send_message(":x: Internal Database Error.  Please try again later!")
-            print("op err")
             # ping the bot owner
             owner_id = agb.system.cogwheel.getBotInformation()["OWNER_ID"]
-            agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), 
-          {
-                    "content": f"<@{owner_id}>\nDatabase Operational Error: {repr(error)}.  Check the DB stuff to make sure it's working!",
+            agb.system.requestHandler.handler.post(
+                os.getenv("WEBHOOK"), 
+                {
+                    "content": f"<@{owner_id}>\nDatabase Operational Error: `{repr(error)}`.  Check the DB stuff to make sure it's working!",
                 },
                 "Database OperationalError")
             return
@@ -206,7 +190,7 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
     embed.set_thumbnail(url="https://static-alphagamebot.alphagame.dev/img/error.png")
     tb = "```\n%s\n```" % ''.join(traceback.format_tb(error.__traceback__))
 
-    v = DebugErrorOptionView #(ErrorOptionView if not agb.cogwheel.isDebugEnv else DebugErrorOptionView)
+    v = ErrorOptionView
 
     try:
         try:
