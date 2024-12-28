@@ -25,7 +25,7 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
     l.debug("handleApplicationCommand: Handling command /{0} from {1}".format(interaction.command.name, interaction.author.id))
     if CAN_USE_DATABASE and tracking:
         # attempt to make a new user if not already in the database
-        agb.system.onboarding.initializeNewUser(cnx, CAN_USE_DATABASE, interaction.author.id, interaction.guild.id)
+        await agb.system.onboarding.initializeNewUser(cnx, CAN_USE_DATABASE, interaction.author.id, interaction.guild.id)
 
         if agb.system.cogwheel.getUserSetting(cnx, interaction.author.id, "message_tracking_consent") == 1:
             await agb.system.leveling.countPoints(interaction, cnx, agb.system.leveling.CountingEvent.COMMAND, CAN_USE_DATABASE, tracking)
