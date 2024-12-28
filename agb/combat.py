@@ -32,6 +32,7 @@ class ReadyStatus(Enum):
     READY = 1
 
 class Combat:
+    """A combat between two users.  This is a class that will handle all the combat logic."""
     challenger: discord.User
     competitor: discord.User
     thread: discord.Thread
@@ -224,10 +225,10 @@ class Combat:
         opponent = self.players[self.otherTurn()]
 
         if player["hp"] <= 0:
-            await self.handleUserWon(self.currentTurn)
+            await self.handleUserWon(self.otherTurn())
             return
         elif opponent["hp"] <= 0:
-            await self.handleUserWon(self.otherTurn())
+            await self.handleUserWon(self.currentTurn)
             return
         
     
