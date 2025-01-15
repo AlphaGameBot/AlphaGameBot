@@ -26,6 +26,7 @@ class MemesCog(agb.system.cogwheel.Cogwheel):
     @commands.slash_command(name="meme", description="Get a meme from reddit!  (Where best memes come from)")
     async def meme(self, interaction: discord.context.ApplicationContext, 
                    subreddit: discord.Option(str, description="The subreddit that you want to get a meme from", default=None, required=False)): # type: ignore
+        await interaction.response.defer()
         # get the meme from the memes api
         if subreddit == None:
             endpoint = agb.system.cogwheel.getAPIEndpoint("meme", "GET_MEME")
@@ -37,15 +38,17 @@ class MemesCog(agb.system.cogwheel.Cogwheel):
         if r.status_code != 200:
             await interaction.response.send_message(":x: `%s`" % d["message"])
             return
+        
         if d["nsfw"] and not interaction.channel.nsfw:
             self.logger.debug("Rejecting this meme because it is a NSFW meme sent in a non-age-restricted channel.")
             await interaction.response.send_message(":x: NSFW memes can only be sent in NSFW channels.")
             return
+        
         embed = agb.system.cogwheel.embed(title=d["title"])
         embed.set_footer(text="Sent in r/{0} by u/{1}".format(d["subreddit"], d["author"]))
         embed.set_image(url=d["preview"][len(d["preview"])-1])
         
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @commands.slash_command(name="helloworld", description="It's industry standard, right?")
     async def hworld(self, interaction):
