@@ -35,7 +35,7 @@ class CatCog(agb.system.cogwheel.Cogwheel):
                         code: discord.Option(int, description="HTTP code")): # type: ignore
         endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "GET_HTTP_CAT").format(code)
 
-        response = agb.requestHandler.handler.get(endpoint)
+        response = handler.get(endpoint)
         
         if response.status_code != 200:
             await interaction.response.send_message(":x: HTTP code not found!")
