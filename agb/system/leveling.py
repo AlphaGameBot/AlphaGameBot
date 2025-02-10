@@ -18,6 +18,7 @@ import discord
 import agb.system.cogwheel
 import json
 import logging
+from asyncio import sleep
 from enum import Enum
 from mysql.connector import (connection)
 
@@ -193,7 +194,9 @@ async def handleMessageLevelUp( ctx: discord.Message,
     cnx.commit()    
     
     try:
-        await ctx.reply(":tada: Congrats, %s, you just advanced to level **%s**!  Nice!" % (ctx.author.mention, c_level))
+        message = await ctx.reply(":tada: Congrats, %s, you just advanced to level **%s**!  Nice!" % (ctx.author.mention, c_level))
+        await sleep(60)
+        await message.delete()
     except discord.errors.Forbidden:
         logger.warning("Cannot send level-up message as the bot is missing the required permissions. (Guild: %s (%s))", ctx.guild.name, ctx.guild.id)
         return
