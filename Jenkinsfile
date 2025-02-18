@@ -8,10 +8,11 @@ pipeline {
     environment {
         TOKEN = credentials('alphagamebot-token')
         WEBHOOK = credentials('alphagamebot-webhook')
+        JENKINS_NOTIFICATIONS_WEBHOOK = credentials('discord-jenkins-webhook')
         DOCKER_TOKEN = credentials('alphagamedev-docker-token')
         AGB_VERSION = sh(returnStdout: true, script: "cat alphagamebot.json | jq '.VERSION' -cMr").trim()
         COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
-
+    
         GITHUB_TOKEN = credentials('alphagamebot-github-token')
         // MySQL stuff
         MYSQL_HOST = "hubby.internal"
@@ -69,7 +70,7 @@ pipeline {
         }
         stage("report") {
             steps {
-                discordSend description: "Jenkins Pipeline Build", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: credentials("discord-jenkins-webhook")
+                discordSend description: "Jenkins Pipeline Build", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: env.JENKINS_NOTIFICATIONS_WEBHOOK
             }
         }
     } // stages
