@@ -41,10 +41,6 @@ pipeline {
             }
         }
         stage('push') {
-            when { 
-                // We ONLY want to push Docker images when we are in the master branch!
-                branch 'master'
-            }
             steps {
                 echo "Pushing image to Docker Hub"
                 sh 'echo $DOCKER_TOKEN | docker login -u alphagamedev --password-stdin'
