@@ -67,5 +67,10 @@ pipeline {
                                 alphagamedev/alphagamebot:$AGB_VERSION -rs" // add alphagamebot flags
             }
         }
+        stage("report") {
+            steps {
+                discordSend description: "Jenkins Pipeline Build", link: env.BUILD_URL, result: currentBuild.currentResult, title: env.JOB_NAME, webhookURL: credentials("discord-jenkins-webhook")
+            }
+        }
     } // stages
 }
