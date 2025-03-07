@@ -4,7 +4,7 @@
     "INVITE_URL": "https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=1494850219126&integration_type=0&scope=bot%20applications.commands"
 
   },
-  "VERSION": "3.12.5",
+  "VERSION": "3.12.6",
   "ANNOUNCEMENT_URL": "https://static-alphagamebot.alphagame.dev/announcement.txt",
   "POINTS": {
     "MESSAGE": 1,
@@ -95,10 +95,6 @@
       "GET_PICTURE": "https://dog.ceo/api/breeds/image/random",
       "GET_BREEDS": "https://dog.ceo/api/breeds/list/all",
       "GET_HTTP_DOG": "https://http.dog/{}.jpg"
-    },
-    "jojo": {
-      "GET_CHARACTERS": "https://stand-by-me.herokuapp.com/api/v1/characters",
-      "GET_CHARACTER_IMAGE": "https://jojos-bizarre-api.netlify.app/assets/{}"
     },
     "dictionary": {
       "GET_WORD_DEFINITION": "https://api.dictionaryapi.dev/api/v2/entries/en/{}"
