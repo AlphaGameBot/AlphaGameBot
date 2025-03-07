@@ -59,7 +59,6 @@ import agb.utility
 import agb.xkcd
 import agb.memes
 import agb.jokes
-import agb.jojo
 import agb.rps
 import agb.minecraft
 import agb.google
@@ -86,7 +85,6 @@ BOT_LOADED_COGS = [
     agb.xkcd.xkcdCog,
     agb.memes.MemesCog,
     agb.jokes.jokesCog,
-    agb.jojo.JojoCog,
     agb.rps.rpsCog,
     agb.minecraft.MinecraftCog,
     agb.moderation.ModerationCog,
