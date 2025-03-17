@@ -37,7 +37,7 @@ def getAPIEndpoint(apiName, process) -> str:
 
 def webhook(text="", dataOverride={}, urlOverride=None) -> bool:
     if not urlOverride:
-        url = os.getenv("WEBHOOK_URL", None)
+        url = os.getenv("WEBHOOK", None)
     else:
         url = urlOverride
     
