@@ -40,6 +40,11 @@ pipeline {
 
             }
         }
+        stage('test') {
+        	steps {
+        		sh "docker run --rm -i --name test-alphagamebot-dryrun alphagamedev/alphagamebot:$AGB_VERSION -nsq --dry-run -l DEBUG"
+        	}
+        }
         stage('push') {
             steps {
                 echo "Pushing image to Docker Hub"
@@ -54,7 +59,7 @@ pipeline {
             steps {
                 // conditionally deploy
                 sh "docker container stop alphagamebot || true"
-                sh "docker container rm alphagamebot || true"
+                sh "docker container rm alphagamebot -f || true"
                 sh "docker run -d \
                                 -v /mnt/bigga/alphagamebot-cache.sqlite:/docker/request-handler.sqlite \
                                 --name alphagamebot \
