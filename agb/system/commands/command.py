@@ -45,11 +45,6 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
         elif isinstance(x["value"], int):
             rtype = "Integer"
         elif isinstance(x["value"], str):
-        if isinstance(x["value"], bool):
-            rtype = "Boolean"
-        elif isinstance(x["value"], int):
-            rtype = "Integer"
-        elif isinstance(x["value"], str):
             rtype = "String"
         else:
             rtype = type(x["value"]).__name__
