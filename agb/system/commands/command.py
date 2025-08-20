@@ -22,6 +22,7 @@ import logging
 
 async def handleApplicationCommand(interaction: discord.context.ApplicationContext, CAN_USE_DATABASE, cnx, tracking):
     l = logging.getLogger("system")
+    
     l.debug("handleApplicationCommand: Handling command /{0} from {1}".format(interaction.command.name, interaction.author.id))
     if CAN_USE_DATABASE and tracking:
         # attempt to make a new user if not already in the database
@@ -31,3 +32,22 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
             await agb.system.leveling.countPoints(interaction, cnx, agb.system.leveling.CountingEvent.COMMAND, CAN_USE_DATABASE, tracking)
         else:
             l.debug("Not tracking command usage for /{0} because user {1} has not consented to message tracking.".format(interaction.command.name, interaction.author.id))
+
+    
+    notification = "**[Command]** /{0}".format(interaction.command.name)
+    data = interaction.interaction.to_dict()
+
+    arguments = ""
+    for x in data["data"]["options"]:
+        rtype = type(x["value"])
+        if isinstance(x["value"], bool):
+            rtype = "Boolean"
+        elif isinstance(x["value"], int):
+            rtype = "Integer"
+        elif isinstance(x["value"], str):
+            rtype = "String"
+        
+        arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
+
+    notification += "\n**[Arguments]**\n{0}".format(arguments)
+    agb.system.cogwheel.webhook(notification)
