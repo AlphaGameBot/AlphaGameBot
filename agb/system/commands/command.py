@@ -38,14 +38,21 @@ async def handleApplicationCommand(interaction: discord.context.ApplicationConte
     data = interaction.interaction.to_dict()
 
     arguments = ""
-    for x in data["data"]["options"]:
+    for x in data["data"].get("options", []):
         rtype = type(x["value"])
         if isinstance(x["value"], bool):
             rtype = "Boolean"
         elif isinstance(x["value"], int):
             rtype = "Integer"
         elif isinstance(x["value"], str):
+        if isinstance(x["value"], bool):
+            rtype = "Boolean"
+        elif isinstance(x["value"], int):
+            rtype = "Integer"
+        elif isinstance(x["value"], str):
             rtype = "String"
+        else:
+            rtype = type(x["value"]).__name__
         
         arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
 

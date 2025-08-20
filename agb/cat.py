@@ -74,4 +74,4 @@ class CatCog(agb.system.cogwheel.Cogwheel):
 
         data = loads(handler.get(endpoint, attemptCache=False).text)
 
-        await interaction.response.send_message(endpoint)
+        await interaction.response.send_message(data["url"])
