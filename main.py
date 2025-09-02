@@ -157,6 +157,41 @@ if args.silent:
 # Load the logging file (logging/main.ini)
 logging.lastResort.setLevel(logging.INFO)
 
+# Reduce noisy full tracebacks from the discord library in logs by
+# converting exc_info into a short single-line summary for selected
+# discord loggers.  This keeps the logs concise on transient network
+# failures (DNS, connection errors) while preserving a short error
+# summary.
+class CondenseTracebackFilter(logging.Filter):
+    def filter(self, record):
+        # If an exception was attached to the record, replace the
+        # detailed traceback with a short one-line summary so the
+        # logging output doesn't expand into a full traceback.
+        if getattr(record, "exc_info", None):
+            try:
+                exc_type, exc_value, _ = record.exc_info
+                short = f"{exc_type.__name__}: {exc_value}"
+            except Exception:
+                short = "(exception details suppressed)"
+            # Replace the message with a concise summary and clear
+            # exc_info so the logging machinery won't print a stacktrace.
+            try:
+                # record.getMessage() may consume msg/args, so build
+                # a new message that includes the original text.
+                orig = record.getMessage()
+            except Exception:
+                orig = record.msg if hasattr(record, 'msg') else ''
+            record.msg = f"{orig} -- {short}"
+            record.args = ()
+            record.exc_info = None
+            record.stack_info = None
+        return True
+
+# Attach the filter to the discord loggers that currently emit
+# long tracebacks on transient network errors.
+for _name in ("discord.client", "discord.gateway"):
+    logging.getLogger(_name).addFilter(CondenseTracebackFilter())
+
 if args.discord_debug:
     logging.getLogger("discord.client").setLevel(logging.DEBUG)
     logging.getLogger("discord.gateway").setLevel(logging.DEBUG)
