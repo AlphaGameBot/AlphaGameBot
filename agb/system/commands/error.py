@@ -72,7 +72,7 @@ class ErrorOptionView(discord.ui.View):
                 arguments = arguments + "* `{0}: {1}` (Type: `{2}`)\n".format(x["name"], x["value"], rtype)
         except KeyError:
             arguments = "*No Arguments.*"
-        response = agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": f"""
+        response = agb.system.requestHandler.handler.post(os.getenv("WEBHOOK"), {"content": f"""<@420052952686919690>\n
 # AlphaGameBot Error Reporter
 An error was reported.  Here is some information!
 
@@ -205,4 +205,5 @@ async def handleApplicationCommandError(interaction: discord.ApplicationContext,
             raise error 
     except discord.errors.NotFound:
         logger.warning("All else failed.  Using standard message to send error without the interaction because NotFound.")
+
         await interaction.channel.send(tb if agb.system.cogwheel.isDebugEnv else "", embed=embed)

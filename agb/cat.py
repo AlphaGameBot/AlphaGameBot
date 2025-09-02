@@ -72,4 +72,6 @@ class CatCog(agb.system.cogwheel.Cogwheel):
                         message: discord.Option(str, description="The message to display on the cat image")): # type: ignore
         endpoint = agb.system.cogwheel.getAPIEndpoint("cat", "GET_CAT_IMAGE_WITH_MESSAGE").format(message)
 
-        await interaction.response.send_message(endpoint)
+        data = loads(handler.get(endpoint, attemptCache=False).text)
+
+        await interaction.response.send_message(data["url"])
