@@ -4,7 +4,7 @@
     "INVITE_URL": "https://discord.com/oauth2/authorize?client_id=946533554953809930&permissions=1494850219126&integration_type=0&scope=bot%20applications.commands"
 
   },
-  "VERSION": "3.12.7",
+  "VERSION": "3.12.10",
   "ANNOUNCEMENT_URL": "https://static-alphagamebot.alphagame.dev/announcement.txt",
   "POINTS": {
     "MESSAGE": 1,
@@ -128,3 +128,4 @@
   },
   "USER-AGENT": "AlphaGameBot/{version}{devstatus} (https://alphagame.dev/alphagamebot/spamming +damien@alphagame.dev); python-requests/{requests}; curl/8.4.0;"
 }
+
