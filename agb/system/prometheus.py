@@ -3,17 +3,21 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
+import logging
 import time
 from asyncio import sleep
 from aiohttp import ClientSession
 from .cogwheel import getBotInformation
 from mysql.connector import MySQLConnection
+
+# FIXME: this can be done much better with asyncio mysql connector
+
 class PrometheusMetricsData:
     startup_time: int | float
     counted_messages: int
 
     def __init__(self, cnx: MySQLConnection) -> None:
-        self.startup_time = -1
+        self.startup_time = time.time()
         self.counted_messages = 0
         self.cnx = cnx
 
@@ -38,16 +42,18 @@ class PrometheusMetricsData:
         guild_ids = [row[0] for row in cursor.fetchall()]
 
         # get all message counts by guildid
-        cursor.execute("SELECT guildid, SUM(messagecount) FROM guild_user_stats GROUP BY guildid")
-        result = {int(guild_id): int(message_count) for guild_id, message_count in cursor.fetchall()}
+        cursor.execute("SELECT guildid, SUM(messages_sent) FROM guild_user_stats GROUP BY guildid")
+        result = {int(guild_id): int(message_count) for guild_id, message_count in cursor.fetchall()} # pyright: ignore[reportArgumentType]
         cursor.close()
         return result
     
 class PrometheusMetricExporter:
-    def __init__(self, cnx: MySQLConnection, pushgateway_url: str) -> None:
+    def __init__(self, cnx: MySQLConnection, pushgateway_url: str, interval: int = 15) -> None:
         self.cnx  = cnx
         self.data = PrometheusMetricsData(cnx)
         self.pushgateway_url = pushgateway_url
+        self.interval = interval
+        
         with open("assets/prometheus_template.txt", "r") as f:
             self.prometheus_template = f.read()
 
@@ -57,25 +63,34 @@ class PrometheusMetricExporter:
     
     async def update_push_gateway_loop(self) -> None:
         """Periodically pushes metrics to the Pushgateway."""
+        logger = logging.getLogger("listener")
 
         BOT_INFORMATION = getBotInformation()
         
         async with ClientSession() as session:
             while True:
+                logger.debug("Pushing metrics to Pushgateway...")
+                # performance:
+                t1 = time.time()
                 # Placeholder for actual Pushgateway update logic
                 messages_counted_by_guild_dict = self.data.get_message_counts_by_guild()
 
                 messages_counted_by_guild = ""
                 for guild_id, message_count in messages_counted_by_guild_dict.items():
-                    messages_counted_by_guild += f'bot_messages_counted{{guild="{guild_id}"}} {message_count}\n'
-                await session.post(self.pushgateway_url, data=self.prometheus_template.format(
-                    version                   = BOT_INFORMATION["version"],
-
-                    uptime_seconds            = self.data.get_uptime(),
-                    message_count             = self.data.counted_messages,
-                    messages_counted_by_guild = messages_counted_by_guild
-                ))
-                await sleep(15)
+                    messages_counted_by_guild += f'bot_messages_counted_by_guild{{guild="{guild_id}"}} {message_count}\n'
+                data = self.prometheus_template.replace(
+                    "{{version}}", BOT_INFORMATION["VERSION"]
+                ).replace(
+                    "{{uptime_seconds}}", str(self.data.get_uptime())
+                ).replace(
+                    "{{message_count}}", str(self.data.counted_messages)
+                ).replace(
+                    "{{messages_counted_by_guild}}", messages_counted_by_guild
+                )
+                await session.post(self.pushgateway_url, data=data)
+                t2 = time.time()
+                logger.debug("Pushed metrics to Pushgateway in %.2f seconds.", t2 - t1)
+                await sleep(self.interval)
 
     def stop(self) -> None:
         """Stops the metrics exporter."""

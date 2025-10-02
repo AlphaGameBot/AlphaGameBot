@@ -50,6 +50,7 @@ import agb.system.message.message
 import agb.system.message.dms
 import agb.system.rotatingStatus
 import agb.system.commands.completion
+import agb.system.prometheus
 
 # RequestHandler
 import agb.system.requestHandler
@@ -126,6 +127,8 @@ parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that 
 parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
 parser.add_argument("--say-trigger", help="Set the trigger for the say command.  Default is the bot's mention.")
 parser.add_argument("--dry-run", help="Run the bot in dry-run mode.  This will not connect to Discord.", action="store_true")
+parser.add_argument("--pushgateway-url", help="Set the Prometheus Pushgateway URL to use.  If not set, Prometheus metrics will be disabled. (Optionally, $PUSHGATEWAY_URL can be used)", default=None)
+
 args = parser.parse_args()
 # Initalize logging services
 
@@ -259,12 +262,28 @@ async def database_reconnect():
     except mysql.connector.errors.InterfaceError:
         l.info("MySQL server connection was lost.  Attempting to reconnect...")
         cnx.ping(reconnect=True, attempts=5, delay=1)
+
+@tasks.loop()
+async def prometheus_pushgateway():
+    logging.getLogger("listener").error("Dispatching Prometheus Pushgateway update task to agb.system.prometheus.PrometheusMetricExporter.update_push_gateway_loop")
+    PROMETHEUS_EXPORTER_URL = args.pushgateway_url if args.pushgateway_url is not None else os.getenv("PUSHGATEWAY_URL", None)
+
+    if not CAN_USE_DATABASE:
+        logging.getLogger("listener").warning("Database functionality is disabled.")
+        return
+
+    assert cnx is not None
+    assert PROMETHEUS_EXPORTER_URL is not None
     
+    PROMETHEUS_EXPORTER = agb.system.prometheus.PrometheusMetricExporter(cnx, PROMETHEUS_EXPORTER_URL) # pyright: ignore[reportArgumentType]
+    logging.getLogger("listener").debug("Dispatching Prometheus Pushgateway update task to agb.system.prometheus.PrometheusMetricExporter.update_push_gateway_loop")
+    await PROMETHEUS_EXPORTER.update_push_gateway_loop()
+
 ##### BOT EVENTS #####
 @bot.listen('on_ready', once=True)
 async def on_ready():
     bot.auto_sync_commands = True # Sync new commands with Discord.
-    BOT_TASKS = [database_reconnect, rotate_status]
+    BOT_TASKS = [database_reconnect, rotate_status, prometheus_pushgateway]
     logging.debug("Starting tasks...")
     for task in BOT_TASKS:
         if not task.is_running():
@@ -274,6 +293,7 @@ async def on_ready():
     logging.info("Bot user is \"{0}\". (ID={1})".format(bot.user.name, bot.user.id))
     logging.info(f"Application ID is \"{bot.application_id}\".")
     logging.info(f"Syncronized {len(bot.application_commands)} application (slash) commands.")
+
 
 @bot.listen('on_application_command_error')
 async def on_application_command_error(interaction: discord.Interaction, error: discord.DiscordException):
@@ -352,7 +372,7 @@ else:
 # set command cogs
 if not CAN_USE_DATABASE:
     logging.info("Database functionality is disabled!")
-    
+
 mysql_cogs = 0
 normal_cogs = 0
 base_cogs = 0
@@ -362,6 +382,7 @@ failed_cogs = 0
 for cog in BOT_LOADED_COGS:
     # this is first b/c MySQLEnabledCogwheel inherits Cogwheel.
     logging.debug(f"Loading cog \"{cog.__name__}\"...")
+    addcog = lambda: print("No addCog function was set!")
     if issubclass(cog, agb.system.cogwheel.MySQLEnabledCogwheel):
         mysql_cogs += 1
 
