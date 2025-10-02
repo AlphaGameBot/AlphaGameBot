@@ -22,8 +22,9 @@ import os
 import logging
 from mysql.connector import MySQLConnection
 
+
 async def rotatingStatus(bot: commands.Bot, 
-                         cnx: MySQLConnection, 
+                         cnx: MySQLConnection | None, 
                          CAN_USE_DATABASE: bool):
     """Background task to change the bot's status every so often
     

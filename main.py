@@ -106,28 +106,27 @@ BOT_LOADED_COGS = [
     agb.github.GithubCog
 ]
 # parsing command line arguments
-if __name__ == "__main__":
-    d = datetime.date.today()
-    parser = argparse.ArgumentParser(
-        prog="AlphaGameBot Discord Bot",
-        description="A Discord Bot that's free and (hopefully) doesn't suck.",
-        epilog=f"(c) Damien Boisvert (AlphaGameDeveloper) {d.year}.  Licensed under GNU GPL v3"
-    )
-    parser.add_argument("-d", "--debug", help="Enable debug mode for the bot.", action="store_true")
-    parser.add_argument("-e", "--environment", help="Automatically load a environment file for the bot.")
-    parser.add_argument("-t", "--token", help="Set the bot's token via the command line. (Not recommended)")
-    parser.add_argument("-n", "--nodatabase", help="Force database to be disabled regardless of environment", action="store_true")
-    parser.add_argument("-r", "--requiredatabase", help="Force database to be enabled.  This will error if the database is not configured correctly.", action="store_true")
-    parser.add_argument("-v", "--version", help="Print the version of the bot and exit.", action="store_true")
-    parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
-    parser.add_argument("--discord-debug", help="Show debug discord gateway/client information, this will be noisy!", action="store_true")
-    parser.add_argument("-s", "--enable-say", help="Enable the say functionality regardless of environment or debug mode.", action="store_true")
-    parser.add_argument("-l", "--log-level", help="Set the log level to a specified level.  Valid levels are FATAL, ERROR, WARN, INFO, and DEBUG.")
-    parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
-    parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
-    parser.add_argument("--say-trigger", help="Set the trigger for the say command.  Default is the bot's mention.")
-    parser.add_argument("--dry-run", help="Run the bot in dry-run mode.  This will not connect to Discord.", action="store_true")
-    args = parser.parse_args()
+d = datetime.date.today()
+parser = argparse.ArgumentParser(
+    prog="AlphaGameBot Discord Bot",
+    description="A Discord Bot that's free and (hopefully) doesn't suck.",
+    epilog=f"(c) Damien Boisvert (AlphaGameDeveloper) {d.year}.  Licensed under GNU GPL v3"
+)
+parser.add_argument("-d", "--debug", help="Enable debug mode for the bot.", action="store_true")
+parser.add_argument("-e", "--environment", help="Automatically load a environment file for the bot.")
+parser.add_argument("-t", "--token", help="Set the bot's token via the command line. (Not recommended)")
+parser.add_argument("-n", "--nodatabase", help="Force database to be disabled regardless of environment", action="store_true")
+parser.add_argument("-r", "--requiredatabase", help="Force database to be enabled.  This will error if the database is not configured correctly.", action="store_true")
+parser.add_argument("-v", "--version", help="Print the version of the bot and exit.", action="store_true")
+parser.add_argument("-q", "--notracking", help="Disable tracking of user data", action="store_false")    
+parser.add_argument("--discord-debug", help="Show debug discord gateway/client information, this will be noisy!", action="store_true")
+parser.add_argument("-s", "--enable-say", help="Enable the say functionality regardless of environment or debug mode.", action="store_true")
+parser.add_argument("-l", "--log-level", help="Set the log level to a specified level.  Valid levels are FATAL, ERROR, WARN, INFO, and DEBUG.")
+parser.add_argument("--silent", help="Synonym for --log-level FATAL.  Note that this will override any value specified in --log-level.", action="store_true")
+parser.add_argument("--strict", help="Kill the program if a cog fails to initialize", action="store_true")
+parser.add_argument("--say-trigger", help="Set the trigger for the say command.  Default is the bot's mention.")
+parser.add_argument("--dry-run", help="Run the bot in dry-run mode.  This will not connect to Discord.", action="store_true")
+args = parser.parse_args()
 # Initalize logging services
 
 logging.config.fileConfig("logging/main.ini") # load the config
@@ -155,7 +154,9 @@ if args.log_level is not None:
 if args.silent:
     LOG_LEVEL = logging.FATAL
 # Load the logging file (logging/main.ini)
-logging.lastResort.setLevel(logging.INFO)
+
+if logging.lastResort is not None:
+    logging.lastResort.setLevel(logging.INFO)
 
 # Reduce noisy full tracebacks from the discord library in logs by
 # converting exc_info into a short single-line summary for selected
@@ -169,8 +170,10 @@ class CondenseTracebackFilter(logging.Filter):
         # logging output doesn't expand into a full traceback.
         if getattr(record, "exc_info", None):
             try:
-                exc_type, exc_value, _ = record.exc_info
-                short = f"{exc_type.__name__}: {exc_value}"
+                exc_info = record.exc_info
+                assert exc_info is not None
+                exc_type, exc_value, _ = exc_info
+                short = f"{exc_type.__name__ if exc_type else 'UnknownException'}: {exc_value}"
             except Exception:
                 short = "(exception details suppressed)"
             # Replace the message with a concise summary and clear
@@ -249,6 +252,7 @@ async def database_reconnect():
     # source: https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-ping.html
     l = logging.getLogger("listener")
     if not CAN_USE_DATABASE: return
+    assert cnx is not None
     
     try:
         cnx.ping()

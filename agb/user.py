@@ -53,9 +53,9 @@ class UserStatsCog(agb.system.cogwheel.MySQLEnabledCogwheel):
         nick = user.nick
 
         if nick != None:
-            presented_username = "%s (%s)".format(nick, username)
+            presented_username = "%s (%s)" % (nick, username)
         else:
-            presented_username = "{0}".format(username)
+            presented_username = username
         
         embed = agb.system.cogwheel.embed(
             title=presented_username

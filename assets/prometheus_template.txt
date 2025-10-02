@@ -1,0 +1,13 @@
+# HELP uptime AlphaGameBot's Uptime (in seconds)
+# TYPE uptime gauge
+uptime{version="{version}"} {uptime_seconds}
+
+# HELP messages_counted Total number of messages counted by AlphaGameBot
+# TYPE messages_counted counter
+messages_counted{version="{version}"} {message_count}
+
+#         result = {int(guild_id): int(message_count) for guild_id, message_count in cursor.fetchall()}
+
+# HELP messages_counted_by_guild Total number of messages counted by AlphaGameBot, broken down by guild
+# TYPE messages_counted_by_guild gauge
+{messages_counted_by_guild}
