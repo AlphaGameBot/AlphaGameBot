@@ -31,7 +31,8 @@ async def handleOnMessage(bot: commands.Bot,
                           tracking: bool, 
                           forcesay: bool,
                           global_say_enabled: bool,
-                          say_trigger: str | None = None) -> None:
+                          say_trigger: str | None = None,
+                          prometheus_exporter=None) -> None:
     """This function handles messages sent by users.  It is called every time a message is sent,
     and it will handle dispatching the message to the appropriate functions.
     
@@ -50,8 +51,18 @@ async def handleOnMessage(bot: commands.Bot,
         logger.debug("handleOnMessage: ignoring messages sent by bots. (id: {0}, userid: {1})".format(ctx.id, ctx.author.id))
         return
     
+    # Track message metrics if prometheus exporter is available
+    if prometheus_exporter and tracking:
+        try:
+            prometheus_exporter.track_message(
+                user_id=ctx.author.id if ctx.author else None,
+                guild_id=ctx.guild.id if ctx.guild else None
+            )
+        except Exception as e:
+            logger.warning("Failed to track message metrics: %s", e)
+    
     if tracking and CAN_USE_DATABASE:
-        await agb.system.onboarding.initializeNewUser(cnx, ctx.author.id, ctx.guild.id)
+        await agb.system.onboarding.initializeNewUser(cnx, CAN_USE_DATABASE, ctx.author.id, ctx.guild.id)
         await agb.system.leveling.countPoints(ctx, cnx, agb.system.leveling.CountingEvent.MESSAGE, CAN_USE_DATABASE, tracking)
         await agb.system.leveling.handleMessageLevelUp(ctx, cnx, CAN_USE_DATABASE, tracking)
     else:

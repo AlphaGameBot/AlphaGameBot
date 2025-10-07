@@ -50,6 +50,7 @@ import agb.system.message.message
 import agb.system.message.dms
 import agb.system.rotatingStatus
 import agb.system.commands.completion
+import agb.system.metrics_decorators
 import agb.system.prometheus
 
 # RequestHandler
@@ -209,7 +210,8 @@ CONFIGURED_LOGGERS = [
 	"cogwheel",
 	"requesthandler",
 	"listener",
-	"system"
+	"system",
+    "prometheus"
 ]
 
 for l in CONFIGURED_LOGGERS:
@@ -263,27 +265,59 @@ async def database_reconnect():
         l.info("MySQL server connection was lost.  Attempting to reconnect...")
         cnx.ping(reconnect=True, attempts=5, delay=1)
 
-@tasks.loop()
+# Global prometheus exporter instance
+PROMETHEUS_EXPORTER = None
+
+@tasks.loop(seconds=30)  # Add a reasonable interval to prevent spam
 async def prometheus_pushgateway():
-    logging.getLogger("listener").error("Dispatching Prometheus Pushgateway update task to agb.system.prometheus.PrometheusMetricExporter.update_push_gateway_loop")
+    global PROMETHEUS_EXPORTER
+    logger = logging.getLogger("listener")
+    
     PROMETHEUS_EXPORTER_URL = args.pushgateway_url if args.pushgateway_url is not None else os.getenv("PUSHGATEWAY_URL", None)
 
-    if not CAN_USE_DATABASE:
-        logging.getLogger("listener").warning("Database functionality is disabled.")
+    if PROMETHEUS_EXPORTER_URL is None:
+        logger.debug("Prometheus Pushgateway URL not configured. Skipping metrics push.")
         return
 
-    assert cnx is not None
-    assert PROMETHEUS_EXPORTER_URL is not None
+    if not CAN_USE_DATABASE:
+        logger.debug("Database functionality is disabled - collecting system metrics only.")
     
-    PROMETHEUS_EXPORTER = agb.system.prometheus.PrometheusMetricExporter(cnx, PROMETHEUS_EXPORTER_URL) # pyright: ignore[reportArgumentType]
-    logging.getLogger("listener").debug("Dispatching Prometheus Pushgateway update task to agb.system.prometheus.PrometheusMetricExporter.update_push_gateway_loop")
-    await PROMETHEUS_EXPORTER.update_push_gateway_loop()
+    # Use the global cnx variable (will be None if database is disabled)
+    current_cnx = cnx if CAN_USE_DATABASE else None
+    
+    logger.debug("Dispatching Prometheus Pushgateway update task to agb.system.prometheus.PrometheusMetricExporter.update_push_gateway_loop")
+    
+    if PROMETHEUS_EXPORTER is None:
+        PROMETHEUS_EXPORTER = agb.system.prometheus.PrometheusMetricExporter(current_cnx, PROMETHEUS_EXPORTER_URL) # pyright: ignore[reportArgumentType]
+        PROMETHEUS_EXPORTER.start()
+        logger.info("Prometheus metrics exporter initialized with URL: %s", PROMETHEUS_EXPORTER_URL)
+        
+        # Initialize the metrics decorators with our exporter
+        agb.system.metrics_decorators.set_prometheus_exporter(PROMETHEUS_EXPORTER)
+        logger.debug("Metrics decorators initialized")
+    
+    logger.debug("Starting Prometheus Pushgateway update loop")
+    await PROMETHEUS_EXPORTER.update_push_gateway_loop(bot_instance=bot)
 
 ##### BOT EVENTS #####
 @bot.listen('on_ready', once=True)
 async def on_ready():
     bot.auto_sync_commands = True # Sync new commands with Discord.
-    BOT_TASKS = [database_reconnect, rotate_status, prometheus_pushgateway]
+    
+    # Determine which tasks to start based on configuration
+    BOT_TASKS = [database_reconnect, rotate_status]
+    
+    # Add prometheus task if pushgateway URL is configured (works with or without database)
+    PROMETHEUS_EXPORTER_URL = args.pushgateway_url if args.pushgateway_url is not None else os.getenv("PUSHGATEWAY_URL", None)
+    if PROMETHEUS_EXPORTER_URL is not None:
+        BOT_TASKS.append(prometheus_pushgateway)
+        if CAN_USE_DATABASE:
+            logging.info("Prometheus metrics enabled with full database integration, pushgateway URL: %s", PROMETHEUS_EXPORTER_URL)
+        else:
+            logging.info("Prometheus metrics enabled (database-independent metrics only), pushgateway URL: %s", PROMETHEUS_EXPORTER_URL)
+    else:
+        logging.info("Prometheus metrics disabled: No pushgateway URL configured")
+    
     logging.debug("Starting tasks...")
     for task in BOT_TASKS:
         if not task.is_running():
@@ -309,12 +343,12 @@ async def on_message(ctx: discord.Message):
         return await agb.system.message.dms.handleDMMessage(bot, ctx, cnx, CAN_USE_DATABASE)
     
     listener.debug(f"Dispatching message {ctx.id} to agb.system.message.handleOnMessage")
-    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say, args.say_trigger)
+    return await agb.system.message.message.handleOnMessage(bot, ctx, cnx, CAN_USE_DATABASE, args.notracking, args.enable_say, args.say_trigger, prometheus_exporter=PROMETHEUS_EXPORTER)
 
 @bot.listen()
 async def on_application_command(ctx: discord.context.ApplicationContext):
     listener.debug("Dispatching slash command /{0} to agb.system.applicationCommand.handleApplicationCommand".format(ctx.command))
-    return await agb.system.commands.command.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx, args.notracking)
+    return await agb.system.commands.command.handleApplicationCommand(ctx, CAN_USE_DATABASE, cnx, args.notracking, PROMETHEUS_EXPORTER)
 
 @bot.listen()
 async def on_application_command_completion(interaction):

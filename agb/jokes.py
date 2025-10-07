@@ -24,9 +24,12 @@ from nltk.corpus import words
 import random
 import cowsay
 import agb.system.cogwheel
+from agb.system.metrics_decorators import track_api_call, track_feature_usage
 
 class jokesCog(agb.system.cogwheel.Cogwheel):
     @commands.slash_command(name="joke", description="I'm so funny, right?")
+    @track_feature_usage("joke_command")
+    @track_api_call("jokeapi")
     async def _joke(self, interaction):
         r = agb.system.requestHandler.handler.get(agb.system.cogwheel.getAPIEndpoint("joke", "GET_JOKE"), attemptCache=False)
         joke = json.loads(r.text)

@@ -22,6 +22,7 @@ import discord
 import json
 import logging
 import html
+from agb.system.metrics_decorators import track_api_call, track_feature_usage
 
 class BaseTriviaOptionDisplayView(discord.ui.View):
     def __init__(self, answers: list[str|bool], correctAnswer: str | bool, intendedUser: discord.User):
@@ -142,6 +143,8 @@ class TriviaCog(agb.system.cogwheel.Cogwheel):
         return results
     
     @commands.slash_command(name="trivia", description="Play a game of trivia")
+    @track_feature_usage("trivia_game")
+    @track_api_call("opentdb")
     async def trivia(self, interaction: discord.ApplicationContext,
                      category: discord.Option(int, "Category", required=False, default=0, autocomplete=_trivia_category_autocomplete), # type: ignore
                      difficulty: discord.Option(str, "Difficulty", required=False, default="easy", choices=["easy", "medium", "hard"]), # type: ignore

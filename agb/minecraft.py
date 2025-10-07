@@ -23,12 +23,14 @@ from socket import gaierror
 from mcstatus.querier import QueryResponse
 
 import agb.system.cogwheel
+from agb.system.metrics_decorators import track_feature_usage
 
 
 class MinecraftCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="minecraft", description="Minecraft-related commands")
 
     @group.command(name="java", description="Ping a Minecraft: Java Edition server amd get data!")
+    @track_feature_usage("minecraft_java_ping")
     async def _java(self, interaction,
                          host: discord.Option(str, description="The host IP address of the server"), # type: ignore
                          port: discord.Option(int, description="The port of the Minecraft server", default=25565)): # type: ignore
@@ -71,6 +73,7 @@ class MinecraftCog(agb.system.cogwheel.Cogwheel):
         await interaction.followup.send(embed=embed)
 
     @group.command(name="bedrock", description="Ping a Minecraft: Bedrock Edition server and get data!")
+    @track_feature_usage("minecraft_bedrock_ping")
     async def _bedrock(self, interaction,
                        host: discord.Option(str, description="The host IP of the Minecraft server"), # type: ignore
                        port: discord.Option(int, description="The port that the Minecraft server us running on", # type: ignore

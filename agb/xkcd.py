@@ -22,12 +22,14 @@ import requests
 import agb.system.requestHandler
 import logging
 import agb.system.cogwheel
+from agb.system.metrics_decorators import track_api_call, track_feature_usage
 
 class xkcdCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name = "xkcd",
                                       description = "XKCD Integrations in Discord!")
     
     @group.command(name="recent", description="Get the most recent XKCD comic")
+    @track_feature_usage("xkcd_recent")
     async def _recent(self, interaction: discord.context.ApplicationContext):
         await interaction.response.defer()
 
@@ -37,6 +39,7 @@ class xkcdCog(agb.system.cogwheel.Cogwheel):
         await interaction.followup.send(embed=embed)
     
     @group.command(name="random", description="Get a random XKCD comic")
+    @track_feature_usage("xkcd_random")
     async def _random(self, interaction: discord.context.ApplicationContext):
         await interaction.response.defer()
         current = self.getComic()[0]
@@ -47,6 +50,7 @@ class xkcdCog(agb.system.cogwheel.Cogwheel):
         await interaction.followup.send(embed=embed)
 
     @group.command(name="number", description="Get a specific XKCD comic")
+    @track_feature_usage("xkcd_specific")
     async def _number(self, interaction: discord.context.ApplicationContext, number: int):
         await interaction.response.defer()
 
@@ -65,6 +69,7 @@ class xkcdCog(agb.system.cogwheel.Cogwheel):
         embed = self.makeEmbedFromXKCD(xkcd)
         await interaction.followup.send(embed=embed)
 
+    @track_api_call("xkcd")
     def getComic(self, 
                  num: int | None = None) -> list[dict, requests.models.Response]:
         self.logger.debug("Getting XKCD #{}".format(num if num != None else "CURRENT"))

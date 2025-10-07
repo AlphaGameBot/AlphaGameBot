@@ -20,6 +20,7 @@ import urllib.parse
 from discord.ext import commands
 import json
 from agb.system.requestHandler import handler, formatQueryString
+from agb.system.metrics_decorators import track_api_call, track_feature_usage
 
 class WikipediaCog(agb.system.cogwheel.Cogwheel):
     group = discord.SlashCommandGroup(name="wikipedia", description="Wikipedia commands!")
@@ -48,6 +49,8 @@ class WikipediaCog(agb.system.cogwheel.Cogwheel):
         return results
 
     @group.command(name="summary", description="Get a summmary of a Wikipedia article!")
+    @track_feature_usage("wikipedia_search")
+    @track_api_call("wikipedia")
     async def _summary(self, interaction: discord.context.ApplicationContext,
                        page: discord.Option(str, description="The page to summarize!", autocomplete=_wikipedia_search_autocomplete)): # type: ignore
         endpoint = agb.system.cogwheel.getAPIEndpoint("wikipedia", "API_ENDPOINT") # this is api.php

@@ -22,6 +22,7 @@ import agb.system.cogwheel
 import json
 from asyncio import sleep
 import logging
+from agb.system.metrics_decorators import track_feature_usage
 
 class CombatTurn(Enum):
     HOME = 0
@@ -480,6 +481,7 @@ class CombatOptionView(agb.system.cogwheel.DefaultView):
     
 class CombatCog(agb.system.cogwheel.Cogwheel):
     @commands.slash_command(name="combat", description="Challenge another user to a combat!")
+    @track_feature_usage("combat_challenge")
     async def _combat_begin(
         self,
         interaction: discord.context.ApplicationContext,

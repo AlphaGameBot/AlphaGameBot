@@ -1,11 +1,57 @@
-# HELP uptime AlphaGameBot's Uptime (in seconds)
-# TYPE uptime gauge
-uptime{version="{{version}}"} {{uptime_seconds}}
+# HELP bot_uptime AlphaGameBot's Uptime (in seconds)
+# TYPE bot_uptime gauge
+bot_uptime{version="{{version}}"} {{uptime_seconds}}
 
-# HELP messages_counted Total number of messages counted by AlphaGameBot
-# TYPE messages_counted counter
-messages_counted{version="{{version}}"} {{message_count}}
+# HELP bot_messages_counted_total Total number of messages counted by AlphaGameBot
+# TYPE bot_messages_counted_total counter
+bot_messages_counted_total{version="{{version}}"} {{message_count}}
 
-# HELP messages_counted_by_guild Total number of messages counted by AlphaGameBot, broken down by guild
-# TYPE messages_counted_by_guild gauge
+# HELP bot_messages_counted_by_guild Total number of messages counted by AlphaGameBot, broken down by guild
+# TYPE bot_messages_counted_by_guild gauge
 {{messages_counted_by_guild}}
+
+# HELP bot_commands_counted_by_guild Total number of commands executed by AlphaGameBot, broken down by guild
+# TYPE bot_commands_counted_by_guild gauge
+{{commands_counted_by_guild}}
+
+# HELP bot_command_count Total number of times each command has been executed
+# TYPE bot_command_count counter
+{{command_metrics}}
+
+# HELP bot_errors_total Total number of errors by type
+# TYPE bot_errors_total counter
+{{error_metrics}}
+
+# HELP bot_api_response_time_seconds Average response time for external API calls
+# TYPE bot_api_response_time_seconds gauge
+{{api_metrics}}
+
+# HELP bot_active_users_daily Number of active users in the last 24 hours
+# TYPE bot_active_users_daily gauge
+# HELP bot_active_users_weekly Number of active users in the last 7 days
+# TYPE bot_active_users_weekly gauge
+# HELP bot_active_users_monthly Number of active users in the last 30 days
+# TYPE bot_active_users_monthly gauge
+{{user_activity_metrics}}
+
+# HELP bot_memory_usage_mb Memory usage in megabytes
+# TYPE bot_memory_usage_mb gauge
+# HELP bot_memory_usage_percent Memory usage as percentage
+# TYPE bot_memory_usage_percent gauge
+# HELP bot_cpu_usage_percent CPU usage as percentage
+# TYPE bot_cpu_usage_percent gauge
+# HELP bot_database_avg_query_time_seconds Average database query time
+# TYPE bot_database_avg_query_time_seconds gauge
+{{performance_metrics}}
+
+# HELP bot_guild_count Number of guilds the bot is connected to
+# TYPE bot_guild_count gauge
+# HELP bot_latency_ms Discord API latency in milliseconds
+# TYPE bot_latency_ms gauge
+# HELP bot_total_users Total number of users across all guilds
+# TYPE bot_total_users gauge
+{{bot_metrics}}
+
+# HELP bot_user_level_distribution Distribution of user levels
+# TYPE bot_user_level_distribution gauge
+{{level_metrics}}
