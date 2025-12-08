@@ -15,7 +15,13 @@
 </p>
 <p align="center">Made by a <b>ENTP</b> with love ❤️</p>
 
-Check out AlphaGameBot's [website](https://alphagame.dev/alphagamebot/)!
+
+> [!IMPORTANT]  
+> This repository (and the Python version of AlphaGameBot, *2.x* and *3.x*) is officially deprecated and is no longer being maintained.
+> All work has been moved to the new version, along with the new website in a monorepo.  It can be found
+> [here](https://github.com/AlphaGameBot/Monorepo).
+
+Check out AlphaGameBot's [website](https://alphagamebot.com)!
 
 ## What is AlphaGameBot?
 AlphaGameBot is a free and open-source Discord bot.  I got the inspiration to make AlphaGameBot when I was trying to find a good Discord bot that met my high requirements
@@ -45,4 +51,12 @@ Example: `python main.py -n`
 ### Docker :)
 Prebuilt images are available on [Docker Hub](https://hub.docker.com/r/alphagamedev/alphagamebot).  More information can be found there.
 
+
+> [!IMPORTANT]  
+> If you are sure you want to use the depricated python version,
+> make sure to use either an explicit tag to which version (2.x to 3.x)
+> or just use the `py-latest` tag. `alphagamedev/alphagamebot:py-latest`
+
 **QuickStart**: `docker run -d --restart unless-stopped --name some-alphagamebot -e TOKEN="..." alphagamedev/alphagamebot:latest /docker/main.py -nsq`
+
+
