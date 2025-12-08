@@ -19,7 +19,8 @@
 > [!IMPORTANT]  
 > This repository (and the Python version of AlphaGameBot, *2.x* and *3.x*) is officially deprecated and is no longer being maintained.
 > All work has been moved to the new version, along with the new website in a monorepo.  It can be found
-> [here](https://github.com/AlphaGameBot/Monorepo).
+> [here](https://github.com/AlphaGameBot/Monorepo).  
+> Please read the end of life letter on [the website](https://alphagamebot.com/blog/2025/12/alphagamebot-python-deprecation).  Believe me, this project is not dead.
 
 Check out AlphaGameBot's [website](https://alphagamebot.com)!
 
